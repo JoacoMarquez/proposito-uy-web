@@ -1,24 +1,23 @@
 ---
+export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
-import { recetas } from "../../data/recetas";
-import { getProducto, nombreCompleto } from "../../data/productos";
+import { getReceta, getProducto, nombreCompleto } from "../../db/queries";
 
-export function getStaticPaths() {
-  return recetas.map((r) => ({ params: { slug: r.slug }, props: { receta: r } }));
-}
+const { slug } = Astro.params;
+const receta = slug ? await getReceta(slug) : undefined;
+if (!receta) return Astro.redirect("/recetario");
 
-const { receta } = Astro.props;
-const aliados = receta.productosAliados
-  .map((slug) => getProducto(slug))
-  .filter((p): p is NonNullable<typeof p> => Boolean(p));
+const aliados = (
+  await Promise.all(receta.productosAliados.map((s) => getProducto(s)))
+).filter((p): p is NonNullable<typeof p> => Boolean(p));
 
-const meta = receta.rendimiento;
+const meta = receta.rendimiento ?? {};
 const fichas = [
-  { label: "Cantidad", valor: meta?.cantidad },
-  { label: "Porción", valor: meta?.porcion },
-  { label: "Porciones", valor: meta?.porciones },
-  { label: "Tiempo", valor: meta?.tiempo },
-  { label: "Conservación", valor: receta.almacenamiento?.vidaUtil },
+  { label: "Cantidad", valor: meta.cantidad },
+  { label: "Porción", valor: meta.porcion },
+  { label: "Porciones", valor: meta.porciones },
+  { label: "Tiempo", valor: meta.tiempo },
+  { label: "Conservación", valor: receta.almacenamientoVidaUtil ?? undefined },
 ].filter((f) => f.valor);
 ---
 

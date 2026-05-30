@@ -1,23 +1,24 @@
 ---
+export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 import ProductCard from "../../components/ProductCard.astro";
 import {
-  productos,
-  categorias,
+  getProducto,
+  getCategoria,
+  getDestacados,
   nombreCompleto,
   formatoPrecio,
-  getProducto,
-} from "../../data/productos";
+} from "../../db/queries";
 import { site, whatsappLink } from "../../data/site";
 
-export function getStaticPaths() {
-  return productos.map((p) => ({ params: { slug: p.slug }, props: { producto: p } }));
-}
+const { slug } = Astro.params;
+const producto = slug ? await getProducto(slug) : undefined;
+if (!producto) return Astro.redirect("/tienda");
 
-const { producto } = Astro.props;
 const nombre = nombreCompleto(producto);
-const cat = categorias[producto.categoria];
-const aliado = producto.productoAliado ? getProducto(producto.productoAliado) : undefined;
+const cat = await getCategoria(producto.categoriaSlug);
+const aliado = producto.productoAliadoSlug ? await getProducto(producto.productoAliadoSlug) : undefined;
+const destacados = (await getDestacados()).filter((p) => p.slug !== producto.slug).slice(0, 3);
 
 const detalles = [
   { label: "Ingredientes", valor: producto.ingredientes },
@@ -30,13 +31,14 @@ const detalles = [
 ].filter((d) => d.valor);
 
 const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
+const primera = producto.presentaciones[0];
 ---
 
 <Layout titulo={nombre} descripcion={producto.descripcion}>
   <section class="mx-auto max-w-5xl px-4 py-12">
     <nav class="text-sm text-marca-600">
       <a href="/tienda" class="hover:underline">Tienda</a> /
-      <a href={`/tienda/${producto.categoria}`} class="hover:underline">{cat.nombre}</a> /
+      <a href={`/tienda/${producto.categoriaSlug}`} class="hover:underline">{cat?.nombre}</a> /
       <span>{nombre}</span>
     </nav>
 
@@ -62,6 +64,12 @@ const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
           </p>
         )}
 
+        {!producto.disponible && (
+          <p class="mt-4 rounded-xl bg-marca-900/5 p-3 text-sm font-medium text-marca-900">
+            Producto temporalmente agotado. Consultanos por WhatsApp.
+          </p>
+        )}
+
         <!-- Presentaciones + precio -->
         <div class="mt-6">
           <label for="presentacion" class="text-sm font-medium text-marca-700">Presentación</label>
@@ -79,15 +87,15 @@ const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
         </div>
 
         <p id="precio" class="mt-4 text-2xl font-bold text-marca-900">
-          {formatoPrecio(producto.presentaciones[0].precio)}
+          {formatoPrecio(primera.precio)}
         </p>
 
         {producto.nota && <p class="mt-2 text-sm text-marca-600">{producto.nota}</p>}
 
-        <!-- Fase 1: pedido por WhatsApp (en Fase 2 será "Agregar al carrito") -->
+        <!-- Fase 1: pedido por WhatsApp (Fase 2 sumará "Agregar al carrito") -->
         <a
           id="pedir"
-          href={whatsappLink(`${mensajeBase} (${producto.presentaciones[0].label})`)}
+          href={whatsappLink(`${mensajeBase} (${primera.label})`)}
           class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-marca-600 px-6 py-3 font-medium text-white transition-colors hover:bg-marca-700"
         >
           Pedir por WhatsApp
@@ -118,10 +126,7 @@ const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
     <div class="mt-16">
       <h2 class="text-2xl font-bold text-marca-700">Los más pedidos</h2>
       <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {productos
-          .filter((p) => p.destacado && p.slug !== producto.slug)
-          .slice(0, 3)
-          .map((p) => <ProductCard producto={p} />)}
+        {destacados.map((p) => <ProductCard producto={p} />)}
       </div>
     </div>
   </section>

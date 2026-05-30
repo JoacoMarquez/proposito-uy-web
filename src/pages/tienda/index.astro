@@ -1,12 +1,9 @@
 ---
+export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
-import { categorias } from "../../data/productos";
+import { getCategorias } from "../../db/queries";
 
-const lista = [
-  { slug: "secos", ...categorias.secos },
-  { slug: "barras", ...categorias.barras },
-  { slug: "humedos", ...categorias.humedos },
-];
+const lista = await getCategorias();
 ---
 
 <Layout titulo="Tienda" descripcion="Conocé todos los productos de Propósito UY.">

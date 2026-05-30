@@ -1,11 +1,11 @@
 ---
+export const prerender = false;
 // Ruta estática: tiene prioridad sobre [categoria].astro, así que no colisiona.
 import Layout from "../../layouts/Layout.astro";
 import ProductCard from "../../components/ProductCard.astro";
-import { productos, categorias } from "../../data/productos";
-import type { Categoria } from "../../data/productos";
+import { getProductos, getCategorias } from "../../db/queries";
 
-const orden: Categoria[] = ["secos", "barras", "humedos"];
+const [productos, cats] = await Promise.all([getProductos(), getCategorias()]);
 ---
 
 <Layout titulo="Catálogo" descripcion="Todos los productos de Propósito UY.">
@@ -15,11 +15,11 @@ const orden: Categoria[] = ["secos", "barras", "humedos"];
     </nav>
     <h1 class="mt-2 text-3xl font-bold text-marca-700">Catálogo completo</h1>
 
-    {orden.map((cat) => (
+    {cats.map((cat) => (
       <div class="mt-10">
-        <h2 class="text-xl font-semibold text-marca-700">{categorias[cat].nombre}</h2>
+        <h2 class="text-xl font-semibold text-marca-700">{cat.nombre}</h2>
         <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {productos.filter((p) => p.categoria === cat).map((p) => <ProductCard producto={p} />)}
+          {productos.filter((p) => p.categoriaSlug === cat.slug).map((p) => <ProductCard producto={p} />)}
         </div>
       </div>
     ))}

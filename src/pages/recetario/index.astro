@@ -1,13 +1,17 @@
 ---
+export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
-import { recetas } from "../../data/recetas";
+import { getRecetas } from "../../db/queries";
+
+const recetas = await getRecetas();
 ---
 
 <Layout titulo="Recetario" descripcion="Recetas para cocinar con los productos de Propósito UY.">
   <section class="mx-auto max-w-6xl px-4 py-16">
     <h1 class="text-3xl font-bold text-marca-700">Recetario</h1>
     <p class="mt-2 max-w-xl text-marca-900/70">
-      Ideas para sacarle el jugo a cada producto.
+      Te invitamos a poner las manos en la masa y preparar recetas simples, ricas y nutritivas con
+      nuestros productos.
     </p>
 
     <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -16,6 +20,7 @@ import { recetas } from "../../data/recetas";
           <div class="flex aspect-video items-center justify-center bg-marca-50 text-sm text-marca-300">Foto pendiente</div>
           <div class="p-4">
             <h2 class="font-semibold text-marca-900">{r.titulo}</h2>
+            <p class="text-sm text-marca-500">por Propósito UY</p>
           </div>
         </a>
       ))}

@@ -1,11 +1,19 @@
 ---
+export const prerender = false;
 import Layout from "../layouts/Layout.astro";
-import { preguntas, temas } from "../data/preguntas";
+import { getPreguntas } from "../db/queries";
 import { site } from "../data/site";
-import type { TemaPregunta } from "../data/preguntas";
 
-const orden: TemaPregunta[] = ["pedidos", "elaboracion", "nutricional"];
-const tabs = [{ id: "todas", label: "Todas" }, ...orden.map((t) => ({ id: t, label: temas[t].nombre }))];
+const preguntas = await getPreguntas();
+const labels: Record<string, string> = {
+  pedidos: "Pedidos",
+  elaboracion: "Elaboración",
+  nutricional: "Nutricional",
+};
+const orden = ["pedidos", "elaboracion", "nutricional"];
+const tabs = [{ id: "todas", label: "Todas" }, ...orden.map((t) => ({ id: t, label: labels[t] }))];
+// Ordenar preguntas según el orden de temas
+preguntas.sort((a, b) => orden.indexOf(a.tema) - orden.indexOf(b.tema));
 ---
 
 <Layout titulo="Preguntas" descripcion="Lo más consultado: pedidos, elaboración y nutrición.">

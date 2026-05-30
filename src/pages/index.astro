@@ -1,13 +1,11 @@
 ---
+export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import ProductCard from "../components/ProductCard.astro";
-import { destacados, categorias } from "../data/productos";
+import { getDestacados, getCategorias } from "../db/queries";
 
-const categoriasLista = [
-  { slug: "secos", ...categorias.secos },
-  { slug: "humedos", ...categorias.humedos },
-  { slug: "barras", ...categorias.barras },
-];
+const destacados = await getDestacados();
+const categoriasLista = await getCategorias();
 
 const atajos = [
   { href: "/recetario", titulo: "Recetario" },

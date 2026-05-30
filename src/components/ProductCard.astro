@@ -1,25 +1,31 @@
 ---
-import type { Producto } from "../data/productos";
-import { nombreCompleto, precioDesde, formatoPrecio } from "../data/productos";
+import type { ProductoFull } from "../db/queries";
+import { nombreCompleto, precioDesde, formatoPrecio } from "../db/queries";
 
 interface Props {
-  producto: Producto;
+  producto: ProductoFull;
 }
 
 const { producto } = Astro.props;
 const nombre = nombreCompleto(producto);
 const desde = producto.presentaciones.length > 1;
+const agotado = !producto.disponible;
 ---
 
 <a
   href={`/producto/${producto.slug}`}
   class="group flex flex-col overflow-hidden rounded-2xl border border-marca-100 bg-white shadow-sm transition-shadow hover:shadow-md"
 >
-  <div class="flex aspect-square items-center justify-center bg-marca-50 text-marca-300">
+  <div class="relative flex aspect-square items-center justify-center bg-marca-50 text-marca-300">
     {producto.imagen ? (
       <img src={producto.imagen} alt={nombre} class="h-full w-full object-cover" />
     ) : (
       <span class="text-sm">Foto pendiente</span>
+    )}
+    {agotado && (
+      <span class="absolute left-3 top-3 rounded-full bg-marca-900/80 px-2 py-1 text-xs font-medium text-white">
+        Agotado
+      </span>
     )}
   </div>
   <div class="flex flex-1 flex-col gap-1 p-4">
