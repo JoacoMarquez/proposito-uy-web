@@ -1,0 +1,129 @@
+// Esquema de la base de datos (Drizzle + Postgres).
+// Refleja la estructura de contenido del sitio. Es la fuente de verdad editable
+// desde el panel /admin.
+
+import {
+  pgTable,
+  serial,
+  text,
+  integer,
+  boolean,
+  timestamp,
+  jsonb,
+} from "drizzle-orm/pg-core";
+
+// ── Contenido de tienda ───────────────────────────────────
+
+export const categorias = pgTable("categorias", {
+  slug: text("slug").primaryKey(), // "secos" | "humedos" | "barras"
+  nombre: text("nombre").notNull(),
+  descripcion: text("descripcion").notNull(),
+  descripcionGeneral: text("descripcion_general").notNull().default(""),
+  caracteristicas: jsonb("caracteristicas").$type<string[]>().notNull().default([]),
+  notasCreador: jsonb("notas_creador").$type<string[]>().notNull().default([]),
+  orden: integer("orden").notNull().default(0),
+});
+
+export const productos = pgTable("productos", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  nombre: text("nombre").notNull(),
+  variante: text("variante").notNull(),
+  categoriaSlug: text("categoria_slug")
+    .notNull()
+    .references(() => categorias.slug),
+  descripcion: text("descripcion").notNull(),
+  textoInformativo: text("texto_informativo"),
+  ingredientes: text("ingredientes").notNull(),
+  packaging: text("packaging").notNull(),
+  conservacion: text("conservacion").notNull(),
+  uso: text("uso"),
+  vencimiento: text("vencimiento").notNull(),
+  tamanoUnitario: text("tamano_unitario"),
+  contenido: text("contenido"),
+  nota: text("nota"),
+  productoAliadoSlug: text("producto_aliado_slug"),
+  destacado: boolean("destacado").notNull().default(false),
+  disponible: boolean("disponible").notNull().default(true),
+  imagen: text("imagen"),
+  orden: integer("orden").notNull().default(0),
+  creadoEn: timestamp("creado_en").notNull().defaultNow(),
+});
+
+export const presentaciones = pgTable("presentaciones", {
+  id: serial("id").primaryKey(),
+  productoId: integer("producto_id")
+    .notNull()
+    .references(() => productos.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  precio: integer("precio").notNull(), // pesos uruguayos
+  orden: integer("orden").notNull().default(0),
+});
+
+export const recetas = pgTable("recetas", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  titulo: text("titulo").notNull(),
+  descripcion: text("descripcion").notNull(),
+  productosAliados: jsonb("productos_aliados").$type<string[]>().notNull().default([]),
+  almacenamientoEnvase: text("almacenamiento_envase"),
+  almacenamientoVidaUtil: text("almacenamiento_vida_util"),
+  rendimiento: jsonb("rendimiento").$type<Record<string, string>>(),
+  ingredientes: jsonb("ingredientes").$type<string[]>().notNull().default([]),
+  procedimiento: jsonb("procedimiento").$type<string[]>().notNull().default([]),
+  imagen: text("imagen"),
+  orden: integer("orden").notNull().default(0),
+});
+
+export const preguntas = pgTable("preguntas", {
+  id: serial("id").primaryKey(),
+  tema: text("tema").notNull(), // "pedidos" | "elaboracion" | "nutricional"
+  pregunta: text("pregunta").notNull(),
+  microResumen: text("micro_resumen").notNull(),
+  desarrollo: jsonb("desarrollo").$type<string[]>().notNull().default([]),
+  orden: integer("orden").notNull().default(0),
+});
+
+// ── Pedidos ───────────────────────────────────────────────
+
+export const pedidos = pgTable("pedidos", {
+  id: serial("id").primaryKey(),
+  numero: text("numero").notNull().unique(), // número de pedido visible
+  // datos del cliente
+  nombre: text("nombre").notNull(),
+  celular: text("celular").notNull(),
+  email: text("email").notNull(),
+  direccion: text("direccion"),
+  notas: text("notas"),
+  // logística
+  modalidad: text("modalidad").notNull(), // "entrega" | "retiro"
+  agenda: text("agenda").notNull(), // "miercoles" | "viernes" | "coordinacion"
+  metodoPago: text("metodo_pago").notNull(), // "transferencia" | "efectivo"
+  // montos
+  subtotal: integer("subtotal").notNull(),
+  costoEnvio: integer("costo_envio").notNull().default(0),
+  total: integer("total").notNull(),
+  estado: text("estado").notNull().default("pendiente"), // pendiente | confirmado | entregado | cancelado
+  creadoEn: timestamp("creado_en").notNull().defaultNow(),
+});
+
+export const pedidoItems = pgTable("pedido_items", {
+  id: serial("id").primaryKey(),
+  pedidoId: integer("pedido_id")
+    .notNull()
+    .references(() => pedidos.id, { onDelete: "cascade" }),
+  productoSlug: text("producto_slug").notNull(),
+  nombre: text("nombre").notNull(), // snapshot del nombre al momento del pedido
+  presentacion: text("presentacion").notNull(),
+  precioUnitario: integer("precio_unitario").notNull(),
+  cantidad: integer("cantidad").notNull(),
+});
+
+// Tipos inferidos para usar en la app
+export type Producto = typeof productos.$inferSelect;
+export type Presentacion = typeof presentaciones.$inferSelect;
+export type Categoria = typeof categorias.$inferSelect;
+export type Receta = typeof recetas.$inferSelect;
+export type Pregunta = typeof preguntas.$inferSelect;
+export type Pedido = typeof pedidos.$inferSelect;
+export type PedidoItem = typeof pedidoItems.$inferSelect;
