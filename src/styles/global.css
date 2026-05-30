@@ -1,16 +1,23 @@
 @import "tailwindcss";
 
-/* Tokens de marca. Ajustá estos valores cuando tengamos la identidad final. */
+/* Paleta oficial de Propósito UY.
+   - Letra:  #2D392C (verde oscuro apagado)
+   - Fondo:  #FBF8EF (amarillo claro)
+   - Acento: #EFD3AA (naranja cálido)
+   El resto de los tonos se derivan de estos tres para tener hovers,
+   bordes y estados sin salirse de la identidad. */
 @theme {
-  --color-marca-50: #f4f7ed;
-  --color-marca-100: #e6eed6;
-  --color-marca-300: #b9cd8f;
-  --color-marca-500: #6f8f3f;
-  --color-marca-600: #58742f;
-  --color-marca-700: #445a25;
-  --color-marca-900: #2a3717;
+  /* Tonos cálidos derivados del acento (fondos suaves, chips, tarjetas) */
+  --color-marca-50: #f4ecdb; /* sección clara, footer */
+  --color-marca-100: #efd3aa; /* acento: chips, tarjetas, iconos */
+  --color-marca-300: #e0bc85; /* acento intenso: hovers, placeholders */
+  /* Verdes (texto y superficies oscuras) */
+  --color-marca-500: #5a6b58; /* texto secundario / detalles */
+  --color-marca-600: #2d392c; /* primario: banner, botones, links */
+  --color-marca-700: #232c22; /* hover oscuro / títulos */
+  --color-marca-900: #2d392c; /* texto principal */
 
-  --color-crema: #faf7f0;
+  --color-crema: #fbf8ef; /* fondo de página */
   --color-tierra: #7a5c3e;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
