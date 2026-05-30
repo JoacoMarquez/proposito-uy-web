@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+/* Tokens de marca. Ajustá estos valores cuando tengamos la identidad final. */
+@theme {
+  --color-marca-50: #f4f7ed;
+  --color-marca-100: #e6eed6;
+  --color-marca-300: #b9cd8f;
+  --color-marca-500: #6f8f3f;
+  --color-marca-600: #58742f;
+  --color-marca-700: #445a25;
+  --color-marca-900: #2a3717;
+
+  --color-crema: #faf7f0;
+  --color-tierra: #7a5c3e;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-crema);
+  color: var(--color-marca-900);
+}

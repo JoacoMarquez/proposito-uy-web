@@ -1,0 +1,48 @@
+---
+import { nav, site } from "../data/site";
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === "/" ? path === "/" : path.startsWith(href);
+---
+
+<header class="sticky top-0 z-50 border-b border-marca-100 bg-crema/90 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    <a href="/" class="text-lg font-bold tracking-tight text-marca-700">{site.nombre}</a>
+
+    <nav class="hidden gap-1 md:flex">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+            isActive(item.href)
+              ? "bg-marca-600 text-white"
+              : "text-marca-700 hover:bg-marca-100",
+          ]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Menú mobile simple (detalle nativo, sin JS) -->
+    <details class="relative md:hidden">
+      <summary class="cursor-pointer list-none rounded-md border border-marca-300 px-3 py-1.5 text-sm font-medium text-marca-700">
+        Menú
+      </summary>
+      <nav class="absolute right-0 mt-2 flex w-44 flex-col rounded-lg border border-marca-100 bg-crema p-2 shadow-lg">
+        {nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "rounded-md px-3 py-2 text-sm",
+              isActive(item.href) ? "bg-marca-100 font-semibold" : "hover:bg-marca-50",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    </details>
+  </div>
+</header>

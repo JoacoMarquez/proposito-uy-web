@@ -1,0 +1,45 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { recetas } from "../../data/recetas";
+
+export function getStaticPaths() {
+  return recetas.map((r) => ({ params: { slug: r.slug }, props: { receta: r } }));
+}
+
+const { receta } = Astro.props;
+---
+
+<Layout titulo={receta.titulo} descripcion={receta.descripcion}>
+  <section class="mx-auto max-w-3xl px-4 py-16">
+    <nav class="text-sm text-marca-600">
+      <a href="/recetario" class="hover:underline">Recetario</a> / <span>{receta.titulo}</span>
+    </nav>
+    <h1 class="mt-2 text-3xl font-bold text-marca-700">{receta.titulo}</h1>
+
+    <div class="mt-6 flex aspect-video items-center justify-center rounded-2xl bg-marca-50 text-sm text-marca-300">
+      Foto pendiente
+    </div>
+
+    {receta.ingredientes && (
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold text-marca-700">Ingredientes</h2>
+        <ul class="mt-2 list-disc pl-5 text-marca-900/80">
+          {receta.ingredientes.map((i) => <li>{i}</li>)}
+        </ul>
+      </div>
+    )}
+
+    {receta.pasos && (
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold text-marca-700">Preparación</h2>
+        <ol class="mt-2 list-decimal space-y-2 pl-5 text-marca-900/80">
+          {receta.pasos.map((p) => <li>{p}</li>)}
+        </ol>
+      </div>
+    )}
+
+    {!receta.ingredientes && !receta.pasos && (
+      <p class="mt-8 text-marca-900/60">Contenido de la receta pendiente de cargar.</p>
+    )}
+  </section>
+</Layout>

@@ -1,0 +1,27 @@
+---
+// Ruta estática: tiene prioridad sobre [categoria].astro, así que no colisiona.
+import Layout from "../../layouts/Layout.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { productos, categorias } from "../../data/productos";
+import type { Categoria } from "../../data/productos";
+
+const orden: Categoria[] = ["secos", "barras", "humedos"];
+---
+
+<Layout titulo="Catálogo" descripcion="Todos los productos de Propósito UY.">
+  <section class="mx-auto max-w-6xl px-4 py-16">
+    <nav class="text-sm text-marca-600">
+      <a href="/tienda" class="hover:underline">Tienda</a> / <span>Catálogo</span>
+    </nav>
+    <h1 class="mt-2 text-3xl font-bold text-marca-700">Catálogo completo</h1>
+
+    {orden.map((cat) => (
+      <div class="mt-10">
+        <h2 class="text-xl font-semibold text-marca-700">{categorias[cat].nombre}</h2>
+        <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {productos.filter((p) => p.categoria === cat).map((p) => <ProductCard producto={p} />)}
+        </div>
+      </div>
+    ))}
+  </section>
+</Layout>

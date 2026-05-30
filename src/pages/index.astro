@@ -1,0 +1,91 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ProductCard from "../components/ProductCard.astro";
+import { productos, categorias } from "../data/productos";
+import { whatsappLink } from "../data/site";
+
+// "Los más pedidos": por ahora destacamos 3 productos. Ajustable.
+const masPedidos = productos.filter((p) =>
+  ["mix-frutos-secos-clasico", "barras-proteicas-clasica", "hummus-garbanzo"].includes(p.slug)
+);
+
+const categoriasLista = [
+  { slug: "secos", ...categorias.secos },
+  { slug: "barras", ...categorias.barras },
+  { slug: "humedos", ...categorias.humedos },
+];
+---
+
+<Layout>
+  <!-- Banner principal -->
+  <section class="bg-marca-600 text-white">
+    <div class="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-20">
+      <p class="rounded-full bg-white/15 px-3 py-1 text-sm">Alimentos con propósito</p>
+      <h1 class="max-w-2xl text-4xl font-bold leading-tight sm:text-5xl">
+        Comida real, hecha con intención.
+      </h1>
+      <p class="max-w-xl text-lg text-white/90">
+        Frutos secos, barras proteicas, hummus y cremas artesanales. Pedí directo por WhatsApp.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="/tienda" class="rounded-full bg-white px-5 py-2.5 font-medium text-marca-700 hover:bg-marca-50">
+          Ver tienda
+        </a>
+        <a href={whatsappLink()} class="rounded-full border border-white/40 px-5 py-2.5 font-medium hover:bg-white/10">
+          Pedir por WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Los más pedidos -->
+  <section class="mx-auto max-w-6xl px-4 py-16">
+    <h2 class="text-2xl font-bold text-marca-700">Los más pedidos</h2>
+    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {masPedidos.map((p) => <ProductCard producto={p} />)}
+    </div>
+  </section>
+
+  <!-- Categorías de productos -->
+  <section class="bg-marca-50">
+    <div class="mx-auto max-w-6xl px-4 py-16">
+      <h2 class="text-2xl font-bold text-marca-700">Categorías</h2>
+      <div class="mt-6 grid gap-5 sm:grid-cols-3">
+        {categoriasLista.map((c) => (
+          <a
+            href={`/tienda/${c.slug}`}
+            class="rounded-2xl border border-marca-100 bg-white p-6 transition-shadow hover:shadow-md"
+          >
+            <h3 class="text-lg font-semibold text-marca-900">{c.nombre}</h3>
+            <p class="mt-1 text-sm text-marca-900/70">{c.descripcion}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Cierre emocional -->
+  <section class="mx-auto max-w-3xl px-4 py-20 text-center">
+    <p class="text-2xl font-medium leading-relaxed text-marca-700">
+      Cada producto es una elección consciente: por vos, por quienes querés y por el planeta.
+    </p>
+  </section>
+
+  <!-- Atajos: Recetario + Retornables + Preguntas -->
+  <section class="mx-auto max-w-6xl px-4 pb-20">
+    <div class="grid gap-5 sm:grid-cols-3">
+      <a href="/recetario" class="rounded-2xl bg-marca-100 p-6 hover:bg-marca-300/60">
+        <h3 class="font-semibold text-marca-900">Recetario</h3>
+        <p class="mt-1 text-sm text-marca-900/70">Cociná con nuestros productos.</p>
+      </a>
+      <a href="/retornables" class="rounded-2xl bg-marca-100 p-6 hover:bg-marca-300/60">
+        <h3 class="font-semibold text-marca-900">Retornables</h3>
+        <p class="mt-1 text-sm text-marca-900/70">Devolvé el envase, sumá impacto.</p>
+      </a>
+      <a href="/preguntas" class="rounded-2xl bg-marca-100 p-6 hover:bg-marca-300/60">
+        <h3 class="font-semibold text-marca-900">Preguntas</h3>
+        <p class="mt-1 text-sm text-marca-900/70">Elaboración, pedidos y nutrición.</p>
+      </a>
+    </div>
+  </section>
+</Layout>

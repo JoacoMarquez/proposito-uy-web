@@ -1,0 +1,25 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { site, whatsappLink } from "../data/site";
+---
+
+<Layout titulo="Contacto" descripcion="Contactá directo a Propósito UY por WhatsApp.">
+  <section class="mx-auto max-w-2xl px-4 py-20 text-center">
+    <h1 class="text-3xl font-bold text-marca-700">Contacto</h1>
+    <p class="mt-4 text-lg text-marca-900/80">
+      Escribinos directo por WhatsApp y coordinamos tu pedido.
+    </p>
+
+    <a
+      href={whatsappLink()}
+      class="mt-8 inline-flex items-center gap-2 rounded-full bg-marca-600 px-8 py-4 text-lg font-medium text-white hover:bg-marca-700"
+    >
+      Abrir WhatsApp
+    </a>
+
+    <p class="mt-10 text-sm text-marca-900/60">
+      También nos encontrás en
+      <a href={site.redes.instagram} class="font-medium text-marca-700 hover:underline">Instagram</a>.
+    </p>
+  </section>
+</Layout>

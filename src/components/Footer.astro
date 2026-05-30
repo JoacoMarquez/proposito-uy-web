@@ -1,0 +1,26 @@
+---
+import { nav, site, whatsappLink } from "../data/site";
+---
+
+<footer class="mt-20 border-t border-marca-100 bg-marca-50">
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
+    <div>
+      <p class="text-lg font-bold text-marca-700">{site.nombre}</p>
+      <p class="mt-2 text-sm text-marca-900/70">Alimentos con propósito.</p>
+    </div>
+
+    <nav class="flex flex-col gap-1 text-sm">
+      {nav.map((item) => (
+        <a href={item.href} class="text-marca-700 hover:underline">{item.label}</a>
+      ))}
+    </nav>
+
+    <div class="flex flex-col gap-2 text-sm">
+      <a href={whatsappLink()} class="font-medium text-marca-700 hover:underline">WhatsApp</a>
+      <a href={site.redes.instagram} class="text-marca-700 hover:underline">Instagram</a>
+    </div>
+  </div>
+  <div class="border-t border-marca-100 px-4 py-4 text-center text-xs text-marca-900/60">
+    © {site.nombre} · {site.dominio}
+  </div>
+</footer>

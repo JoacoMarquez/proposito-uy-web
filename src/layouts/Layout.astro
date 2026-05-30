@@ -1,0 +1,36 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../data/site";
+
+interface Props {
+  titulo?: string;
+  descripcion?: string;
+}
+
+const { titulo, descripcion } = Astro.props;
+const tituloFinal = titulo ? `${titulo} · ${site.nombre}` : site.nombre;
+const desc = descripcion ?? "Alimentos con propósito. Frutos secos, barras proteicas, hummus y cremas artesanales.";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{tituloFinal}</title>
+    <meta name="description" content={desc} />
+    <meta property="og:title" content={tituloFinal} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:type" content="website" />
+  </head>
+  <body class="flex min-h-screen flex-col font-sans">
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
