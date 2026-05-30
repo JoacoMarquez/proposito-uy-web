@@ -1,7 +1,6 @@
 ---
 import type { Producto } from "../data/productos";
-import { nombreCompleto } from "../data/productos";
-import { whatsappLink, site } from "../data/site";
+import { nombreCompleto, precioDesde, formatoPrecio } from "../data/productos";
 
 interface Props {
   producto: Producto;
@@ -9,10 +8,13 @@ interface Props {
 
 const { producto } = Astro.props;
 const nombre = nombreCompleto(producto);
-const link = whatsappLink(`${site.whatsappMensajeBase} ${nombre}`);
+const desde = producto.presentaciones.length > 1;
 ---
 
-<article class="flex flex-col overflow-hidden rounded-2xl border border-marca-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+<a
+  href={`/producto/${producto.slug}`}
+  class="group flex flex-col overflow-hidden rounded-2xl border border-marca-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+>
   <div class="flex aspect-square items-center justify-center bg-marca-50 text-marca-300">
     {producto.imagen ? (
       <img src={producto.imagen} alt={nombre} class="h-full w-full object-cover" />
@@ -20,19 +22,15 @@ const link = whatsappLink(`${site.whatsappMensajeBase} ${nombre}`);
       <span class="text-sm">Foto pendiente</span>
     )}
   </div>
-  <div class="flex flex-1 flex-col gap-3 p-4">
-    <div>
-      <h3 class="font-semibold text-marca-900">{producto.nombre}</h3>
-      <p class="text-sm text-marca-600">{producto.variante}</p>
-    </div>
-    {producto.descripcion && (
-      <p class="text-sm text-marca-900/70">{producto.descripcion}</p>
-    )}
-    <a
-      href={link}
-      class="mt-auto inline-flex items-center justify-center rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-marca-700"
-    >
-      Pedir por WhatsApp
-    </a>
+  <div class="flex flex-1 flex-col gap-1 p-4">
+    <h3 class="font-semibold text-marca-900">{producto.nombre}</h3>
+    <p class="text-sm text-marca-600">{producto.variante}</p>
+    <p class="mt-2 font-medium text-marca-900">
+      {desde && <span class="text-sm font-normal text-marca-500">desde </span>}
+      {formatoPrecio(precioDesde(producto))}
+    </p>
+    <span class="mt-3 inline-flex w-fit items-center text-sm font-medium text-marca-700 group-hover:underline">
+      Ver producto →
+    </span>
   </div>
-</article>
+</a>

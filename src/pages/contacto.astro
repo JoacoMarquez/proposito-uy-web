@@ -1,21 +1,27 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { site, whatsappLink } from "../data/site";
+import { site } from "../data/site";
 ---
 
-<Layout titulo="Contacto" descripcion="Contactá directo a Propósito UY por WhatsApp.">
+<Layout titulo="Contacto" descripcion="Estamos para escucharte. Escribinos por WhatsApp.">
   <section class="mx-auto max-w-2xl px-4 py-20 text-center">
-    <h1 class="text-3xl font-bold text-marca-700">Contacto</h1>
+    <h1 class="text-3xl font-bold text-marca-700">Estamos para escucharte</h1>
     <p class="mt-4 text-lg text-marca-900/80">
-      Escribinos directo por WhatsApp y coordinamos tu pedido.
+      Nuestro enfoque está en la calidad de lo que hacemos, por eso cada consulta, comentario o
+      sugerencia nos importa. Nos ayuda a mejorar, crecer y ofrecerte un producto y servicio que
+      realmente aporten valor.
     </p>
 
     <a
-      href={whatsappLink()}
+      href={site.whatsappConversacion}
+      target="_blank"
+      rel="noopener"
       class="mt-8 inline-flex items-center gap-2 rounded-full bg-marca-600 px-8 py-4 text-lg font-medium text-white hover:bg-marca-700"
     >
-      Abrir WhatsApp
+      Contacto directo a WhatsApp
     </a>
+
+    <p class="mt-4 text-sm text-marca-900/60">Te recordamos que nuestro horario de atención es de {site.horarioAtencion}</p>
 
     <p class="mt-10 text-sm text-marca-900/60">
       También nos encontrás en

@@ -1,0 +1,151 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import {
+  productos,
+  categorias,
+  nombreCompleto,
+  formatoPrecio,
+  getProducto,
+} from "../../data/productos";
+import { site, whatsappLink } from "../../data/site";
+
+export function getStaticPaths() {
+  return productos.map((p) => ({ params: { slug: p.slug }, props: { producto: p } }));
+}
+
+const { producto } = Astro.props;
+const nombre = nombreCompleto(producto);
+const cat = categorias[producto.categoria];
+const aliado = producto.productoAliado ? getProducto(producto.productoAliado) : undefined;
+
+const detalles = [
+  { label: "Ingredientes", valor: producto.ingredientes },
+  { label: "Tamaño unitario", valor: producto.tamanoUnitario },
+  { label: "Contenido", valor: producto.contenido },
+  { label: "Packaging", valor: producto.packaging },
+  { label: "Conservación", valor: producto.conservacion },
+  { label: "Uso", valor: producto.uso },
+  { label: "Vencimiento", valor: producto.vencimiento },
+].filter((d) => d.valor);
+
+const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
+---
+
+<Layout titulo={nombre} descripcion={producto.descripcion}>
+  <section class="mx-auto max-w-5xl px-4 py-12">
+    <nav class="text-sm text-marca-600">
+      <a href="/tienda" class="hover:underline">Tienda</a> /
+      <a href={`/tienda/${producto.categoria}`} class="hover:underline">{cat.nombre}</a> /
+      <span>{nombre}</span>
+    </nav>
+
+    <div class="mt-6 grid gap-10 md:grid-cols-2">
+      <!-- Galería -->
+      <div class="flex aspect-square items-center justify-center rounded-2xl bg-marca-50 text-marca-300">
+        {producto.imagen ? (
+          <img src={producto.imagen} alt={nombre} class="h-full w-full rounded-2xl object-cover" />
+        ) : (
+          <span class="text-sm">Foto pendiente</span>
+        )}
+      </div>
+
+      <!-- Info principal -->
+      <div>
+        <h1 class="text-3xl font-bold text-marca-900">{producto.nombre}</h1>
+        <p class="text-lg text-marca-600">{producto.variante}</p>
+        <p class="mt-4 text-marca-900/80">{producto.descripcion}</p>
+
+        {producto.textoInformativo && (
+          <p class="mt-4 rounded-xl bg-marca-100 p-3 text-sm text-marca-900/80">
+            ❄️ {producto.textoInformativo}
+          </p>
+        )}
+
+        <!-- Presentaciones + precio -->
+        <div class="mt-6">
+          <label for="presentacion" class="text-sm font-medium text-marca-700">Presentación</label>
+          <select
+            id="presentacion"
+            class="mt-1 block w-full rounded-xl border border-marca-300 bg-white px-3 py-2 text-marca-900"
+            data-nombre={nombre}
+          >
+            {producto.presentaciones.map((pr) => (
+              <option value={pr.label} data-precio={pr.precio}>
+                {pr.label} — {formatoPrecio(pr.precio)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <p id="precio" class="mt-4 text-2xl font-bold text-marca-900">
+          {formatoPrecio(producto.presentaciones[0].precio)}
+        </p>
+
+        {producto.nota && <p class="mt-2 text-sm text-marca-600">{producto.nota}</p>}
+
+        <!-- Fase 1: pedido por WhatsApp (en Fase 2 será "Agregar al carrito") -->
+        <a
+          id="pedir"
+          href={whatsappLink(`${mensajeBase} (${producto.presentaciones[0].label})`)}
+          class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-marca-600 px-6 py-3 font-medium text-white transition-colors hover:bg-marca-700"
+        >
+          Pedir por WhatsApp
+        </a>
+
+        {aliado && (
+          <p class="mt-6 text-sm text-marca-700">
+            Producto aliado:
+            <a href={`/producto/${aliado.slug}`} class="font-medium underline">
+              {nombreCompleto(aliado)}
+            </a>
+          </p>
+        )}
+      </div>
+    </div>
+
+    <!-- Detalles -->
+    <div class="mt-12 grid gap-4 sm:grid-cols-2">
+      {detalles.map((d) => (
+        <div class="rounded-xl border border-marca-100 bg-white p-4">
+          <h2 class="text-sm font-semibold text-marca-700">{d.label}</h2>
+          <p class="mt-1 text-sm text-marca-900/80">{d.valor}</p>
+        </div>
+      ))}
+    </div>
+
+    <!-- Los más pedidos -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-marca-700">Los más pedidos</h2>
+      <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {productos
+          .filter((p) => p.destacado && p.slug !== producto.slug)
+          .slice(0, 3)
+          .map((p) => <ProductCard producto={p} />)}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const select = document.getElementById("presentacion") as HTMLSelectElement | null;
+  const precioEl = document.getElementById("precio");
+  const pedir = document.getElementById("pedir") as HTMLAnchorElement | null;
+  const numero = "59897174174";
+  const base = "¡Hola Propósito! Quiero hacer un pedido:";
+
+  function actualizar() {
+    if (!select) return;
+    const opt = select.selectedOptions[0];
+    const precio = Number(opt.dataset.precio);
+    const nombre = select.dataset.nombre ?? "";
+    const label = opt.value;
+    if (precioEl) precioEl.textContent = "$U" + precio.toLocaleString("es-UY");
+    if (pedir) {
+      const msg = `${base} ${nombre} (${label})`;
+      pedir.href = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
+    }
+  }
+
+  select?.addEventListener("change", actualizar);
+</script>
