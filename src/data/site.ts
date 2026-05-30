@@ -11,6 +11,8 @@ export const site = {
   redes: {
     instagram: "https://instagram.com/propositouy",
   },
+  // TODO: enlace a las tablas nutricionales (PDF/Drive/imagen). Aparece en Preguntas → Nutricional.
+  tablasNutricionalesUrl: "#",
 } as const;
 
 // Construye un link wa.me con mensaje opcional prellenado.

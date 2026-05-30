@@ -1,9 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { preguntas, temas } from "../data/preguntas";
+import { site } from "../data/site";
 import type { TemaPregunta } from "../data/preguntas";
 
 const orden: TemaPregunta[] = ["elaboracion", "pedidos", "nutricional"];
+
+// Tabs: "todas" + un tab por tema.
+const tabs = [
+  { id: "todas", label: "Todas" },
+  ...orden.map((t) => ({ id: t, label: temas[t] })),
+];
 ---
 
 <Layout titulo="Preguntas" descripcion="Dudas sobre elaboración, pedidos y nutrición.">
@@ -11,21 +18,66 @@ const orden: TemaPregunta[] = ["elaboracion", "pedidos", "nutricional"];
     <h1 class="text-3xl font-bold text-marca-700">Preguntas frecuentes</h1>
     <p class="mt-2 text-marca-900/70">Elaboración, pedidos y nutrición.</p>
 
-    {orden.map((tema) => (
-      <div class="mt-10">
-        <h2 class="text-xl font-semibold text-marca-700">{temas[tema]}</h2>
-        <div class="mt-4 space-y-3">
-          {preguntas.filter((p) => p.tema === tema).map((p) => (
-            <details class="group rounded-xl border border-marca-100 bg-white p-4">
-              <summary class="flex cursor-pointer list-none items-center justify-between font-medium text-marca-900">
-                {p.pregunta}
-                <span class="text-marca-500 transition-transform group-open:rotate-45">+</span>
-              </summary>
-              <p class="mt-3 text-sm text-marca-900/70">{p.respuesta}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    ))}
+    <!-- Tabs / filtros -->
+    <div class="mt-8 flex flex-wrap gap-2" role="tablist">
+      {tabs.map((tab, i) => (
+        <button
+          type="button"
+          data-tab={tab.id}
+          class:list={[
+            "tab-btn rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+            i === 0 ? "bg-marca-600 text-white" : "bg-marca-100 text-marca-700 hover:bg-marca-300/60",
+          ]}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Link a tablas nutricionales (tema nutricional) -->
+    <a
+      href={site.tablasNutricionalesUrl}
+      data-tema="nutricional"
+      class="faq-item mt-6 flex items-center justify-between rounded-xl border border-marca-100 bg-marca-50 p-4 text-sm font-medium text-marca-700 hover:bg-marca-100"
+    >
+      Ver tablas nutricionales
+      <span aria-hidden="true">→</span>
+    </a>
+
+    <!-- Lista de preguntas -->
+    <div class="mt-4 space-y-3">
+      {preguntas.map((p) => (
+        <details class="faq-item group rounded-xl border border-marca-100 bg-white p-4" data-tema={p.tema}>
+          <summary class="flex cursor-pointer list-none items-center justify-between font-medium text-marca-900">
+            {p.pregunta}
+            <span class="text-marca-500 transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <p class="mt-3 text-sm text-marca-900/70">{p.respuesta}</p>
+        </details>
+      ))}
+    </div>
   </section>
 </Layout>
+
+<script>
+  const botones = document.querySelectorAll<HTMLButtonElement>(".tab-btn");
+  const items = document.querySelectorAll<HTMLElement>(".faq-item");
+  const activo = ["bg-marca-600", "text-white"];
+  const inactivo = ["bg-marca-100", "text-marca-700", "hover:bg-marca-300/60"];
+
+  function filtrar(tab: string) {
+    items.forEach((el) => {
+      el.hidden = tab !== "todas" && el.dataset.tema !== tab;
+    });
+    botones.forEach((b) => {
+      const esActivo = b.dataset.tab === tab;
+      b.classList.toggle("bg-marca-600", esActivo);
+      b.classList.toggle("text-white", esActivo);
+      b.classList.toggle("bg-marca-100", !esActivo);
+      b.classList.toggle("text-marca-700", !esActivo);
+      b.classList.toggle("hover:bg-marca-300/60", !esActivo);
+    });
+  }
+
+  botones.forEach((b) => b.addEventListener("click", () => filtrar(b.dataset.tab!)));
+</script>
