@@ -2,7 +2,7 @@
 
 import { db } from "./index";
 import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems } from "./schema";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
 
@@ -191,7 +191,20 @@ export async function getPedidoByNumero(numero: string) {
 }
 
 export async function getPedidos() {
-  return db.select().from(pedidos).orderBy(asc(pedidos.id));
+  return db.select().from(pedidos).orderBy(desc(pedidos.id));
+}
+
+export async function getPedidoById(id: number) {
+  const [p] = await db.select().from(pedidos).where(eq(pedidos.id, id)).limit(1);
+  if (!p) return undefined;
+  const items = await db.select().from(pedidoItems).where(eq(pedidoItems.pedidoId, p.id));
+  return { ...p, items };
+}
+
+export const ESTADOS_PEDIDO = ["pendiente", "confirmado", "entregado", "cancelado"] as const;
+
+export async function actualizarEstadoPedido(id: number, estado: string) {
+  await db.update(pedidos).set({ estado }).where(eq(pedidos.id, id));
 }
 
 // ── Helpers (puros) ──
