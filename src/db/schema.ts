@@ -119,6 +119,23 @@ export const pedidoItems = pgTable("pedido_items", {
   cantidad: integer("cantidad").notNull(),
 });
 
+// ── Administración / auth ─────────────────────────────────
+
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  creadoEn: timestamp("creado_en").notNull().defaultNow(),
+});
+
+export const adminSessions = pgTable("admin_sessions", {
+  id: text("id").primaryKey(), // hash del token de sesión
+  userId: integer("user_id")
+    .notNull()
+    .references(() => adminUsers.id, { onDelete: "cascade" }),
+  expiraEn: timestamp("expira_en").notNull(),
+});
+
 // Tipos inferidos para usar en la app
 export type Producto = typeof productos.$inferSelect;
 export type Presentacion = typeof presentaciones.$inferSelect;

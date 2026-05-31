@@ -1,0 +1,201 @@
+---
+export const prerender = false;
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import {
+  getProductoById,
+  getProductos,
+  getCategorias,
+  upsertProducto,
+  deleteProducto,
+  type ProductoInput,
+} from "../../../db/queries";
+
+const { id: idParam } = Astro.params;
+const esNuevo = idParam === "nuevo";
+const id = esNuevo ? null : Number(idParam);
+
+if (!esNuevo && (!id || Number.isNaN(id))) return Astro.redirect("/admin/productos");
+
+let error = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+
+  if (form.get("_action") === "delete" && id) {
+    await deleteProducto(id);
+    return Astro.redirect("/admin/productos");
+  }
+
+  const s = (k: string) => String(form.get(k) ?? "").trim();
+  const sn = (k: string) => (s(k) === "" ? null : s(k));
+
+  const labels = form.getAll("pres_label").map((x) => String(x).trim());
+  const precios = form.getAll("pres_precio").map((x) => String(x).trim());
+  const pres = labels
+    .map((label, i) => ({ label, precio: Number(precios[i]) }))
+    .filter((p) => p.label !== "" && Number.isFinite(p.precio) && p.precio > 0);
+
+  const data: ProductoInput = {
+    slug: s("slug"),
+    nombre: s("nombre"),
+    variante: s("variante"),
+    categoriaSlug: s("categoriaSlug"),
+    descripcion: s("descripcion"),
+    textoInformativo: sn("textoInformativo"),
+    ingredientes: s("ingredientes"),
+    packaging: s("packaging"),
+    conservacion: s("conservacion"),
+    uso: sn("uso"),
+    vencimiento: s("vencimiento"),
+    tamanoUnitario: sn("tamanoUnitario"),
+    contenido: sn("contenido"),
+    nota: sn("nota"),
+    productoAliadoSlug: sn("productoAliadoSlug"),
+    destacado: form.get("destacado") === "on",
+    disponible: form.get("disponible") === "on",
+    imagen: sn("imagen"),
+  };
+
+  if (!data.slug || !data.nombre || !data.variante || !data.categoriaSlug) {
+    error = "Completá al menos slug, nombre, variante y categoría.";
+  } else if (pres.length === 0) {
+    error = "Agregá al menos una presentación con precio.";
+  } else {
+    await upsertProducto(id, data, pres);
+    return Astro.redirect("/admin/productos");
+  }
+}
+
+const producto = id ? await getProductoById(id) : undefined;
+if (!esNuevo && !producto) return Astro.redirect("/admin/productos");
+
+const [cats, todos] = await Promise.all([getCategorias(), getProductos()]);
+const p = producto;
+// Filas de presentaciones: existentes + 2 vacías para agregar
+const filasPres = [...(p?.presentaciones ?? []), { label: "", precio: 0 }, { label: "", precio: 0 }];
+
+const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
+---
+
+<AdminLayout titulo={esNuevo ? "Nuevo producto" : `Editar: ${p?.nombre} | ${p?.variante}`}>
+  <a href="/admin/productos" class="text-sm text-marca-700 hover:underline">← Volver a productos</a>
+
+  {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+
+  <form method="POST" class="mt-4 max-w-3xl space-y-5">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="text-sm font-medium text-marca-700">Nombre</label>
+        <input name="nombre" value={p?.nombre ?? ""} required class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Variante</label>
+        <input name="variante" value={p?.variante ?? ""} required class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Slug (URL)</label>
+        <input name="slug" value={p?.slug ?? ""} required class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Categoría</label>
+        <select name="categoriaSlug" class={campoBase}>
+          {cats.map((c) => (
+            <option value={c.slug} selected={p?.categoriaSlug === c.slug}>{c.nombre}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Descripción</label>
+      <textarea name="descripcion" rows="2" class={campoBase}>{p?.descripcion ?? ""}</textarea>
+    </div>
+
+    <!-- Presentaciones -->
+    <div>
+      <label class="text-sm font-medium text-marca-700">Presentaciones y precios</label>
+      <p class="text-xs text-marca-500">Label (ej: ½ kg, x12) y precio en pesos. Dejá vacío para omitir.</p>
+      <div class="mt-2 space-y-2">
+        {filasPres.map((pr) => (
+          <div class="flex gap-2">
+            <input name="pres_label" value={pr.label} placeholder="Label" class="flex-1 rounded-xl border border-marca-300 px-3 py-2 text-sm" />
+            <input name="pres_precio" value={pr.precio || ""} type="number" placeholder="Precio" class="w-32 rounded-xl border border-marca-300 px-3 py-2 text-sm" />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="text-sm font-medium text-marca-700">Ingredientes</label>
+        <textarea name="ingredientes" rows="2" class={campoBase}>{p?.ingredientes ?? ""}</textarea>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Texto informativo (ej: congelado)</label>
+        <textarea name="textoInformativo" rows="2" class={campoBase}>{p?.textoInformativo ?? ""}</textarea>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Packaging</label>
+        <input name="packaging" value={p?.packaging ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Conservación</label>
+        <input name="conservacion" value={p?.conservacion ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Uso</label>
+        <input name="uso" value={p?.uso ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Vencimiento</label>
+        <input name="vencimiento" value={p?.vencimiento ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Tamaño unitario</label>
+        <input name="tamanoUnitario" value={p?.tamanoUnitario ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Contenido (cajas)</label>
+        <input name="contenido" value={p?.contenido ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Nota</label>
+        <input name="nota" value={p?.nota ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Producto aliado</label>
+        <select name="productoAliadoSlug" class={campoBase}>
+          <option value="">— ninguno —</option>
+          {todos.filter((x) => x.id !== p?.id).map((x) => (
+            <option value={x.slug} selected={p?.productoAliadoSlug === x.slug}>{x.nombre} | {x.variante}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <div class="flex gap-6">
+      <label class="flex items-center gap-2 text-sm text-marca-700">
+        <input type="checkbox" name="destacado" checked={p?.destacado ?? false} /> Destacado (más pedidos)
+      </label>
+      <label class="flex items-center gap-2 text-sm text-marca-700">
+        <input type="checkbox" name="disponible" checked={p?.disponible ?? true} /> Disponible
+      </label>
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit" class="rounded-full bg-marca-600 px-6 py-2.5 font-medium text-white hover:bg-marca-700">
+        Guardar
+      </button>
+      <a href="/admin/productos" class="text-sm text-marca-700 hover:underline">Cancelar</a>
+    </div>
+  </form>
+
+  {!esNuevo && (
+    <form method="POST" class="mt-8 max-w-3xl border-t border-marca-100 pt-4">
+      <input type="hidden" name="_action" value="delete" />
+      <button type="submit" class="text-sm text-red-600 hover:underline" onclick="return confirm('¿Eliminar este producto?')">
+        Eliminar producto
+      </button>
+    </form>
+  )}
+</AdminLayout>

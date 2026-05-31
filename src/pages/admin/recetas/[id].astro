@@ -1,0 +1,145 @@
+---
+export const prerender = false;
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import {
+  getRecetaById,
+  getProductos,
+  upsertReceta,
+  deleteReceta,
+  type RecetaInput,
+} from "../../../db/queries";
+
+const { id: idParam } = Astro.params;
+const esNuevo = idParam === "nuevo";
+const id = esNuevo ? null : Number(idParam);
+if (!esNuevo && (!id || Number.isNaN(id))) return Astro.redirect("/admin/recetas");
+
+let error = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+
+  if (form.get("_action") === "delete" && id) {
+    await deleteReceta(id);
+    return Astro.redirect("/admin/recetas");
+  }
+
+  const s = (k: string) => String(form.get(k) ?? "").trim();
+  const sn = (k: string) => (s(k) === "" ? null : s(k));
+  const lineas = (k: string) =>
+    s(k)
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+  const rendKeys = ["cantidad", "porcion", "porciones", "tiempo"] as const;
+  const rendimiento: Record<string, string> = {};
+  for (const k of rendKeys) if (s(`rend_${k}`)) rendimiento[k] = s(`rend_${k}`);
+
+  const data: RecetaInput = {
+    slug: s("slug"),
+    titulo: s("titulo"),
+    descripcion: s("descripcion"),
+    productosAliados: form.getAll("productosAliados").map((x) => String(x)),
+    almacenamientoEnvase: sn("almacenamientoEnvase"),
+    almacenamientoVidaUtil: sn("almacenamientoVidaUtil"),
+    rendimiento: Object.keys(rendimiento).length ? rendimiento : null,
+    ingredientes: lineas("ingredientes"),
+    procedimiento: lineas("procedimiento"),
+    imagen: sn("imagen"),
+  };
+
+  if (!data.slug || !data.titulo) {
+    error = "Completá al menos slug y título.";
+  } else {
+    await upsertReceta(id, data);
+    return Astro.redirect("/admin/recetas");
+  }
+}
+
+const receta = id ? await getRecetaById(id) : undefined;
+if (!esNuevo && !receta) return Astro.redirect("/admin/recetas");
+
+const todos = await getProductos();
+const r = receta;
+const rend = (r?.rendimiento ?? {}) as Record<string, string>;
+const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
+---
+
+<AdminLayout titulo={esNuevo ? "Nueva receta" : `Editar: ${r?.titulo}`}>
+  <a href="/admin/recetas" class="text-sm text-marca-700 hover:underline">← Volver a recetas</a>
+
+  {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+
+  <form method="POST" class="mt-4 max-w-3xl space-y-5">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="text-sm font-medium text-marca-700">Título</label>
+        <input name="titulo" value={r?.titulo ?? ""} required class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Slug (URL)</label>
+        <input name="slug" value={r?.slug ?? ""} required class={campoBase} />
+      </div>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Descripción</label>
+      <textarea name="descripcion" rows="3" class={campoBase}>{r?.descripcion ?? ""}</textarea>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Productos aliados</label>
+      <select name="productosAliados" multiple size="5" class={campoBase}>
+        {todos.map((x) => (
+          <option value={x.slug} selected={r?.productosAliados.includes(x.slug)}>{x.nombre} | {x.variante}</option>
+        ))}
+      </select>
+      <p class="text-xs text-marca-500">Ctrl/Cmd + click para elegir varios.</p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-4">
+      {["cantidad", "porcion", "porciones", "tiempo"].map((k) => (
+        <div>
+          <label class="text-sm font-medium capitalize text-marca-700">{k}</label>
+          <input name={`rend_${k}`} value={rend[k] ?? ""} class={campoBase} />
+        </div>
+      ))}
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="text-sm font-medium text-marca-700">Envase de almacenamiento</label>
+        <input name="almacenamientoEnvase" value={r?.almacenamientoEnvase ?? ""} class={campoBase} />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Vida útil</label>
+        <input name="almacenamientoVidaUtil" value={r?.almacenamientoVidaUtil ?? ""} class={campoBase} />
+      </div>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Ingredientes (uno por línea)</label>
+      <textarea name="ingredientes" rows="6" class={campoBase}>{(r?.ingredientes ?? []).join("\n")}</textarea>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Procedimiento (un paso por línea)</label>
+      <textarea name="procedimiento" rows="8" class={campoBase}>{(r?.procedimiento ?? []).join("\n")}</textarea>
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit" class="rounded-full bg-marca-600 px-6 py-2.5 font-medium text-white hover:bg-marca-700">Guardar</button>
+      <a href="/admin/recetas" class="text-sm text-marca-700 hover:underline">Cancelar</a>
+    </div>
+  </form>
+
+  {!esNuevo && (
+    <form method="POST" class="mt-8 max-w-3xl border-t border-marca-100 pt-4">
+      <input type="hidden" name="_action" value="delete" />
+      <button type="submit" class="text-sm text-red-600 hover:underline" onclick="return confirm('¿Eliminar esta receta?')">
+        Eliminar receta
+      </button>
+    </form>
+  )}
+</AdminLayout>

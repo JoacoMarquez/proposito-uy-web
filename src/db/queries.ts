@@ -64,6 +64,95 @@ export async function getPreguntas(): Promise<Pregunta[]> {
   return db.select().from(preguntas).orderBy(asc(preguntas.orden));
 }
 
+// ── Mutaciones (panel admin) ──
+export interface ProductoInput {
+  slug: string;
+  nombre: string;
+  variante: string;
+  categoriaSlug: string;
+  descripcion: string;
+  textoInformativo: string | null;
+  ingredientes: string;
+  packaging: string;
+  conservacion: string;
+  uso: string | null;
+  vencimiento: string;
+  tamanoUnitario: string | null;
+  contenido: string | null;
+  nota: string | null;
+  productoAliadoSlug: string | null;
+  destacado: boolean;
+  disponible: boolean;
+  imagen: string | null;
+}
+
+export async function getProductoById(id: number): Promise<ProductoFull | undefined> {
+  const [p] = await db.select().from(productos).where(eq(productos.id, id)).limit(1);
+  if (!p) return undefined;
+  const pres = await db
+    .select()
+    .from(presentaciones)
+    .where(eq(presentaciones.productoId, id))
+    .orderBy(asc(presentaciones.orden));
+  return { ...p, presentaciones: pres };
+}
+
+export async function upsertProducto(
+  id: number | null,
+  data: ProductoInput,
+  pres: { label: string; precio: number }[],
+): Promise<number> {
+  let prodId = id;
+  if (id) {
+    await db.update(productos).set(data).where(eq(productos.id, id));
+  } else {
+    const [r] = await db.insert(productos).values(data).returning({ id: productos.id });
+    prodId = r.id;
+  }
+  await db.delete(presentaciones).where(eq(presentaciones.productoId, prodId!));
+  if (pres.length) {
+    await db.insert(presentaciones).values(
+      pres.map((p, i) => ({ productoId: prodId!, label: p.label, precio: p.precio, orden: i })),
+    );
+  }
+  return prodId!;
+}
+
+export async function deleteProducto(id: number): Promise<void> {
+  await db.delete(productos).where(eq(productos.id, id));
+}
+
+export interface RecetaInput {
+  slug: string;
+  titulo: string;
+  descripcion: string;
+  productosAliados: string[];
+  almacenamientoEnvase: string | null;
+  almacenamientoVidaUtil: string | null;
+  rendimiento: Record<string, string> | null;
+  ingredientes: string[];
+  procedimiento: string[];
+  imagen: string | null;
+}
+
+export async function getRecetaById(id: number): Promise<Receta | undefined> {
+  const [r] = await db.select().from(recetas).where(eq(recetas.id, id)).limit(1);
+  return r;
+}
+
+export async function upsertReceta(id: number | null, data: RecetaInput): Promise<number> {
+  if (id) {
+    await db.update(recetas).set(data).where(eq(recetas.id, id));
+    return id;
+  }
+  const [r] = await db.insert(recetas).values(data).returning({ id: recetas.id });
+  return r.id;
+}
+
+export async function deleteReceta(id: number): Promise<void> {
+  await db.delete(recetas).where(eq(recetas.id, id));
+}
+
 // ── Helpers (puros) ──
 export function nombreCompleto(p: { nombre: string; variante: string }): string {
   return `${p.nombre} | ${p.variante}`;

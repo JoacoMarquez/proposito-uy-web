@@ -1,0 +1,38 @@
+---
+export const prerender = false;
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { getRecetas } from "../../../db/queries";
+
+const recetas = await getRecetas();
+---
+
+<AdminLayout titulo="Recetas">
+  <div class="mb-4 flex justify-end">
+    <a href="/admin/recetas/nuevo" class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
+      + Nueva receta
+    </a>
+  </div>
+
+  <div class="overflow-hidden rounded-2xl border border-marca-100 bg-white">
+    <table class="w-full text-sm">
+      <thead class="border-b border-marca-100 bg-marca-50 text-left text-marca-700">
+        <tr>
+          <th class="p-3">Receta</th>
+          <th class="p-3">Aliados</th>
+          <th class="p-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {recetas.map((r) => (
+          <tr class="border-b border-marca-50 last:border-0">
+            <td class="p-3 font-medium text-marca-900">{r.titulo}</td>
+            <td class="p-3 text-marca-900/70">{r.productosAliados.join(", ") || "—"}</td>
+            <td class="p-3 text-right">
+              <a href={`/admin/recetas/${r.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</AdminLayout>

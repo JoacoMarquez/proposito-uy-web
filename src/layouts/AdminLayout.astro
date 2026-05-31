@@ -1,0 +1,60 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  titulo: string;
+}
+const { titulo } = Astro.props;
+const email = Astro.locals.adminUser?.email;
+const path = Astro.url.pathname;
+
+const nav = [
+  { label: "Inicio", href: "/admin" },
+  { label: "Productos", href: "/admin/productos" },
+  { label: "Recetas", href: "/admin/recetas" },
+];
+const activo = (href: string) =>
+  href === "/admin" ? path === "/admin" : path.startsWith(href);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{titulo} · Admin Propósito UY</title>
+  </head>
+  <body class="min-h-screen bg-crema font-sans text-marca-900">
+    <div class="flex min-h-screen">
+      <aside class="w-56 shrink-0 border-r border-marca-100 bg-white p-4">
+        <p class="px-2 text-lg font-bold text-marca-700">Propósito UY</p>
+        <p class="px-2 text-xs text-marca-500">Panel de administración</p>
+        <nav class="mt-6 flex flex-col gap-1">
+          {nav.map((n) => (
+            <a
+              href={n.href}
+              class:list={[
+                "rounded-lg px-3 py-2 text-sm font-medium",
+                activo(n.href) ? "bg-marca-600 text-white" : "text-marca-700 hover:bg-marca-50",
+              ]}
+            >
+              {n.label}
+            </a>
+          ))}
+        </nav>
+        <div class="mt-8 border-t border-marca-100 pt-4 text-xs text-marca-500">
+          <p class="truncate px-2">{email}</p>
+          <a href="/admin/logout" class="mt-2 block px-2 text-marca-700 hover:underline">Cerrar sesión</a>
+          <a href="/" target="_blank" class="mt-1 block px-2 text-marca-700 hover:underline">Ver sitio ↗</a>
+        </div>
+      </aside>
+
+      <main class="flex-1 p-8">
+        <h1 class="text-2xl font-bold text-marca-700">{titulo}</h1>
+        <div class="mt-6">
+          <slot />
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
