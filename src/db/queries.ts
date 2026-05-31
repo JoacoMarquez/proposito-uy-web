@@ -1,8 +1,9 @@
 // Capa de acceso a datos. Las páginas y el panel leen el contenido desde acá.
 
 import { db } from "./index";
-import { productos, presentaciones, categorias, recetas, preguntas } from "./schema";
+import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems } from "./schema";
 import { asc, eq } from "drizzle-orm";
+import { randomBytes } from "node:crypto";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
 
 export type { Categoria, Receta, Pregunta } from "./schema";
@@ -151,6 +152,46 @@ export async function upsertReceta(id: number | null, data: RecetaInput): Promis
 
 export async function deleteReceta(id: number): Promise<void> {
   await db.delete(recetas).where(eq(recetas.id, id));
+}
+
+// ── Pedidos ──
+export interface NuevoPedido {
+  nombre: string;
+  celular: string;
+  email: string;
+  direccion: string | null;
+  notas: string | null;
+  modalidad: string;
+  agenda: string;
+  metodoPago: string;
+  subtotal: number;
+  costoEnvio: number;
+  total: number;
+}
+export interface ItemPedido {
+  productoSlug: string;
+  nombre: string;
+  presentacion: string;
+  precioUnitario: number;
+  cantidad: number;
+}
+
+export async function crearPedido(data: NuevoPedido, items: ItemPedido[]): Promise<string> {
+  const numero = "P-" + randomBytes(4).toString("hex").toUpperCase();
+  const [row] = await db.insert(pedidos).values({ numero, ...data }).returning({ id: pedidos.id });
+  await db.insert(pedidoItems).values(items.map((i) => ({ pedidoId: row.id, ...i })));
+  return numero;
+}
+
+export async function getPedidoByNumero(numero: string) {
+  const [p] = await db.select().from(pedidos).where(eq(pedidos.numero, numero)).limit(1);
+  if (!p) return undefined;
+  const items = await db.select().from(pedidoItems).where(eq(pedidoItems.pedidoId, p.id));
+  return { ...p, items };
+}
+
+export async function getPedidos() {
+  return db.select().from(pedidos).orderBy(asc(pedidos.id));
 }
 
 // ── Helpers (puros) ──

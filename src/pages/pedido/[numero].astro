@@ -1,0 +1,77 @@
+---
+export const prerender = false;
+import Layout from "../../layouts/Layout.astro";
+import { getPedidoByNumero, formatoPrecio } from "../../db/queries";
+import { site, whatsappLink } from "../../data/site";
+
+const { numero } = Astro.params;
+const pedido = numero ? await getPedidoByNumero(numero) : undefined;
+if (!pedido) return Astro.redirect("/");
+
+const agendaLabel: Record<string, string> = {
+  miercoles: "Miércoles",
+  viernes: "Viernes",
+  coordinacion: "Coordinación personalizada",
+};
+const wa = whatsappLink(`Hola! Adjunto el comprobante de mi pedido ${pedido.numero}.`);
+---
+
+<Layout titulo={`Pedido ${pedido.numero}`} descripcion="Confirmación de pedido.">
+  <section class="mx-auto max-w-2xl px-4 py-16">
+    <div class="rounded-2xl border border-marca-100 bg-white p-8">
+      <p class="text-sm font-medium text-marca-600">¡Pedido recibido!</p>
+      <h1 class="mt-1 text-3xl font-bold text-marca-700">Pedido {pedido.numero}</h1>
+      <p class="mt-2 text-marca-900/70">Gracias, {pedido.nombre}. Te enviamos la confirmación a {pedido.email}.</p>
+
+      <!-- Resumen -->
+      <div class="mt-6 space-y-2 border-t border-marca-100 pt-4 text-sm">
+        {pedido.items.map((i) => (
+          <div class="flex justify-between">
+            <span>{i.cantidad}× {i.nombre} <span class="text-marca-500">({i.presentacion})</span></span>
+            <span>{formatoPrecio(i.precioUnitario * i.cantidad)}</span>
+          </div>
+        ))}
+        <div class="flex justify-between border-t border-marca-100 pt-2"><span>Subtotal</span><span>{formatoPrecio(pedido.subtotal)}</span></div>
+        <div class="flex justify-between"><span>Envío</span><span>{pedido.costoEnvio === 0 ? "Gratis" : formatoPrecio(pedido.costoEnvio)}</span></div>
+        <div class="flex justify-between text-lg font-bold text-marca-900"><span>Total</span><span>{formatoPrecio(pedido.total)}</span></div>
+      </div>
+
+      <!-- Logística -->
+      <dl class="mt-6 grid grid-cols-2 gap-3 text-sm">
+        <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{pedido.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta"}</dd></div>
+        <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaLabel[pedido.agenda] ?? pedido.agenda}</dd></div>
+        {pedido.direccion && <div class="col-span-2"><dt class="text-marca-500">Dirección</dt><dd class="font-medium">{pedido.direccion}</dd></div>}
+        {pedido.modalidad === "retiro" && <div class="col-span-2"><dt class="text-marca-500">Retiro en</dt><dd class="font-medium">{site.direccionRetiro}</dd></div>}
+      </dl>
+
+      <!-- Instrucciones de pago -->
+      <div class="mt-6 rounded-xl bg-marca-50 p-4 text-sm">
+        {pedido.metodoPago === "transferencia" ? (
+          <>
+            <p class="font-medium text-marca-700">Pago por transferencia</p>
+            <p class="mt-1 text-marca-900/80">Para confirmar tu pedido, realizá la transferencia y enviá el comprobante por WhatsApp indicando tu número de pedido <strong>{pedido.numero}</strong>.</p>
+            <p class="mt-2 text-marca-900/60">Datos bancarios: pendientes de cargar.</p>
+            <a href={wa} target="_blank" rel="noopener" class="mt-3 inline-block rounded-full bg-marca-600 px-5 py-2.5 font-medium text-white hover:bg-marca-700">Enviar comprobante por WhatsApp</a>
+          </>
+        ) : (
+          <>
+            <p class="font-medium text-marca-700">Pago en efectivo</p>
+            <p class="mt-1 text-marca-900/80">Vas a abonar en efectivo al momento de la entrega o del retiro.</p>
+          </>
+        )}
+      </div>
+
+      {pedido.agenda === "coordinacion" && (
+        <p class="mt-4 text-sm text-marca-900/70">Seleccionaste “Coordinación personalizada”: coordinamos por WhatsApp una alternativa para la entrega o el retiro.</p>
+      )}
+
+      <a href="/tienda" class="mt-6 inline-block text-sm font-medium text-marca-700 hover:underline">← Seguir comprando</a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  // El pedido ya está confirmado: vaciar el carrito por las dudas.
+  import { limpiar } from "../../scripts/cart";
+  limpiar();
+</script>

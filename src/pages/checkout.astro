@@ -1,0 +1,162 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { site } from "../data/site";
+---
+
+<Layout titulo="Checkout" descripcion="Finalizá tu pedido en Propósito UY.">
+  <section class="mx-auto max-w-4xl px-4 py-12">
+    <h1 class="text-3xl font-bold text-marca-700">Finalizar pedido</h1>
+
+    <form id="checkout" class="mt-8 grid gap-8 md:grid-cols-[1fr_320px]">
+      <!-- Datos y opciones -->
+      <div class="space-y-6">
+        <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
+          <legend class="px-2 font-semibold text-marca-700">Tus datos</legend>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="text-sm">Nombre completo
+              <input name="nombre" required class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+            <label class="text-sm">Celular
+              <input name="celular" required class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+            <label class="text-sm sm:col-span-2">Correo electrónico
+              <input name="email" type="email" required class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
+          <legend class="px-2 font-semibold text-marca-700">Entrega o retiro</legend>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 text-sm"><input type="radio" name="modalidad" value="entrega" checked /> Entrega a domicilio</label>
+            <label class="flex items-center gap-2 text-sm"><input type="radio" name="modalidad" value="retiro" /> Retiro en planta</label>
+          </div>
+          <label id="campo-direccion" class="mt-3 block text-sm">Dirección
+            <input name="direccion" class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+          <p id="info-retiro" class="mt-3 hidden text-sm text-marca-900/70">
+            Retiro en {site.direccionRetiro}. Coordinamos por WhatsApp.
+          </p>
+        </fieldset>
+
+        <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
+          <legend class="px-2 font-semibold text-marca-700">Agenda</legend>
+          <select name="agenda" class="w-full rounded-xl border border-marca-300 px-3 py-2">
+            <option value="miercoles">Miércoles</option>
+            <option value="viernes">Viernes</option>
+            <option value="coordinacion">Coordinación personalizada</option>
+          </select>
+          <p class="mt-2 text-sm text-marca-900/60">Trabajamos entregas y retiros los miércoles y viernes. Si necesitás otro día, elegí “Coordinación personalizada” y lo vemos por WhatsApp.</p>
+        </fieldset>
+
+        <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
+          <legend class="px-2 font-semibold text-marca-700">Método de pago</legend>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 text-sm"><input type="radio" name="metodoPago" value="transferencia" checked /> Transferencia</label>
+            <label class="flex items-center gap-2 text-sm"><input type="radio" name="metodoPago" value="efectivo" /> Efectivo</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
+          <legend class="px-2 font-semibold text-marca-700">Notas del pedido</legend>
+          <textarea name="notas" rows="3" class="w-full rounded-xl border border-marca-300 px-3 py-2"
+            placeholder="Referencias de entrega, retornables, detalle de sabores en Barras Mix, etc."></textarea>
+        </fieldset>
+      </div>
+
+      <!-- Resumen -->
+      <aside class="h-fit rounded-2xl border border-marca-100 bg-white p-5 md:sticky md:top-24">
+        <h2 class="font-semibold text-marca-700">Tu pedido</h2>
+        <div id="resumen-items" class="mt-3 space-y-2 text-sm"></div>
+        <div class="mt-4 space-y-1 border-t border-marca-100 pt-4 text-sm">
+          <div class="flex justify-between"><span>Subtotal</span><span id="r-subtotal"></span></div>
+          <div class="flex justify-between"><span>Envío</span><span id="r-envio"></span></div>
+          <div class="mt-1 flex justify-between text-lg font-bold text-marca-900"><span>Total</span><span id="r-total"></span></div>
+        </div>
+        <p id="error" class="mt-3 hidden rounded-lg bg-red-50 p-2 text-sm text-red-700"></p>
+        <button id="confirmar" type="submit" class="mt-5 w-full rounded-full bg-marca-600 px-5 py-3 font-medium text-white hover:bg-marca-700">
+          Confirmar pedido
+        </button>
+        <a href="/carrito" class="mt-2 block text-center text-sm text-marca-700 hover:underline">Volver al carrito</a>
+      </aside>
+    </form>
+  </section>
+</Layout>
+
+<script>
+  import { getCarrito, subtotal as calcSubtotal, limpiar, formatoPrecio } from "../scripts/cart";
+
+  const ENVIO = 250;
+  const ENVIO_GRATIS_DESDE = 3000;
+
+  const form = document.getElementById("checkout") as HTMLFormElement;
+  const itemsEl = document.getElementById("resumen-items")!;
+  const errorEl = document.getElementById("error")!;
+  const confirmar = document.getElementById("confirmar") as HTMLButtonElement;
+
+  if (getCarrito().length === 0) location.href = "/carrito";
+
+  function modalidad() {
+    return (form.querySelector('input[name="modalidad"]:checked') as HTMLInputElement).value;
+  }
+  function costoEnvio(sub: number) {
+    return modalidad() === "retiro" ? 0 : sub >= ENVIO_GRATIS_DESDE ? 0 : ENVIO;
+  }
+
+  function render() {
+    const items = getCarrito();
+    itemsEl.innerHTML = items
+      .map((i) => `<div class="flex justify-between"><span>${i.cantidad}× ${i.nombre} <span class="text-marca-500">(${i.presentacion})</span></span><span>${formatoPrecio(i.precio * i.cantidad)}</span></div>`)
+      .join("");
+    const sub = calcSubtotal();
+    const envio = costoEnvio(sub);
+    document.getElementById("r-subtotal")!.textContent = formatoPrecio(sub);
+    document.getElementById("r-envio")!.textContent = envio === 0 ? "Gratis" : formatoPrecio(envio);
+    document.getElementById("r-total")!.textContent = formatoPrecio(sub + envio);
+  }
+
+  // Mostrar/ocultar dirección según modalidad
+  function toggleModalidad() {
+    const esEntrega = modalidad() === "entrega";
+    document.getElementById("campo-direccion")!.classList.toggle("hidden", !esEntrega);
+    document.getElementById("info-retiro")!.classList.toggle("hidden", esEntrega);
+    (form.direccion as HTMLInputElement).required = esEntrega;
+    render();
+  }
+  form.querySelectorAll('input[name="modalidad"]').forEach((r) => r.addEventListener("change", toggleModalidad));
+
+  render();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.classList.add("hidden");
+    confirmar.disabled = true;
+    confirmar.textContent = "Procesando…";
+
+    const fd = new FormData(form);
+    const payload = {
+      nombre: fd.get("nombre"),
+      celular: fd.get("celular"),
+      email: fd.get("email"),
+      direccion: fd.get("direccion"),
+      notas: fd.get("notas"),
+      modalidad: fd.get("modalidad"),
+      agenda: fd.get("agenda"),
+      metodoPago: fd.get("metodoPago"),
+      items: getCarrito().map((i) => ({ slug: i.slug, presentacion: i.presentacion, cantidad: i.cantidad })),
+    };
+
+    try {
+      const res = await fetch("/api/pedidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo crear el pedido.");
+      limpiar();
+      location.href = `/pedido/${data.numero}`;
+    } catch (err: any) {
+      errorEl.textContent = err.message;
+      errorEl.classList.remove("hidden");
+      confirmar.disabled = false;
+      confirmar.textContent = "Confirmar pedido";
+    }
+  });
+</script>

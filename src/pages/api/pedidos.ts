@@ -1,0 +1,75 @@
+import type { APIRoute } from "astro";
+import { getProducto, crearPedido, type ItemPedido } from "../../db/queries";
+
+export const prerender = false;
+
+const ENVIO = 250;
+const ENVIO_GRATIS_DESDE = 3000;
+
+function json(obj: unknown, status = 200) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+export const POST: APIRoute = async ({ request }) => {
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Datos inválidos." }, 400);
+  }
+
+  const { nombre, celular, email, direccion, notas, modalidad, agenda, metodoPago, items } = body ?? {};
+
+  if (!nombre || !celular || !email || !modalidad || !agenda || !metodoPago) {
+    return json({ error: "Faltan datos del pedido." }, 400);
+  }
+  if (!["entrega", "retiro"].includes(modalidad)) return json({ error: "Modalidad inválida." }, 400);
+  if (modalidad === "entrega" && !direccion) return json({ error: "Falta la dirección de entrega." }, 400);
+  if (!Array.isArray(items) || items.length === 0) return json({ error: "El carrito está vacío." }, 400);
+
+  // Revalidar cada ítem contra la base (no confiamos en los precios del cliente).
+  const validados: ItemPedido[] = [];
+  let subtotal = 0;
+  for (const it of items) {
+    const prod = await getProducto(String(it?.slug ?? ""));
+    if (!prod || !prod.disponible) continue;
+    const pres = prod.presentaciones.find((p) => p.label === it?.presentacion);
+    if (!pres) continue;
+    const cantidad = Math.max(1, Math.floor(Number(it?.cantidad) || 0));
+    subtotal += pres.precio * cantidad;
+    validados.push({
+      productoSlug: prod.slug,
+      nombre: `${prod.nombre} | ${prod.variante}`,
+      presentacion: pres.label,
+      precioUnitario: pres.precio,
+      cantidad,
+    });
+  }
+
+  if (validados.length === 0) return json({ error: "No hay productos válidos en el carrito." }, 400);
+
+  const costoEnvio = modalidad === "retiro" ? 0 : subtotal >= ENVIO_GRATIS_DESDE ? 0 : ENVIO;
+  const total = subtotal + costoEnvio;
+
+  const numero = await crearPedido(
+    {
+      nombre: String(nombre),
+      celular: String(celular),
+      email: String(email),
+      direccion: modalidad === "entrega" ? String(direccion) : null,
+      notas: notas ? String(notas) : null,
+      modalidad: String(modalidad),
+      agenda: String(agenda),
+      metodoPago: String(metodoPago),
+      subtotal,
+      costoEnvio,
+      total,
+    },
+    validados,
+  );
+
+  return json({ numero }, 200);
+};
