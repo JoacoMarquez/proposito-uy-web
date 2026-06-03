@@ -37,12 +37,15 @@ import { site } from "../data/site";
 
         <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
           <legend class="px-2 font-semibold text-marca-700">Agenda</legend>
-          <select name="agenda" class="w-full rounded-xl border border-marca-300 px-3 py-2">
-            <option value="miercoles">Miércoles</option>
-            <option value="viernes">Viernes</option>
-            <option value="coordinacion">Coordinación personalizada</option>
-          </select>
-          <p class="mt-2 text-sm text-marca-900/60">Trabajamos entregas y retiros los miércoles y viernes. Si necesitás otro día, elegí “Coordinación personalizada” y lo vemos por WhatsApp.</p>
+          <p class="text-sm text-marca-900/60">Elegí un día disponible (trabajamos entregas y retiros los miércoles y viernes) o pedí coordinación personalizada.</p>
+          <div id="agenda-dias" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3"></div>
+          <button type="button" id="agenda-coord" class="agenda-opcion mt-2 block w-full rounded-xl border border-marca-300 px-3 py-2 text-left text-sm hover:border-marca-500">
+            <span class="font-medium text-marca-700">Coordinación personalizada</span>
+            <span class="block text-marca-900/60">Otro día u horario — lo coordinamos por WhatsApp.</span>
+          </button>
+          <input type="hidden" name="agenda" />
+          <input type="hidden" name="fechaAgenda" />
+          <p id="agenda-error" class="mt-2 hidden text-sm text-red-600">Elegí una opción de agenda.</p>
         </fieldset>
 
         <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
@@ -123,8 +126,65 @@ import { site } from "../data/site";
 
   render();
 
+  // ── Agenda: calendario de días habilitados (miércoles y viernes) ──
+  const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+  const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "set", "oct", "nov", "dic"];
+  const diasEl = document.getElementById("agenda-dias")!;
+  const coordBtn = document.getElementById("agenda-coord")!;
+  const agendaError = document.getElementById("agenda-error")!;
+  const agendaInput = form.elements.namedItem("agenda") as HTMLInputElement;
+  const fechaInput = form.elements.namedItem("fechaAgenda") as HTMLInputElement;
+
+  function proximosDias(cantidad: number) {
+    const out: { iso: string; tipo: string; label: string }[] = [];
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    while (out.length < cantidad) {
+      d.setDate(d.getDate() + 1);
+      const wd = d.getDay();
+      if (wd === 3 || wd === 5) {
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        out.push({ iso, tipo: wd === 3 ? "miercoles" : "viernes", label: `${DIAS[wd]} ${d.getDate()} ${MESES[d.getMonth()]}` });
+      }
+    }
+    return out;
+  }
+
+  diasEl.innerHTML = proximosDias(6)
+    .map(
+      (d) =>
+        `<button type="button" data-iso="${d.iso}" data-tipo="${d.tipo}" class="agenda-opcion agenda-dia rounded-xl border border-marca-300 px-3 py-2 text-center text-sm hover:border-marca-500"><span class="block font-medium text-marca-700">${d.label}</span></button>`,
+    )
+    .join("");
+
+  function seleccionar(el: HTMLElement) {
+    document
+      .querySelectorAll(".agenda-opcion")
+      .forEach((b) => b.classList.remove("border-marca-600", "bg-marca-50", "ring-1", "ring-marca-600"));
+    el.classList.add("border-marca-600", "bg-marca-50", "ring-1", "ring-marca-600");
+    agendaError.classList.add("hidden");
+  }
+
+  diasEl.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest(".agenda-dia") as HTMLButtonElement | null;
+    if (!btn) return;
+    agendaInput.value = btn.dataset.tipo!;
+    fechaInput.value = btn.dataset.iso!;
+    seleccionar(btn);
+  });
+  coordBtn.addEventListener("click", () => {
+    agendaInput.value = "coordinacion";
+    fechaInput.value = "";
+    seleccionar(coordBtn);
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (!agendaInput.value) {
+      agendaError.classList.remove("hidden");
+      document.getElementById("agenda-dias")!.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     errorEl.classList.add("hidden");
     confirmar.disabled = true;
     confirmar.textContent = "Procesando…";
@@ -138,6 +198,7 @@ import { site } from "../data/site";
       notas: fd.get("notas"),
       modalidad: fd.get("modalidad"),
       agenda: fd.get("agenda"),
+      fechaAgenda: fd.get("fechaAgenda") || null,
       metodoPago: fd.get("metodoPago"),
       items: getCarrito().map((i) => ({ slug: i.slug, presentacion: i.presentacion, cantidad: i.cantidad })),
     };

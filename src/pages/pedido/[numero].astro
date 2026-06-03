@@ -13,6 +13,18 @@ const agendaLabel: Record<string, string> = {
   viernes: "Viernes",
   coordinacion: "Coordinación personalizada",
 };
+function fechaLegible(iso: string) {
+  return new Date(iso + "T12:00:00Z").toLocaleDateString("es-UY", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  });
+}
+const agendaRaw = pedido.fechaAgenda
+  ? fechaLegible(pedido.fechaAgenda)
+  : (agendaLabel[pedido.agenda] ?? pedido.agenda);
+const agendaTexto = agendaRaw.charAt(0).toUpperCase() + agendaRaw.slice(1);
 const wa = whatsappLink(`Hola! Adjunto el comprobante de mi pedido ${pedido.numero}.`);
 ---
 
@@ -39,7 +51,7 @@ const wa = whatsappLink(`Hola! Adjunto el comprobante de mi pedido ${pedido.nume
       <!-- Logística -->
       <dl class="mt-6 grid grid-cols-2 gap-3 text-sm">
         <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{pedido.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta"}</dd></div>
-        <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaLabel[pedido.agenda] ?? pedido.agenda}</dd></div>
+        <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto}</dd></div>
         {pedido.direccion && <div class="col-span-2"><dt class="text-marca-500">Dirección</dt><dd class="font-medium">{pedido.direccion}</dd></div>}
         {pedido.modalidad === "retiro" && <div class="col-span-2"><dt class="text-marca-500">Retiro en</dt><dd class="font-medium">{site.direccionRetiro}</dd></div>}
       </dl>

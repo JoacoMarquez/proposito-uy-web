@@ -163,6 +163,7 @@ export interface NuevoPedido {
   notas: string | null;
   modalidad: string;
   agenda: string;
+  fechaAgenda: string | null;
   metodoPago: string;
   subtotal: number;
   costoEnvio: number;

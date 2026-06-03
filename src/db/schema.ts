@@ -98,6 +98,7 @@ export const pedidos = pgTable("pedidos", {
   // logística
   modalidad: text("modalidad").notNull(), // "entrega" | "retiro"
   agenda: text("agenda").notNull(), // "miercoles" | "viernes" | "coordinacion"
+  fechaAgenda: text("fecha_agenda"), // ISO YYYY-MM-DD del día elegido; null si es coordinación
   metodoPago: text("metodo_pago").notNull(), // "transferencia" | "efectivo"
   // montos
   subtotal: integer("subtotal").notNull(),

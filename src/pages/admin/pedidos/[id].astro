@@ -29,6 +29,10 @@ const agendaLabel: Record<string, string> = {
   coordinacion: "Coordinación personalizada",
 };
 const fmtFecha = (d: Date) => new Date(d).toLocaleString("es-UY");
+const agendaRaw = pedido.fechaAgenda
+  ? new Date(pedido.fechaAgenda + "T12:00:00Z").toLocaleDateString("es-UY", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
+  : (agendaLabel[pedido.agenda] ?? pedido.agenda);
+const agendaTexto = agendaRaw.charAt(0).toUpperCase() + agendaRaw.slice(1);
 const waCliente = `https://wa.me/${pedido.celular.replace(/\D/g, "").replace(/^0/, "598")}`;
 ---
 
@@ -60,7 +64,7 @@ const waCliente = `https://wa.me/${pedido.celular.replace(/\D/g, "").replace(/^0
           <div><dt class="text-marca-500">Celular</dt><dd class="font-medium"><a href={waCliente} target="_blank" rel="noopener" class="text-marca-700 hover:underline">{pedido.celular}</a></dd></div>
           <div class="col-span-2"><dt class="text-marca-500">Email</dt><dd class="font-medium">{pedido.email}</dd></div>
           <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{pedido.modalidad === "entrega" ? "Entrega" : "Retiro"}</dd></div>
-          <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaLabel[pedido.agenda] ?? pedido.agenda}</dd></div>
+          <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto}</dd></div>
           {pedido.direccion && <div class="col-span-2"><dt class="text-marca-500">Dirección</dt><dd class="font-medium">{pedido.direccion}</dd></div>}
           <div><dt class="text-marca-500">Pago</dt><dd class="font-medium capitalize">{pedido.metodoPago}</dd></div>
           <div><dt class="text-marca-500">Fecha</dt><dd class="font-medium">{fmtFecha(pedido.creadoEn)}</dd></div>
