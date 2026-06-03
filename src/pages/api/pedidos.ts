@@ -13,6 +13,25 @@ function json(obj: unknown, status = 200) {
   });
 }
 
+// Valida la agenda: "coordinacion" (sin fecha) o un día puntual habilitado
+// (miércoles/viernes, futuro). No confiamos en el tipo que manda el cliente:
+// lo derivamos del día de la semana de la fecha elegida.
+function validarAgenda(
+  agenda: unknown,
+  fechaAgenda: unknown,
+): { agenda: string; fechaAgenda: string | null } | null {
+  if (agenda === "coordinacion") return { agenda: "coordinacion", fechaAgenda: null };
+  if (typeof fechaAgenda !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(fechaAgenda)) return null;
+  const d = new Date(fechaAgenda + "T12:00:00Z");
+  if (Number.isNaN(d.getTime())) return null;
+  const hoy = new Date();
+  hoy.setUTCHours(0, 0, 0, 0);
+  if (d < hoy) return null; // no permitir fechas pasadas
+  const wd = d.getUTCDay(); // 3 = miércoles, 5 = viernes
+  if (wd !== 3 && wd !== 5) return null;
+  return { agenda: wd === 3 ? "miercoles" : "viernes", fechaAgenda };
+}
+
 export const POST: APIRoute = async ({ request }) => {
   let body: any;
   try {
@@ -21,12 +40,14 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: "Datos inválidos." }, 400);
   }
 
-  const { nombre, celular, email, direccion, notas, modalidad, agenda, metodoPago, items } = body ?? {};
+  const { nombre, celular, email, direccion, notas, modalidad, agenda, fechaAgenda, metodoPago, items } = body ?? {};
 
   if (!nombre || !celular || !email || !modalidad || !agenda || !metodoPago) {
     return json({ error: "Faltan datos del pedido." }, 400);
   }
   if (!["entrega", "retiro"].includes(modalidad)) return json({ error: "Modalidad inválida." }, 400);
+  const agendaOk = validarAgenda(agenda, fechaAgenda);
+  if (!agendaOk) return json({ error: "Elegí un día de agenda válido." }, 400);
   if (modalidad === "entrega" && !direccion) return json({ error: "Falta la dirección de entrega." }, 400);
   if (!Array.isArray(items) || items.length === 0) return json({ error: "El carrito está vacío." }, 400);
 
@@ -62,7 +83,8 @@ export const POST: APIRoute = async ({ request }) => {
       direccion: modalidad === "entrega" ? String(direccion) : null,
       notas: notas ? String(notas) : null,
       modalidad: String(modalidad),
-      agenda: String(agenda),
+      agenda: agendaOk.agenda,
+      fechaAgenda: agendaOk.fechaAgenda,
       metodoPago: String(metodoPago),
       subtotal,
       costoEnvio,
