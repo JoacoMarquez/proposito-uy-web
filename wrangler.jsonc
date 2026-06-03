@@ -1,0 +1,12 @@
+{
+  // Configuración del Worker de Cloudflare para la web de Propósito UY.
+  // nodejs_compat habilita node:crypto (scrypt del panel) y process.env.
+  "name": "proposito-uy",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2025-05-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  }
+}
