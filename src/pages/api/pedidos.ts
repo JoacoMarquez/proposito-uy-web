@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getProducto, crearPedido, type ItemPedido } from "../../db/queries";
+import { enviarMailsPedido } from "../../lib/mail";
 
 export const prerender = false;
 
@@ -92,6 +93,24 @@ export const POST: APIRoute = async ({ request }) => {
     },
     validados,
   );
+
+  // Mails de confirmación (best-effort: no bloquean ni rompen el pedido).
+  await enviarMailsPedido({
+    numero,
+    nombre: String(nombre),
+    email: String(email),
+    celular: String(celular),
+    direccion: modalidad === "entrega" ? String(direccion) : null,
+    notas: notas ? String(notas) : null,
+    modalidad: String(modalidad),
+    agenda: agendaOk.agenda,
+    fechaAgenda: agendaOk.fechaAgenda,
+    metodoPago: String(metodoPago),
+    subtotal,
+    costoEnvio,
+    total,
+    items: validados,
+  });
 
   return json({ numero }, 200);
 };
