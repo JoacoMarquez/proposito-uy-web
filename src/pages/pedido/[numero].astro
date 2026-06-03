@@ -26,6 +26,7 @@ const agendaRaw = pedido.fechaAgenda
   : (agendaLabel[pedido.agenda] ?? pedido.agenda);
 const agendaTexto = agendaRaw.charAt(0).toUpperCase() + agendaRaw.slice(1);
 const wa = whatsappLink(`Hola! Adjunto el comprobante de mi pedido ${pedido.numero}.`);
+const waCoord = whatsappLink(`Hola! Mi pedido ${pedido.numero} es con coordinación personalizada. Quiero coordinar el día y horario de la entrega o el retiro.`);
 ---
 
 <Layout titulo={`Pedido ${pedido.numero}`} descripcion="Confirmación de pedido.">
@@ -74,7 +75,11 @@ const wa = whatsappLink(`Hola! Adjunto el comprobante de mi pedido ${pedido.nume
       </div>
 
       {pedido.agenda === "coordinacion" && (
-        <p class="mt-4 text-sm text-marca-900/70">Seleccionaste “Coordinación personalizada”: coordinamos por WhatsApp una alternativa para la entrega o el retiro.</p>
+        <div class="mt-4 rounded-xl bg-marca-50 p-4 text-sm">
+          <p class="font-medium text-marca-700">Coordinación personalizada</p>
+          <p class="mt-1 text-marca-900/80">Elegiste coordinar el día y horario por WhatsApp. Escribinos y lo definimos juntos.</p>
+          <a href={waCoord} target="_blank" rel="noopener" class="mt-3 inline-block rounded-full bg-marca-600 px-5 py-2.5 font-medium text-white hover:bg-marca-700">Coordinar por WhatsApp</a>
+        </div>
       )}
 
       <a href="/tienda" class="mt-6 inline-block text-sm font-medium text-marca-700 hover:underline">← Seguir comprando</a>
