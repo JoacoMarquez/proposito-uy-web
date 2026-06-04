@@ -105,6 +105,7 @@ export const pedidos = pgTable("pedidos", {
   costoEnvio: integer("costo_envio").notNull().default(0),
   total: integer("total").notNull(),
   estado: text("estado").notNull().default("pendiente"), // pendiente | confirmado | entregado | cancelado
+  clienteId: integer("cliente_id"), // cuenta del cliente, si compró logueado (null si invitado)
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
@@ -137,6 +138,26 @@ export const adminSessions = pgTable("admin_sessions", {
   expiraEn: timestamp("expira_en").notNull(),
 });
 
+// ── Cuentas de cliente ────────────────────────────────────
+
+export const clientes = pgTable("clientes", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  nombre: text("nombre").notNull(),
+  celular: text("celular"),
+  direcciones: jsonb("direcciones").$type<string[]>().notNull().default([]),
+  creadoEn: timestamp("creado_en").notNull().defaultNow(),
+});
+
+export const clienteSessions = pgTable("cliente_sessions", {
+  id: text("id").primaryKey(), // hash del token de sesión
+  clienteId: integer("cliente_id")
+    .notNull()
+    .references(() => clientes.id, { onDelete: "cascade" }),
+  expiraEn: timestamp("expira_en").notNull(),
+});
+
 // Tipos inferidos para usar en la app
 export type Producto = typeof productos.$inferSelect;
 export type Presentacion = typeof presentaciones.$inferSelect;
@@ -145,3 +166,4 @@ export type Receta = typeof recetas.$inferSelect;
 export type Pregunta = typeof preguntas.$inferSelect;
 export type Pedido = typeof pedidos.$inferSelect;
 export type PedidoItem = typeof pedidoItems.$inferSelect;
+export type Cliente = typeof clientes.$inferSelect;
