@@ -1,0 +1,115 @@
+---
+export const prerender = false;
+import Layout from "../../layouts/Layout.astro";
+import { getClientePorId, actualizarCliente, getPedidosDeCliente } from "../../lib/cliente-auth";
+import { formatoPrecio } from "../../db/queries";
+import { agendaTexto } from "../../lib/agenda";
+
+const sesion = Astro.locals.cliente;
+if (!sesion) return Astro.redirect("/cuenta/login");
+
+let cliente = await getClientePorId(sesion.id);
+if (!cliente) return Astro.redirect("/cuenta/login");
+
+let msg = "";
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const accion = String(form.get("_accion") ?? "");
+  const direcciones = [...cliente.direcciones];
+
+  if (accion === "perfil") {
+    await actualizarCliente(cliente.id, {
+      nombre: String(form.get("nombre") ?? "").trim() || cliente.nombre,
+      celular: String(form.get("celular") ?? "").trim() || null,
+    });
+    msg = "Datos actualizados.";
+  } else if (accion === "agregar-direccion") {
+    const dir = String(form.get("direccion") ?? "").trim();
+    if (dir) {
+      direcciones.push(dir);
+      await actualizarCliente(cliente.id, { direcciones });
+      msg = "Dirección agregada.";
+    }
+  } else if (accion === "quitar-direccion") {
+    const i = Number(form.get("indice"));
+    if (Number.isInteger(i) && i >= 0 && i < direcciones.length) {
+      direcciones.splice(i, 1);
+      await actualizarCliente(cliente.id, { direcciones });
+      msg = "Dirección eliminada.";
+    }
+  }
+  cliente = (await getClientePorId(sesion.id))!;
+}
+
+const pedidos = await getPedidosDeCliente(sesion.id);
+---
+
+<Layout titulo="Mi cuenta" descripcion="Tu cuenta de Propósito UY.">
+  <section class="mx-auto max-w-3xl px-4 py-12">
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-marca-700">Mi cuenta</h1>
+      <a href="/cuenta/logout" class="text-sm text-marca-700 hover:underline">Cerrar sesión</a>
+    </div>
+    <p class="mt-1 text-marca-900/70">Hola, {cliente.nombre} · {cliente.email}</p>
+    {msg && <p class="mt-4 rounded-lg bg-marca-50 p-3 text-sm text-marca-700">{msg}</p>}
+
+    <!-- Datos personales -->
+    <div class="mt-8 rounded-2xl border border-marca-100 bg-white p-6">
+      <h2 class="font-semibold text-marca-700">Datos personales</h2>
+      <form method="POST" class="mt-4 grid gap-4 sm:grid-cols-2">
+        <input type="hidden" name="_accion" value="perfil" />
+        <label class="text-sm">Nombre
+          <input name="nombre" value={cliente.nombre} class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+        <label class="text-sm">Celular
+          <input name="celular" value={cliente.celular ?? ""} class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+        <div class="sm:col-span-2">
+          <button class="rounded-full bg-marca-600 px-5 py-2 text-sm font-medium text-white hover:bg-marca-700">Guardar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Direcciones -->
+    <div class="mt-6 rounded-2xl border border-marca-100 bg-white p-6">
+      <h2 class="font-semibold text-marca-700">Direcciones guardadas</h2>
+      {cliente.direcciones.length === 0 && <p class="mt-2 text-sm text-marca-900/60">Todavía no guardaste ninguna.</p>}
+      <ul class="mt-3 space-y-2">
+        {cliente.direcciones.map((dir, i) => (
+          <li class="flex items-center justify-between rounded-xl bg-marca-50 px-3 py-2 text-sm">
+            <span class="text-marca-900">{dir}</span>
+            <form method="POST">
+              <input type="hidden" name="_accion" value="quitar-direccion" />
+              <input type="hidden" name="indice" value={i} />
+              <button class="text-marca-700 hover:underline">Quitar</button>
+            </form>
+          </li>
+        ))}
+      </ul>
+      <form method="POST" class="mt-3 flex gap-2">
+        <input type="hidden" name="_accion" value="agregar-direccion" />
+        <input name="direccion" placeholder="Calle, número, esquina, referencias…" required
+          class="flex-1 rounded-xl border border-marca-300 px-3 py-2 text-sm" />
+        <button class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">Agregar</button>
+      </form>
+    </div>
+
+    <!-- Pedidos -->
+    <div class="mt-6 rounded-2xl border border-marca-100 bg-white p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold text-marca-700">Mis pedidos</h2>
+        <a href="/cuenta/pedidos" class="text-sm text-marca-700 hover:underline">Ver todos →</a>
+      </div>
+      {pedidos.length === 0 ? (
+        <p class="mt-2 text-sm text-marca-900/60">Todavía no hiciste pedidos.</p>
+      ) : (
+        <ul class="mt-3 space-y-2 text-sm">
+          {pedidos.slice(0, 4).map((p) => (
+            <li class="flex items-center justify-between border-b border-marca-100 pb-2">
+              <span><a href={`/pedido/${p.numero}`} class="font-medium text-marca-700 hover:underline">{p.numero}</a> · {agendaTexto(p.agenda, p.fechaAgenda)}</span>
+              <span class="text-marca-900">{formatoPrecio(p.total)} · <span class="capitalize text-marca-600">{p.estado}</span></span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+</Layout>

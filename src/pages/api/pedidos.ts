@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getProducto, crearPedido, type ItemPedido } from "../../db/queries";
 import { enviarMailsPedido } from "../../lib/mail";
+import { validarAgenda } from "../../lib/agenda";
 
 export const prerender = false;
 
@@ -14,26 +15,7 @@ function json(obj: unknown, status = 200) {
   });
 }
 
-// Valida la agenda: "coordinacion" (sin fecha) o un día puntual habilitado
-// (miércoles/viernes, futuro). No confiamos en el tipo que manda el cliente:
-// lo derivamos del día de la semana de la fecha elegida.
-function validarAgenda(
-  agenda: unknown,
-  fechaAgenda: unknown,
-): { agenda: string; fechaAgenda: string | null } | null {
-  if (agenda === "coordinacion") return { agenda: "coordinacion", fechaAgenda: null };
-  if (typeof fechaAgenda !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(fechaAgenda)) return null;
-  const d = new Date(fechaAgenda + "T12:00:00Z");
-  if (Number.isNaN(d.getTime())) return null;
-  const hoy = new Date();
-  hoy.setUTCHours(0, 0, 0, 0);
-  if (d < hoy) return null; // no permitir fechas pasadas
-  const wd = d.getUTCDay(); // 3 = miércoles, 5 = viernes
-  if (wd !== 3 && wd !== 5) return null;
-  return { agenda: wd === 3 ? "miercoles" : "viernes", fechaAgenda };
-}
-
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   let body: any;
   try {
     body = await request.json();
@@ -90,6 +72,7 @@ export const POST: APIRoute = async ({ request }) => {
       subtotal,
       costoEnvio,
       total,
+      clienteId: locals.cliente?.id ?? null,
     },
     validados,
   );

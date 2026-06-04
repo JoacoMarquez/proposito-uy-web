@@ -1,0 +1,63 @@
+---
+export const prerender = false;
+import Layout from "../../layouts/Layout.astro";
+import { registrarCliente, crearSesionCliente, CLIENTE_COOKIE } from "../../lib/cliente-auth";
+
+if (Astro.locals.cliente) return Astro.redirect("/cuenta");
+
+let error = "";
+let valores = { nombre: "", email: "", celular: "" };
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  valores = {
+    nombre: String(form.get("nombre") ?? ""),
+    email: String(form.get("email") ?? ""),
+    celular: String(form.get("celular") ?? ""),
+  };
+  const { cliente, error: err } = await registrarCliente({
+    nombre: valores.nombre,
+    email: valores.email,
+    celular: valores.celular,
+    password: String(form.get("password") ?? ""),
+  });
+  if (cliente) {
+    const { token, expira } = await crearSesionCliente(cliente.id);
+    Astro.cookies.set(CLIENTE_COOKIE, token, {
+      httpOnly: true,
+      secure: import.meta.env.PROD,
+      sameSite: "lax",
+      path: "/",
+      expires: expira,
+    });
+    return Astro.redirect("/cuenta");
+  }
+  error = err ?? "No se pudo crear la cuenta.";
+}
+---
+
+<Layout titulo="Crear cuenta" descripcion="Creá tu cuenta de Propósito UY.">
+  <section class="mx-auto max-w-sm px-4 py-12">
+    <h1 class="text-2xl font-bold text-marca-700">Crear cuenta</h1>
+    <p class="mt-1 text-sm text-marca-900/70">Guardá tus datos y seguí tus pedidos.</p>
+    {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+    <form method="POST" class="mt-6 space-y-4">
+      <label class="block text-sm font-medium text-marca-700">Nombre completo
+        <input name="nombre" required value={valores.nombre}
+          class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+      <label class="block text-sm font-medium text-marca-700">Email
+        <input type="email" name="email" required autocomplete="username" value={valores.email}
+          class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+      <label class="block text-sm font-medium text-marca-700">Celular
+        <input name="celular" value={valores.celular}
+          class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
+      <label class="block text-sm font-medium text-marca-700">Contraseña
+        <input type="password" name="password" required minlength="6" autocomplete="new-password"
+          class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" />
+        <span class="text-xs text-marca-900/50">Mínimo 6 caracteres.</span></label>
+      <button type="submit" class="w-full rounded-full bg-marca-600 py-2.5 font-medium text-white hover:bg-marca-700">Crear cuenta</button>
+    </form>
+    <p class="mt-4 text-center text-sm text-marca-900/70">¿Ya tenés cuenta?
+      <a href="/cuenta/login" class="font-medium text-marca-700 hover:underline">Ingresá</a>
+    </p>
+  </section>
+</Layout>

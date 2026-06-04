@@ -1,0 +1,71 @@
+---
+export const prerender = false;
+import Layout from "../../layouts/Layout.astro";
+import { getPedidosDeCliente, cambiarAgendaPedido } from "../../lib/cliente-auth";
+import { formatoPrecio } from "../../db/queries";
+import { proximosDiasHabilitados, validarAgenda, agendaTexto } from "../../lib/agenda";
+
+const sesion = Astro.locals.cliente;
+if (!sesion) return Astro.redirect("/cuenta/login");
+
+let msg = "";
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const pedidoId = Number(form.get("pedidoId"));
+  const valor = String(form.get("valor") ?? "");
+  const ag =
+    valor === "coordinacion" ? validarAgenda("coordinacion", null) : validarAgenda("dia", valor);
+  if (!ag || !Number.isInteger(pedidoId)) {
+    msg = "Opción de agenda inválida.";
+  } else {
+    const ok = await cambiarAgendaPedido(pedidoId, sesion.id, ag.agenda, ag.fechaAgenda);
+    msg = ok ? "Agenda actualizada." : "No se pudo cambiar: el pedido ya no está pendiente.";
+  }
+}
+
+const pedidos = await getPedidosDeCliente(sesion.id);
+const dias = proximosDiasHabilitados(6);
+---
+
+<Layout titulo="Mis pedidos" descripcion="Historial de pedidos de tu cuenta.">
+  <section class="mx-auto max-w-3xl px-4 py-12">
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-marca-700">Mis pedidos</h1>
+      <a href="/cuenta" class="text-sm text-marca-700 hover:underline">← Mi cuenta</a>
+    </div>
+    {msg && <p class="mt-4 rounded-lg bg-marca-50 p-3 text-sm text-marca-700">{msg}</p>}
+
+    {pedidos.length === 0 ? (
+      <p class="mt-8 text-marca-900/60">Todavía no hiciste pedidos. <a href="/tienda" class="text-marca-700 hover:underline">Ir a la tienda →</a></p>
+    ) : (
+      <ul class="mt-8 space-y-4">
+        {pedidos.map((p) => (
+          <li class="rounded-2xl border border-marca-100 bg-white p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <a href={`/pedido/${p.numero}`} class="font-semibold text-marca-700 hover:underline">{p.numero}</a>
+              <span class="rounded-full bg-marca-50 px-3 py-1 text-xs font-medium capitalize text-marca-700">{p.estado}</span>
+            </div>
+            <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div><dt class="text-marca-500">Total</dt><dd class="font-medium text-marca-900">{formatoPrecio(p.total)}</dd></div>
+              <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{p.modalidad === "entrega" ? "Entrega" : "Retiro"}</dd></div>
+              <div class="col-span-2"><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto(p.agenda, p.fechaAgenda)}</dd></div>
+            </dl>
+
+            {p.estado === "pendiente" && (
+              <form method="POST" class="mt-3 flex flex-wrap items-end gap-2 border-t border-marca-100 pt-3">
+                <input type="hidden" name="pedidoId" value={p.id} />
+                <label class="text-sm">Cambiar agenda
+                  <select name="valor" class="mt-1 block rounded-xl border border-marca-300 px-3 py-2 text-sm">
+                    {dias.map((d) => <option value={d.iso}>{d.label}</option>)}
+                    <option value="coordinacion">Coordinación personalizada</option>
+                  </select>
+                </label>
+                <button class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">Actualizar</button>
+              </form>
+            )}
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</Layout>

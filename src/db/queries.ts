@@ -168,6 +168,7 @@ export interface NuevoPedido {
   subtotal: number;
   costoEnvio: number;
   total: number;
+  clienteId?: number | null;
 }
 export interface ItemPedido {
   productoSlug: string;
