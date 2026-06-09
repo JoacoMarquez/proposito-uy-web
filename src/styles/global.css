@@ -32,3 +32,20 @@ body {
   background-color: var(--color-crema);
   color: var(--color-marca-900);
 }
+
+/* Botón de favorito (corazón). Estado activo = relleno y rojo. */
+.fav-btn[aria-pressed="true"] {
+  color: #dc2626;
+}
+.fav-btn[aria-pressed="true"] .fav-icon {
+  fill: currentColor;
+}
+.fav-label-remove {
+  display: none;
+}
+.fav-btn[aria-pressed="true"] .fav-label-add {
+  display: none;
+}
+.fav-btn[aria-pressed="true"] .fav-label-remove {
+  display: inline;
+}
