@@ -1,42 +1,37 @@
 # Deploy
 
 La web se despliega a **Cloudflare Workers** automáticamente en cada push a `main`
-mediante el workflow [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).
-También se puede disparar a mano desde la pestaña **Actions → Deploy a Cloudflare → Run workflow**.
+mediante la **integración Git de Cloudflare** (Workers Builds), configurada en el
+dashboard de Cloudflare. No hay GitHub Action: el build y el deploy los maneja
+Cloudflare directamente al detectar el push.
 
-## 1. Secrets del repositorio de GitHub
+> Worker en producción: **proposito-uy-web** · URL por defecto del proyecto en
+> `*.workers.dev` (ver dashboard).
 
-Para que el workflow pueda deployar, hay que cargar estos *secrets* en
-**GitHub → Settings → Secrets and variables → Actions → New repository secret**:
+## Cómo está configurado
 
-| Secret | Para qué | Dónde obtenerlo |
-|---|---|---|
-| `CLOUDFLARE_API_TOKEN` | Autoriza a Wrangler a deployar | Cloudflare → My Profile → API Tokens → Create Token → plantilla **"Edit Cloudflare Workers"** |
-| `CLOUDFLARE_ACCOUNT_ID` | Identifica la cuenta destino | Cloudflare → Workers & Pages → panel derecho (**Account ID**) |
-| `DATABASE_URL` | Solo por seguridad durante el build | Cadena de conexión de Neon (la misma del `.env`) |
+- **Cloudflare → Workers & Pages → proposito-uy-web → Settings → Build**:
+  conectado al repo `JoacoMarquez/proposito-uy-web`, rama `main`.
+  Build command: `npm run build`. Deploy con la config de `wrangler.jsonc`.
 
-## 2. Secrets de runtime del Worker
+## Secrets / variables de runtime del Worker
 
-El deploy sube el **código**, pero el Worker necesita sus propias variables en
-**runtime**. Estas NO van en el `.env` ni en GitHub: se cargan en Cloudflare, una sola vez,
-con `wrangler secret put <NOMBRE>` (o desde el dashboard del Worker → Settings → Variables):
+El Worker necesita estas variables para funcionar (DB, login, mails). Se cargan
+**una sola vez** en el dashboard del Worker, como **Secret** (encriptadas):
+
+**Cloudflare → Workers & Pages → proposito-uy-web → Settings → Variables and Secrets**
 
 - `DATABASE_URL` — conexión a Neon
 - `RESEND_API_KEY` — envío de mails (Resend)
 - `AUTH_SECRET` — firma de sesiones del panel
 - `ADMIN_EMAIL` — email del admin
 
-```bash
-# Ejemplo (se ejecuta una vez, de forma local, apuntando al Worker de producción):
-npx wrangler secret put DATABASE_URL
-npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put AUTH_SECRET
-npx wrangler secret put ADMIN_EMAIL
-```
+Si el build necesita alguna variable en tiempo de build, se agrega en
+**Settings → Build → Variables and secrets** del mismo proyecto.
 
-## 3. Dominio
+## Dominio
 
-Apuntar `propositouy.com.uy` al Worker se hace en Cloudflare (rutas/custom domain) +
+Apuntar `propositouy.com.uy` al Worker se hace en Cloudflare (custom domain) +
 DNS del registrador. Ver tickets **PROP-65** (DNS) y **PROP-76** (correo del dominio).
 
 ## Deploy manual (sin CI)
@@ -45,3 +40,6 @@ DNS del registrador. Ver tickets **PROP-65** (DNS) y **PROP-76** (correo del dom
 npm run build
 npx wrangler deploy
 ```
+
+> ⚠️ Verificar que el `name` en `wrangler.jsonc` apunte al Worker correcto antes
+> de un deploy manual, para no crear un Worker duplicado.
