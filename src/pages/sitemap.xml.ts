@@ -16,6 +16,9 @@ const RUTAS_FIJAS = [
   "/retornables",
   "/preguntas",
   "/contacto",
+  "/legales/privacidad",
+  "/legales/terminos",
+  "/legales/cookies",
 ];
 
 function url(path: string): string {
