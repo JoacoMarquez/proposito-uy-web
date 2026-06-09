@@ -158,6 +158,13 @@ export const clienteSessions = pgTable("cliente_sessions", {
   expiraEn: timestamp("expira_en").notNull(),
 });
 
+// Suscriptores al newsletter (formulario del footer).
+export const suscriptores = pgTable("suscriptores", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  creadoEn: timestamp("creado_en").notNull().defaultNow(),
+});
+
 // Tipos inferidos para usar en la app
 export type Producto = typeof productos.$inferSelect;
 export type Presentacion = typeof presentaciones.$inferSelect;
@@ -167,3 +174,4 @@ export type Pregunta = typeof preguntas.$inferSelect;
 export type Pedido = typeof pedidos.$inferSelect;
 export type PedidoItem = typeof pedidoItems.$inferSelect;
 export type Cliente = typeof clientes.$inferSelect;
+export type Suscriptor = typeof suscriptores.$inferSelect;

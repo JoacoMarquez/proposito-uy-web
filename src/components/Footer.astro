@@ -8,6 +8,28 @@ import { navLegales } from "../data/legales";
     <div>
       <p class="text-lg font-bold text-marca-700">{site.nombre}</p>
       <p class="mt-2 text-sm text-marca-900/70">Alimentos con propósito.</p>
+
+      <form id="newsletter-form" class="mt-4" novalidate>
+        <label for="nl-email" class="text-sm font-medium text-marca-700">Sumate a las novedades</label>
+        <div class="mt-2 flex gap-2">
+          <input
+            id="nl-email"
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder="Tu email"
+            class="min-w-0 flex-1 rounded-full border border-marca-300 bg-white px-4 py-2 text-sm text-marca-900 placeholder:text-marca-300"
+          />
+          <button
+            type="submit"
+            class="shrink-0 rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700 disabled:opacity-60"
+          >
+            Suscribirme
+          </button>
+        </div>
+        <p id="nl-msg" class="mt-2 text-xs" role="status" hidden></p>
+      </form>
     </div>
 
     <nav class="flex flex-col gap-1 text-sm">
@@ -34,3 +56,45 @@ import { navLegales } from "../data/legales";
     </nav>
   </div>
 </footer>
+
+<script>
+  const form = document.getElementById("newsletter-form") as HTMLFormElement | null;
+  const input = document.getElementById("nl-email") as HTMLInputElement | null;
+  const msg = document.getElementById("nl-msg") as HTMLParagraphElement | null;
+  const btn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+
+  function mostrar(texto: string, ok: boolean) {
+    if (!msg) return;
+    msg.textContent = texto;
+    msg.hidden = false;
+    msg.className = "mt-2 text-xs " + (ok ? "text-marca-700" : "text-red-600");
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = (input?.value ?? "").trim();
+    if (!email) {
+      mostrar("Ingresá tu email.", false);
+      return;
+    }
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        mostrar(data.mensaje ?? "¡Listo!", true);
+        form.reset();
+      } else {
+        mostrar(data.error ?? "No pudimos suscribirte.", false);
+      }
+    } catch {
+      mostrar("Error de conexión. Probá de nuevo.", false);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+</script>
