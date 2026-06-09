@@ -14,6 +14,7 @@ Cada ítem referencia su ticket de Jira (proyecto PROP).
 | 7 | ⬜ Pendiente | [PROP-57](https://joaco1119.atlassian.net/browse/PROP-57) | **Resend / emails:** confirmar dominio de envío y quién hace la verificación DNS. Necesito acceso o que él agregue los registros. |
 | 8 | ⬜ Pendiente | [PROP-65](https://joaco1119.atlassian.net/browse/PROP-65) / [PROP-76](https://joaco1119.atlassian.net/browse/PROP-76) | **Dominio propositouy.com.uy:** acceso al panel DNS (Hostinger) para apuntar el sitio y configurar el correo `@propositouy.com.uy`. |
 | 9 | ⬜ Pendiente | [PROP-66](https://joaco1119.atlassian.net/browse/PROP-66) | **Imagen para compartir (Open Graph):** ideal una imagen de marca dedicada de 1200×630 px para los previews al compartir en redes/WhatsApp. Hoy se usa una foto de producto como default. |
+| 10 | ⬜ Pendiente | [PROP-68](https://joaco1119.atlassian.net/browse/PROP-68) | **Revisión de textos legales:** las páginas de Privacidad, Términos y Cookies ya están armadas con textos base. Falta que el cliente/un abogado los **revise y apruebe**, y complete datos formales (razón social, RUT, responsable de datos). Definir quién redacta/valida. |
 
 ---
 _Última actualización: 2026-06-09_
