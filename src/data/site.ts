@@ -16,6 +16,9 @@ export const site = {
   redes: {
     instagram: "https://instagram.com/propositouy",
   },
+  // Imagen por defecto para previews al compartir (Open Graph / Twitter).
+  // Ideal: reemplazar por una imagen de marca dedicada de 1200x630 (PROP-66).
+  ogImagen: "/productos/granola-del-dia-clasica.webp",
   // Grilla de retornabilidad (documento externo del cliente).
   grillaRetornablesUrl:
     "https://docs.google.com/spreadsheets/d/1bUN7BbojfdpoWQeLc0byjdodWaWVOXTOUTKMG5ltcYQ/edit?usp=sharing",

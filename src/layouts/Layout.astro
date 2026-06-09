@@ -7,11 +7,19 @@ import { site } from "../data/site";
 interface Props {
   titulo?: string;
   descripcion?: string;
+  /** Imagen para previews al compartir (Open Graph). Por defecto, la del sitio. */
+  imagen?: string;
+  /** Si true, pide a los buscadores no indexar la página (páginas privadas). */
+  noindex?: boolean;
 }
 
-const { titulo, descripcion } = Astro.props;
+const { titulo, descripcion, imagen, noindex = false } = Astro.props;
 const tituloFinal = titulo ? `${titulo} · ${site.nombre}` : site.nombre;
 const desc = descripcion ?? "Alimentos con propósito. Frutos secos, barras proteicas, hummus y cremas artesanales.";
+// URLs absolutas estables (independientes del host) para canonical y Open Graph.
+const baseUrl = `https://${site.dominio}`;
+const canonical = new URL(Astro.url.pathname, baseUrl).href;
+const imagenOg = new URL(imagen ?? site.ogImagen, baseUrl).href;
 ---
 
 <!doctype html>
@@ -20,11 +28,28 @@ const desc = descripcion ?? "Alimentos con propósito. Frutos secos, barras prot
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" sizes="any" />
+    <meta name="theme-color" content="#2d392c" />
     <title>{tituloFinal}</title>
     <meta name="description" content={desc} />
+    {noindex ? (
+      <meta name="robots" content="noindex, nofollow" />
+    ) : (
+      <link rel="canonical" href={canonical} />
+    )}
+    <!-- Open Graph -->
+    <meta property="og:site_name" content={site.nombre} />
     <meta property="og:title" content={tituloFinal} />
     <meta property="og:description" content={desc} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imagenOg} />
+    <meta property="og:locale" content="es_UY" />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloFinal} />
+    <meta name="twitter:description" content={desc} />
+    <meta name="twitter:image" content={imagenOg} />
   </head>
   <body class="flex min-h-screen flex-col font-sans">
     <Header />

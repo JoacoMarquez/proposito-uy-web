@@ -13,6 +13,7 @@ Cada ítem referencia su ticket de Jira (proyecto PROP).
 | 6 | ⬜ Pendiente | [PROP-56](https://joaco1119.atlassian.net/browse/PROP-56) | **Email real de Pedro** para crear el usuario admin del panel. |
 | 7 | ⬜ Pendiente | [PROP-57](https://joaco1119.atlassian.net/browse/PROP-57) | **Resend / emails:** confirmar dominio de envío y quién hace la verificación DNS. Necesito acceso o que él agregue los registros. |
 | 8 | ⬜ Pendiente | [PROP-65](https://joaco1119.atlassian.net/browse/PROP-65) / [PROP-76](https://joaco1119.atlassian.net/browse/PROP-76) | **Dominio propositouy.com.uy:** acceso al panel DNS (Hostinger) para apuntar el sitio y configurar el correo `@propositouy.com.uy`. |
+| 9 | ⬜ Pendiente | [PROP-66](https://joaco1119.atlassian.net/browse/PROP-66) | **Imagen para compartir (Open Graph):** ideal una imagen de marca dedicada de 1200×630 px para los previews al compartir en redes/WhatsApp. Hoy se usa una foto de producto como default. |
 
 ---
 _Última actualización: 2026-06-09_
