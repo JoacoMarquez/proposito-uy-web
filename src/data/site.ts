@@ -19,8 +19,9 @@ export const site = {
   // Grilla de retornabilidad (documento externo del cliente).
   grillaRetornablesUrl:
     "https://docs.google.com/spreadsheets/d/1bUN7BbojfdpoWQeLc0byjdodWaWVOXTOUTKMG5ltcYQ/edit?usp=sharing",
-  // TODO: enlace a las tablas nutricionales (no estaba en el documento).
-  tablasNutricionalesUrl: "#",
+  // Enlace a las tablas nutricionales (Google Sheets/Drive público o PDF en /public).
+  // Dejar "" mientras no esté cargado: el botón en /preguntas se oculta solo. (PROP-34)
+  tablasNutricionalesUrl: "",
   // Envío
   costoEnvio: 250,
   envioGratisDesde: 3000,

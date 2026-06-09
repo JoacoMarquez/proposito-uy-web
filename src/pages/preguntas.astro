@@ -12,6 +12,10 @@ const labels: Record<string, string> = {
 };
 const orden = ["pedidos", "elaboracion", "nutricional"];
 const tabs = [{ id: "todas", label: "Todas" }, ...orden.map((t) => ({ id: t, label: labels[t] }))];
+// El botón de tablas nutricionales solo se muestra si hay una URL real cargada (PROP-34).
+const tablasUrl = site.tablasNutricionalesUrl?.trim();
+const hayTablas = !!tablasUrl && tablasUrl !== "#";
+const tablasExterna = !!tablasUrl && /^https?:\/\//.test(tablasUrl);
 // Ordenar preguntas según el orden de temas
 preguntas.sort((a, b) => orden.indexOf(a.tema) - orden.indexOf(b.tema));
 ---
@@ -40,15 +44,19 @@ preguntas.sort((a, b) => orden.indexOf(a.tema) - orden.indexOf(b.tema));
       ))}
     </div>
 
-    <!-- Link a tablas nutricionales (tema nutricional) -->
-    <a
-      href={site.tablasNutricionalesUrl}
-      data-tema="nutricional"
-      class="faq-item mt-6 flex items-center justify-between rounded-xl border border-marca-100 bg-marca-50 p-4 text-sm font-medium text-marca-700 hover:bg-marca-100"
-    >
-      Ver tablas nutricionales actualizadas
-      <span aria-hidden="true">→</span>
-    </a>
+    <!-- Link a tablas nutricionales (tema nutricional) — solo si hay URL cargada (PROP-34) -->
+    {hayTablas && (
+      <a
+        href={tablasUrl}
+        data-tema="nutricional"
+        target={tablasExterna ? "_blank" : undefined}
+        rel={tablasExterna ? "noopener noreferrer" : undefined}
+        class="faq-item mt-6 flex items-center justify-between rounded-xl border border-marca-100 bg-marca-50 p-4 text-sm font-medium text-marca-700 hover:bg-marca-100"
+      >
+        Ver tablas nutricionales actualizadas
+        <span aria-hidden="true">→</span>
+      </a>
+    )}
 
     <!-- Lista de preguntas -->
     <div class="mt-4 space-y-3">
