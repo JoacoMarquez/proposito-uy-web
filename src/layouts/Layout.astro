@@ -3,6 +3,7 @@ import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CookieBanner from "../components/CookieBanner.astro";
+import FavoritosInit from "../components/FavoritosInit.astro";
 import { site } from "../data/site";
 
 interface Props {
@@ -59,5 +60,6 @@ const imagenOg = new URL(imagen ?? site.ogImagen, baseUrl).href;
     </main>
     <Footer />
     <CookieBanner />
+    <FavoritosInit />
   </body>
 </html>

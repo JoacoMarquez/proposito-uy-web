@@ -7,8 +7,10 @@ import {
   getCategoria,
   getDestacados,
   nombreCompleto,
+  precioDesde,
   formatoPrecio,
 } from "../../db/queries";
+import FavoritoBoton from "../../components/FavoritoBoton.astro";
 import { site, whatsappLink } from "../../data/site";
 
 const { slug } = Astro.params;
@@ -126,6 +128,19 @@ const primera = producto.presentaciones[0];
         >
           o pedir directo por WhatsApp
         </a>
+
+        <div class="mt-4">
+          <FavoritoBoton
+            slug={producto.slug}
+            nombre={nombre}
+            variante={producto.variante}
+            imagen={producto.imagen ?? undefined}
+            precioDesde={precioDesde(producto)}
+            desde={producto.presentaciones.length > 1}
+            variante2="full"
+            class="w-full"
+          />
+        </div>
 
         {aliado && (
           <p class="mt-6 text-sm text-marca-700">

@@ -1,0 +1,37 @@
+---
+// Inicializa los botones de favorito de toda la página (delegación de eventos)
+// y mantiene su estado visual sincronizado con localStorage. Se incluye una vez
+// en el Layout. No renderiza nada visible.
+---
+
+<script>
+  import { esFavorito, toggle, type ItemFavorito } from "../scripts/favoritos";
+
+  function sync(btn: HTMLElement) {
+    btn.setAttribute("aria-pressed", String(esFavorito(btn.dataset.slug || "")));
+  }
+
+  function syncAll() {
+    document.querySelectorAll<HTMLElement>("[data-fav-toggle]").forEach(sync);
+  }
+
+  document.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement)?.closest<HTMLElement>("[data-fav-toggle]");
+    if (!btn) return;
+    // El corazón suele estar dentro de un enlace (card): evitamos navegar.
+    e.preventDefault();
+    e.stopPropagation();
+    const item: ItemFavorito = {
+      slug: btn.dataset.slug || "",
+      nombre: btn.dataset.nombre || "",
+      variante: btn.dataset.variante || "",
+      imagen: btn.dataset.imagen || undefined,
+      precioDesde: Number(btn.dataset.precio || 0),
+      desde: btn.dataset.desde === "true",
+    };
+    toggle(item);
+  });
+
+  document.addEventListener("favoritos:cambio", syncAll);
+  syncAll();
+</script>
