@@ -34,7 +34,7 @@ const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
 const primera = producto.presentaciones[0];
 ---
 
-<Layout titulo={nombre} descripcion={producto.descripcion}>
+<Layout titulo={nombre} descripcion={producto.descripcion} imagen={producto.imagen ?? undefined}>
   <section class="mx-auto max-w-5xl px-4 py-12">
     <nav class="text-sm text-marca-600">
       <a href="/tienda" class="hover:underline">Tienda</a> /

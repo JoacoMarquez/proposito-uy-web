@@ -16,11 +16,15 @@ export const site = {
   redes: {
     instagram: "https://instagram.com/propositouy",
   },
+  // Imagen por defecto para previews al compartir (Open Graph / Twitter).
+  // Ideal: reemplazar por una imagen de marca dedicada de 1200x630 (PROP-66).
+  ogImagen: "/productos/granola-del-dia-clasica.webp",
   // Grilla de retornabilidad (documento externo del cliente).
   grillaRetornablesUrl:
     "https://docs.google.com/spreadsheets/d/1bUN7BbojfdpoWQeLc0byjdodWaWVOXTOUTKMG5ltcYQ/edit?usp=sharing",
-  // TODO: enlace a las tablas nutricionales (no estaba en el documento).
-  tablasNutricionalesUrl: "#",
+  // Enlace a las tablas nutricionales (Google Sheets/Drive público o PDF en /public).
+  // Dejar "" mientras no esté cargado: el botón en /preguntas se oculta solo. (PROP-34)
+  tablasNutricionalesUrl: "",
   // Envío
   costoEnvio: 250,
   envioGratisDesde: 3000,
