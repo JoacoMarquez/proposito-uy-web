@@ -1,0 +1,114 @@
+---
+export const prerender = false;
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import {
+  getPreguntaById,
+  upsertPregunta,
+  deletePregunta,
+  TEMAS_PREGUNTA,
+  type PreguntaInput,
+} from "../../../db/queries";
+
+const { id: idParam } = Astro.params;
+const esNuevo = idParam === "nuevo";
+const id = esNuevo ? null : Number(idParam);
+if (!esNuevo && (!id || Number.isNaN(id))) return Astro.redirect("/admin/preguntas");
+
+let error = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+
+  if (form.get("_action") === "delete" && id) {
+    await deletePregunta(id);
+    return Astro.redirect("/admin/preguntas");
+  }
+
+  const s = (k: string) => String(form.get(k) ?? "").trim();
+  const lineas = (k: string) =>
+    s(k)
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+  const data: PreguntaInput = {
+    tema: s("tema"),
+    pregunta: s("pregunta"),
+    microResumen: s("microResumen"),
+    desarrollo: lineas("desarrollo"),
+    orden: Number(s("orden")) || 0,
+  };
+
+  if (!data.pregunta || !data.tema) {
+    error = "Completá al menos la pregunta y el tema.";
+  } else if (!TEMAS_PREGUNTA.includes(data.tema as (typeof TEMAS_PREGUNTA)[number])) {
+    error = "Tema inválido.";
+  } else {
+    await upsertPregunta(id, data);
+    return Astro.redirect("/admin/preguntas");
+  }
+}
+
+const pregunta = id ? await getPreguntaById(id) : undefined;
+if (!esNuevo && !pregunta) return Astro.redirect("/admin/preguntas");
+
+const p = pregunta;
+const temaLabel: Record<string, string> = {
+  pedidos: "Pedidos",
+  elaboracion: "Elaboración",
+  nutricional: "Nutricional",
+};
+const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
+---
+
+<AdminLayout titulo={esNuevo ? "Nueva pregunta" : `Editar pregunta`}>
+  <a href="/admin/preguntas" class="text-sm text-marca-700 hover:underline">← Volver a preguntas</a>
+
+  {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+
+  <form method="POST" class="mt-4 max-w-3xl space-y-5">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="text-sm font-medium text-marca-700">Tema</label>
+        <select name="tema" required class={campoBase}>
+          {TEMAS_PREGUNTA.map((t) => (
+            <option value={t} selected={p?.tema === t}>{temaLabel[t]}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-marca-700">Orden</label>
+        <input name="orden" type="number" value={p?.orden ?? 0} class={campoBase} />
+      </div>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Pregunta</label>
+      <input name="pregunta" value={p?.pregunta ?? ""} required class={campoBase} />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Micro resumen (texto bajo la pregunta)</label>
+      <input name="microResumen" value={p?.microResumen ?? ""} class={campoBase} />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Desarrollo (un párrafo por línea)</label>
+      <textarea name="desarrollo" rows="8" class={campoBase}>{(p?.desarrollo ?? []).join("\n")}</textarea>
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit" class="rounded-full bg-marca-600 px-6 py-2.5 font-medium text-white hover:bg-marca-700">Guardar</button>
+      <a href="/admin/preguntas" class="text-sm text-marca-700 hover:underline">Cancelar</a>
+    </div>
+  </form>
+
+  {!esNuevo && (
+    <form method="POST" class="mt-8 max-w-3xl border-t border-marca-100 pt-4">
+      <input type="hidden" name="_action" value="delete" />
+      <button type="submit" class="text-sm text-red-600 hover:underline" onclick="return confirm('¿Eliminar esta pregunta?')">
+        Eliminar pregunta
+      </button>
+    </form>
+  )}
+</AdminLayout>

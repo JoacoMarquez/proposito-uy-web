@@ -65,6 +65,34 @@ export async function getPreguntas(): Promise<Pregunta[]> {
   return db.select().from(preguntas).orderBy(asc(preguntas.orden));
 }
 
+export const TEMAS_PREGUNTA = ["pedidos", "elaboracion", "nutricional"] as const;
+
+export interface PreguntaInput {
+  tema: string;
+  pregunta: string;
+  microResumen: string;
+  desarrollo: string[];
+  orden: number;
+}
+
+export async function getPreguntaById(id: number): Promise<Pregunta | undefined> {
+  const [p] = await db.select().from(preguntas).where(eq(preguntas.id, id)).limit(1);
+  return p;
+}
+
+export async function upsertPregunta(id: number | null, data: PreguntaInput): Promise<number> {
+  if (id) {
+    await db.update(preguntas).set(data).where(eq(preguntas.id, id));
+    return id;
+  }
+  const [p] = await db.insert(preguntas).values(data).returning({ id: preguntas.id });
+  return p.id;
+}
+
+export async function deletePregunta(id: number): Promise<void> {
+  await db.delete(preguntas).where(eq(preguntas.id, id));
+}
+
 // ── Mutaciones (panel admin) ──
 export interface ProductoInput {
   slug: string;
