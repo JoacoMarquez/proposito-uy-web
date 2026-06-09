@@ -1,0 +1,80 @@
+---
+// Banner de consentimiento de cookies (PROP-67).
+// Persiste la elección en localStorage ("all" | "essential") y expone el estado
+// en window.__cookieConsent + el evento "cookieconsent:all" para que cualquier
+// script no esencial (ej. analytics futuro) se cargue solo si hay consentimiento.
+import { site } from "../data/site";
+---
+
+<div
+  id="cookie-banner"
+  role="dialog"
+  aria-live="polite"
+  aria-label="Aviso de cookies"
+  hidden
+  class="fixed inset-x-0 bottom-0 z-50 border-t border-marca-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80"
+>
+  <div class="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 text-sm text-marca-900 sm:flex-row sm:items-center sm:justify-between">
+    <p class="max-w-2xl text-marca-900/80">
+      Usamos cookies esenciales para que el sitio funcione y, con tu permiso,
+      cookies no esenciales para mejorar tu experiencia.
+      {site.cookiesPolicyUrl && (
+        <a href={site.cookiesPolicyUrl} class="font-medium text-marca-700 underline">Más información</a>
+      )}
+    </p>
+    <div class="flex shrink-0 gap-2">
+      <button
+        type="button"
+        data-reject
+        class="rounded-full border border-marca-300 px-4 py-2 font-medium text-marca-700 hover:bg-marca-50"
+      >
+        Solo esenciales
+      </button>
+      <button
+        type="button"
+        data-accept
+        class="rounded-full bg-marca-600 px-4 py-2 font-medium text-white hover:bg-marca-700"
+      >
+        Aceptar todo
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const KEY = "cookie-consent";
+  const banner = document.getElementById("cookie-banner");
+
+  if (banner) {
+    const apply = (v: string) => {
+      (window as any).__cookieConsent = v;
+      document.documentElement.dataset.cookieConsent = v;
+      if (v === "all") window.dispatchEvent(new CustomEvent("cookieconsent:all"));
+    };
+
+    const stored = localStorage.getItem(KEY);
+    if (stored) {
+      apply(stored);
+    } else {
+      banner.hidden = false;
+    }
+
+    const choose = (v: string) => {
+      localStorage.setItem(KEY, v);
+      apply(v);
+      banner.hidden = true;
+    };
+
+    banner.querySelector("[data-accept]")?.addEventListener("click", () => choose("all"));
+    banner.querySelector("[data-reject]")?.addEventListener("click", () => choose("essential"));
+
+    // Permite reabrir el banner desde cualquier enlace con data-cookie-settings (ej. footer).
+    document.addEventListener("click", (e) => {
+      const target = (e.target as HTMLElement)?.closest("[data-cookie-settings]");
+      if (target) {
+        e.preventDefault();
+        banner.hidden = false;
+      }
+    });
+  }
+</script>
