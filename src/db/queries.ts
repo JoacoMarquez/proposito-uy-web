@@ -1,7 +1,7 @@
 // Capa de acceso a datos. Las páginas y el panel leen el contenido desde acá.
 
 import { db } from "./index";
-import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems } from "./schema";
+import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores } from "./schema";
 import { asc, desc, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
@@ -207,6 +207,17 @@ export const ESTADOS_PEDIDO = ["pendiente", "confirmado", "entregado", "cancelad
 
 export async function actualizarEstadoPedido(id: number, estado: string) {
   await db.update(pedidos).set({ estado }).where(eq(pedidos.id, id));
+}
+
+// ── Newsletter ──
+// Inserta el suscriptor. Devuelve "duplicado" si el email ya estaba registrado.
+export async function suscribirNewsletter(email: string): Promise<"ok" | "duplicado"> {
+  const [row] = await db
+    .insert(suscriptores)
+    .values({ email: email.trim().toLowerCase() })
+    .onConflictDoNothing({ target: suscriptores.email })
+    .returning({ id: suscriptores.id });
+  return row ? "ok" : "duplicado";
 }
 
 // ── Helpers (puros) ──
