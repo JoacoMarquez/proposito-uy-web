@@ -19,6 +19,9 @@ export const site = {
   // Imagen por defecto para previews al compartir (Open Graph / Twitter).
   // Ideal: reemplazar por una imagen de marca dedicada de 1200x630 (PROP-66).
   ogImagen: "/productos/granola-del-dia-clasica.webp",
+  // URL de la política de cookies. Dejar "" hasta tener las páginas legales:
+  // el banner muestra el link "Más información" solo si está cargada (PROP-67/PROP-68).
+  cookiesPolicyUrl: "",
   // Grilla de retornabilidad (documento externo del cliente).
   grillaRetornablesUrl:
     "https://docs.google.com/spreadsheets/d/1bUN7BbojfdpoWQeLc0byjdodWaWVOXTOUTKMG5ltcYQ/edit?usp=sharing",
