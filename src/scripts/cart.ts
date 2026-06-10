@@ -1,12 +1,17 @@
 // Carrito del lado del cliente, persistido en localStorage.
 // Emite el evento "carrito:cambio" para que la UI (badge, listados) se actualice.
 
+import type { MixDetalle } from "../lib/barrasMix";
+
 export interface ItemCarrito {
   slug: string;
   nombre: string; // nombre completo: "Hummus | Garbanzo"
   presentacion: string; // label de la presentación
   precio: number; // precio unitario al momento de agregar (se revalida en el server)
   cantidad: number;
+  // Detalle de sabores para una caja personalizada de Barras Mix (PROP-31).
+  // Si está presente, el server recalcula el precio a partir de él.
+  mix?: MixDetalle;
 }
 
 const KEY = "carrito";
