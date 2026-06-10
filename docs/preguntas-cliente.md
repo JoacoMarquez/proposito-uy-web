@@ -7,7 +7,7 @@ Cada ítem referencia su ticket de Jira (proyecto PROP).
 |---|--------|--------|----------------------|
 | 1 | ⬜ Pendiente | [PROP-34](https://joaco1119.atlassian.net/browse/PROP-34) | **Tablas nutricionales:** ¿a dónde tiene que llevar el botón "Ver tablas nutricionales actualizadas" de la página Preguntas? (link a Google Sheets/Drive, o un PDF para subir al sitio). Hoy es un link muerto (`#`). |
 | 2 | ⬜ Pendiente | [PROP-41](https://joaco1119.atlassian.net/browse/PROP-41) | **Datos bancarios para transferencia:** banco, titular, nº de cuenta / sucursal, y alias si tiene. Hoy figura "datos bancarios: pendientes de cargar" en la página de pedido y en el mail. |
-| 3 | ⬜ Pendiente | [PROP-31](https://joaco1119.atlassian.net/browse/PROP-31) | **Calculadora Barras Mix:** confirmar la regla de precio (+$16 por barra de Cajú). ¿Es correcto el monto y aplica solo a Cajú? |
+| 3 | ⬜ Pendiente | [PROP-31](https://joaco1119.atlassian.net/browse/PROP-31) | **Calculadora Barras Mix:** ya implementada con la regla base + **$16 por barra de Cajú** (suma exacta al tamaño). Falta que Pedro **confirme el monto final** del recargo. Si cambia, es una sola constante (`RECARGO_CAJU`). |
 | 4 | ⬜ Pendiente | [PROP-63](https://joaco1119.atlassian.net/browse/PROP-63) | **Textos/copys finales:** ¿hay versión final de textos institucionales, descripciones de producto, etc., o se usan los actuales? |
 | 5 | ⬜ Pendiente | [PROP-11](https://joaco1119.atlassian.net/browse/PROP-11) | **Fotos pendientes:** faltan fotos de recetas (recetario) y de la sección Nosotros (valores/equipo). Pedir el material. |
 | 6 | ⬜ Pendiente | [PROP-56](https://joaco1119.atlassian.net/browse/PROP-56) | **Email real de Pedro** para crear el usuario admin del panel. |
