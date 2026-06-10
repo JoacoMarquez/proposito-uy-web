@@ -27,3 +27,7 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 .vercel
+
+# Imágenes originales (solo se versiona el WebP en public/)
+imagenes-fuente/*
+!imagenes-fuente/README.md
