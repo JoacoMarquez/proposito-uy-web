@@ -75,6 +75,7 @@ const esMix = producto.slug === MIX_SLUG;
         )}
 
         {esMix ? (
+          producto.disponible ? (
           <div id="mix-config" class="mt-6 space-y-4" data-slug={producto.slug} data-nombre={nombre}>
             <div>
               <label for="mix-tamano" class="text-sm font-medium text-marca-700">Tamaño de la caja</label>
@@ -121,6 +122,14 @@ const esMix = producto.slug === MIX_SLUG;
               </button>
             </div>
           </div>
+          ) : (
+            <a
+              href={whatsappLink(`Hola! Quiero consultar por ${nombre}`)}
+              class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-marca-600 px-6 py-3 font-medium text-white hover:bg-marca-700"
+            >
+              Consultar por WhatsApp
+            </a>
+          )
         ) : (
           <Fragment>
             <div class="mt-6">
