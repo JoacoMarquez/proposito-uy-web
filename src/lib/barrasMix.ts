@@ -5,6 +5,9 @@
 export const MIX_SLUG = "barras-proteicas-mix";
 export const RECARGO_CAJU = 16; // $U extra por cada barra de Cajú
 
+// Tamaños de referencia. La capacidad real se deriva de los dígitos del label
+// (ver cantidadTamano), para que cliente y servidor coincidan aunque Pedro
+// renombre una presentación en el panel (ej. "Caja x12").
 export const TAMANOS_MIX = [
   { label: "x12", cantidad: 12 },
   { label: "x24", cantidad: 24 },
@@ -26,8 +29,12 @@ export interface MixDetalle {
   sabores: SaboresMix;
 }
 
+// Capacidad de la caja a partir del label, derivada de sus dígitos (ej. "x12" → 12,
+// "Caja x24" → 24). Misma regla que usa el cliente, evitando que un cambio de label
+// haga que el servidor descarte el mix en silencio.
 export function cantidadTamano(label: string): number | null {
-  return TAMANOS_MIX.find((t) => t.label === label)?.cantidad ?? null;
+  const n = parseInt(String(label ?? "").replace(/\D/g, ""), 10);
+  return Number.isInteger(n) && n > 0 ? n : null;
 }
 
 export function totalBarras(sabores: SaboresMix): number {
