@@ -220,7 +220,7 @@ const direcciones = cliente?.direcciones ?? [];
       agenda: fd.get("agenda"),
       fechaAgenda: fd.get("fechaAgenda") || null,
       metodoPago: fd.get("metodoPago"),
-      items: getCarrito().map((i) => ({ slug: i.slug, presentacion: i.presentacion, cantidad: i.cantidad })),
+      items: getCarrito().map((i) => ({ slug: i.slug, presentacion: i.presentacion, cantidad: i.cantidad, mix: i.mix })),
     };
 
     try {

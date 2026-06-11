@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getProducto, crearPedido, type ItemPedido } from "../../db/queries";
 import { enviarMailsPedido } from "../../lib/mail";
 import { validarAgenda } from "../../lib/agenda";
+import { MIX_SLUG, mixValido, precioMix, etiquetaMix, type MixDetalle } from "../../lib/barrasMix";
 
 export const prerender = false;
 
@@ -40,9 +41,29 @@ export const POST: APIRoute = async ({ request, locals }) => {
   for (const it of items) {
     const prod = await getProducto(String(it?.slug ?? ""));
     if (!prod || !prod.disponible) continue;
+    const cantidad = Math.max(1, Math.floor(Number(it?.cantidad) || 0));
+
+    // Caja personalizada de Barras Mix: el precio se recalcula desde la regla,
+    // tomando la base del tamaño desde la DB + recargo por barras de Cajú.
+    if (prod.slug === MIX_SLUG && it?.mix) {
+      const mix = it.mix as MixDetalle;
+      if (!mixValido(mix)) continue;
+      const base = prod.presentaciones.find((p) => p.label === mix.tamano);
+      if (!base) continue;
+      const precioUnitario = precioMix(base.precio, mix);
+      subtotal += precioUnitario * cantidad;
+      validados.push({
+        productoSlug: prod.slug,
+        nombre: `${prod.nombre} | ${prod.variante}`,
+        presentacion: etiquetaMix(mix),
+        precioUnitario,
+        cantidad,
+      });
+      continue;
+    }
+
     const pres = prod.presentaciones.find((p) => p.label === it?.presentacion);
     if (!pres) continue;
-    const cantidad = Math.max(1, Math.floor(Number(it?.cantidad) || 0));
     subtotal += pres.precio * cantidad;
     validados.push({
       productoSlug: prod.slug,
