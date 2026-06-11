@@ -34,6 +34,8 @@ const detalles = [
 ].filter((d) => d.valor);
 
 const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
+// Link de consulta por WhatsApp para productos agotados (reusado en la rama mix y la normal).
+const consultaWaHref = whatsappLink(`Hola! Quiero consultar por ${nombre}`);
 const primera = producto.presentaciones[0];
 const esMix = producto.slug === MIX_SLUG;
 ---
@@ -124,7 +126,7 @@ const esMix = producto.slug === MIX_SLUG;
           </div>
           ) : (
             <a
-              href={whatsappLink(`Hola! Quiero consultar por ${nombre}`)}
+              href={consultaWaHref}
               class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-marca-600 px-6 py-3 font-medium text-white hover:bg-marca-700"
             >
               Consultar por WhatsApp
@@ -173,7 +175,7 @@ const esMix = producto.slug === MIX_SLUG;
               </div>
             ) : (
               <a
-                href={whatsappLink(`Hola! Quiero consultar por ${nombre}`)}
+                href={consultaWaHref}
                 class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-marca-600 px-6 py-3 font-medium text-white hover:bg-marca-700"
               >
                 Consultar por WhatsApp
