@@ -144,7 +144,7 @@ const direcciones = cliente?.direcciones ?? [];
   }
   form.querySelectorAll('input[name="modalidad"]').forEach((r) => r.addEventListener("change", toggleModalidad));
 
-  render();
+  toggleModalidad(); // inicializa estado (required de dirección, info de retiro) + primer render del resumen
 
   // ── Agenda: calendario de días habilitados (miércoles y viernes) ──
   const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
