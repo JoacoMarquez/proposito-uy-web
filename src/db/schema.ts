@@ -158,6 +158,16 @@ export const clienteSessions = pgTable("cliente_sessions", {
   expiraEn: timestamp("expira_en").notNull(),
 });
 
+// Imágenes subidas desde el panel, guardadas en la propia base (Neon) para no
+// depender de un blob store externo. `data` es el binario en base64; se sirven
+// desde /api/img/[id]. El campo `imagen` de productos/recetas guarda esa URL.
+export const imagenes = pgTable("imagenes", {
+  id: serial("id").primaryKey(),
+  data: text("data").notNull(), // contenido del archivo en base64
+  mime: text("mime").notNull(), // ej. "image/webp"
+  creadoEn: timestamp("creado_en").notNull().defaultNow(),
+});
+
 // Suscriptores al newsletter (formulario del footer).
 export const suscriptores = pgTable("suscriptores", {
   id: serial("id").primaryKey(),
@@ -175,3 +185,4 @@ export type Pedido = typeof pedidos.$inferSelect;
 export type PedidoItem = typeof pedidoItems.$inferSelect;
 export type Cliente = typeof clientes.$inferSelect;
 export type Suscriptor = typeof suscriptores.$inferSelect;
+export type Imagen = typeof imagenes.$inferSelect;
