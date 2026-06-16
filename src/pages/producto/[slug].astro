@@ -2,6 +2,7 @@
 export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 import ProductCard from "../../components/ProductCard.astro";
+import TituloSeccion from "../../components/TituloSeccion.astro";
 import {
   getProducto,
   getCategoria,
@@ -228,7 +229,7 @@ const esMix = producto.slug === MIX_SLUG;
 
     <!-- Los más pedidos -->
     <div class="mt-16">
-      <h2 class="text-2xl font-bold text-marca-700">Los más pedidos</h2>
+      <TituloSeccion titulo="Los más pedidos" />
       <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {destacados.map((p) => <ProductCard producto={p} />)}
       </div>
@@ -239,10 +240,12 @@ const esMix = producto.slug === MIX_SLUG;
 <script>
   import { agregar, formatoPrecio } from "../../scripts/cart";
 
+  function setup() {
   const select = document.getElementById("presentacion") as HTMLSelectElement | null;
+  const agregarBtn = document.getElementById("agregar") as HTMLButtonElement | null;
+  if (!select && !agregarBtn) return;
   const precioEl = document.getElementById("precio");
   const pedir = document.getElementById("pedir") as HTMLAnchorElement | null;
-  const agregarBtn = document.getElementById("agregar") as HTMLButtonElement | null;
   const cantidadEl = document.getElementById("cantidad") as HTMLInputElement | null;
   const numero = "59897174174";
   const base = "¡Hola Propósito! Quiero hacer un pedido:";
@@ -279,6 +282,9 @@ const esMix = producto.slug === MIX_SLUG;
     agregarBtn.textContent = "✓ Agregado";
     setTimeout(() => (agregarBtn.textContent = original), 1200);
   });
+  }
+
+  document.addEventListener("astro:page-load", setup);
 </script>
 
 <script>
@@ -291,6 +297,7 @@ const esMix = producto.slug === MIX_SLUG;
     type SaboresMix,
   } from "../../lib/barrasMix";
 
+  function setup() {
   const cfg = document.getElementById("mix-config");
   if (cfg) {
     const tamanoSel = document.getElementById("mix-tamano") as HTMLSelectElement;
@@ -357,4 +364,7 @@ const esMix = producto.slug === MIX_SLUG;
       setTimeout(() => (btn.textContent = original), 1200);
     });
   }
+  }
+
+  document.addEventListener("astro:page-load", setup);
 </script>

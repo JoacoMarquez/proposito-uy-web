@@ -79,8 +79,10 @@ preguntas.sort((a, b) => orden.indexOf(a.tema) - orden.indexOf(b.tema));
 </Layout>
 
 <script>
+  function setup() {
   const botones = document.querySelectorAll<HTMLButtonElement>(".tab-btn");
   const items = document.querySelectorAll<HTMLElement>(".faq-item");
+  if (!botones.length) return;
 
   function filtrar(tab: string) {
     items.forEach((el) => {
@@ -97,4 +99,7 @@ preguntas.sort((a, b) => orden.indexOf(a.tema) - orden.indexOf(b.tema));
   }
 
   botones.forEach((b) => b.addEventListener("click", () => filtrar(b.dataset.tab!)));
+  }
+
+  document.addEventListener("astro:page-load", setup);
 </script>

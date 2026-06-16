@@ -3,6 +3,7 @@ export const prerender = false;
 // Ruta estática: tiene prioridad sobre [categoria].astro, así que no colisiona.
 import Layout from "../../layouts/Layout.astro";
 import ProductCard from "../../components/ProductCard.astro";
+import TituloSeccion from "../../components/TituloSeccion.astro";
 import { getProductos, getCategorias } from "../../db/queries";
 
 const [productos, cats] = await Promise.all([getProductos(), getCategorias()]);
@@ -17,7 +18,7 @@ const [productos, cats] = await Promise.all([getProductos(), getCategorias()]);
 
     {cats.map((cat) => (
       <div class="mt-10">
-        <h2 class="text-xl font-semibold text-marca-700">{cat.nombre}</h2>
+        <TituloSeccion titulo={cat.nombre} />
         <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {productos.filter((p) => p.categoriaSlug === cat.slug).map((p) => <ProductCard producto={p} />)}
         </div>

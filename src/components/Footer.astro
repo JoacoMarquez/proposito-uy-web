@@ -58,43 +58,50 @@ import { navLegales } from "../data/legales";
 </footer>
 
 <script>
-  const form = document.getElementById("newsletter-form") as HTMLFormElement | null;
-  const input = document.getElementById("nl-email") as HTMLInputElement | null;
-  const msg = document.getElementById("nl-msg") as HTMLParagraphElement | null;
-  const btn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+  // El footer se vuelve a renderizar en cada navegación (View Transitions),
+  // así que reconectamos el formulario en cada carga de página.
+  function setupNewsletter() {
+    const form = document.getElementById("newsletter-form") as HTMLFormElement | null;
+    if (!form) return;
+    const input = document.getElementById("nl-email") as HTMLInputElement | null;
+    const msg = document.getElementById("nl-msg") as HTMLParagraphElement | null;
+    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 
-  function mostrar(texto: string, ok: boolean) {
-    if (!msg) return;
-    msg.textContent = texto;
-    msg.hidden = false;
-    msg.className = "mt-2 text-xs " + (ok ? "text-marca-700" : "text-red-600");
+    function mostrar(texto: string, ok: boolean) {
+      if (!msg) return;
+      msg.textContent = texto;
+      msg.hidden = false;
+      msg.className = "mt-2 text-xs " + (ok ? "text-marca-700" : "text-red-600");
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = (input?.value ?? "").trim();
+      if (!email) {
+        mostrar("Ingresá tu email.", false);
+        return;
+      }
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch("/api/newsletter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          mostrar(data.mensaje ?? "¡Listo!", true);
+          form.reset();
+        } else {
+          mostrar(data.error ?? "No pudimos suscribirte.", false);
+        }
+      } catch {
+        mostrar("Error de conexión. Probá de nuevo.", false);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
   }
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = (input?.value ?? "").trim();
-    if (!email) {
-      mostrar("Ingresá tu email.", false);
-      return;
-    }
-    if (btn) btn.disabled = true;
-    try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        mostrar(data.mensaje ?? "¡Listo!", true);
-        form.reset();
-      } else {
-        mostrar(data.error ?? "No pudimos suscribirte.", false);
-      }
-    } catch {
-      mostrar("Error de conexión. Probá de nuevo.", false);
-    } finally {
-      if (btn) btn.disabled = false;
-    }
-  });
+  document.addEventListener("astro:page-load", setupNewsletter);
 </script>

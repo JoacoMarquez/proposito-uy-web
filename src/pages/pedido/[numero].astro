@@ -89,6 +89,10 @@ const waCoord = whatsappLink(`Hola! Mi pedido ${pedido.numero} es con coordinaci
 
 <script>
   // El pedido ya está confirmado: vaciar el carrito por las dudas.
+  // Con View Transitions el script vive entre páginas, así que solo limpiamos
+  // cuando realmente estamos en una página de pedido.
   import { limpiar } from "../../scripts/cart";
-  limpiar();
+  document.addEventListener("astro:page-load", () => {
+    if (location.pathname.startsWith("/pedido/")) limpiar();
+  });
 </script>
