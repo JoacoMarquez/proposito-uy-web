@@ -20,7 +20,7 @@ const precio = precioDesde(producto);
   <a href={`/producto/${producto.slug}`} class="flex flex-1 flex-col">
     <div class="relative flex aspect-square items-center justify-center bg-marca-50 text-marca-300">
       {producto.imagen ? (
-        <img src={producto.imagen} alt={nombre} class="h-full w-full object-cover" />
+        <img src={producto.imagen} alt={nombre} width="800" height="800" loading="lazy" decoding="async" class="h-full w-full object-cover" />
       ) : (
         <span class="text-sm">Foto pendiente</span>
       )}
