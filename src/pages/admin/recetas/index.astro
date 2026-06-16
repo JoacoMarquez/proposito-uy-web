@@ -25,7 +25,14 @@ const recetas = await getRecetas();
       <tbody>
         {recetas.map((r) => (
           <tr class="border-b border-marca-50 last:border-0">
-            <td class="p-3 font-medium text-marca-900">{r.titulo}</td>
+            <td class="p-3">
+              <div class="flex items-center gap-3">
+                {r.imagen
+                  ? <img src={r.imagen} alt={r.titulo} class="h-10 w-10 shrink-0 rounded-lg border border-marca-100 object-cover" />
+                  : <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-marca-100 bg-marca-50 text-marca-300" aria-hidden="true">🖼️</div>}
+                <span class="font-medium text-marca-900">{r.titulo}</span>
+              </div>
+            </td>
             <td class="p-3 text-marca-900/70">{r.productosAliados.join(", ") || "—"}</td>
             <td class="p-3 text-right">
               <a href={`/admin/recetas/${r.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
