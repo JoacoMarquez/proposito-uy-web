@@ -43,18 +43,24 @@ import { site } from "../data/site";
 
 <script>
   const KEY = "cookie-consent";
-  const banner = document.getElementById("cookie-banner");
 
-  if (banner) {
-    const apply = (v: string) => {
-      (window as any).__cookieConsent = v;
-      document.documentElement.dataset.cookieConsent = v;
-      if (v === "all") window.dispatchEvent(new CustomEvent("cookieconsent:all"));
-    };
+  const apply = (v: string) => {
+    (window as any).__cookieConsent = v;
+    document.documentElement.dataset.cookieConsent = v;
+    if (v === "all") window.dispatchEvent(new CustomEvent("cookieconsent:all"));
+  };
+
+  // El banner se vuelve a renderizar en cada navegación (View Transitions),
+  // así que reconectamos sus botones y reaplicamos el consentimiento en cada
+  // carga de página.
+  function setupBanner() {
+    const banner = document.getElementById("cookie-banner");
+    if (!banner) return;
 
     const stored = localStorage.getItem(KEY);
     if (stored) {
       apply(stored);
+      banner.hidden = true;
     } else {
       banner.hidden = false;
     }
@@ -67,14 +73,18 @@ import { site } from "../data/site";
 
     banner.querySelector("[data-accept]")?.addEventListener("click", () => choose("all"));
     banner.querySelector("[data-reject]")?.addEventListener("click", () => choose("essential"));
-
-    // Permite reabrir el banner desde cualquier enlace con data-cookie-settings (ej. footer).
-    document.addEventListener("click", (e) => {
-      const target = (e.target as HTMLElement)?.closest("[data-cookie-settings]");
-      if (target) {
-        e.preventDefault();
-        banner.hidden = false;
-      }
-    });
   }
+
+  // Reabrir el banner desde cualquier enlace con data-cookie-settings (ej. footer).
+  // Listener global registrado una sola vez; re-consulta el banner al hacer clic.
+  document.addEventListener("click", (e) => {
+    const target = (e.target as HTMLElement)?.closest("[data-cookie-settings]");
+    if (target) {
+      e.preventDefault();
+      const banner = document.getElementById("cookie-banner");
+      if (banner) banner.hidden = false;
+    }
+  });
+
+  document.addEventListener("astro:page-load", setupBanner);
 </script>

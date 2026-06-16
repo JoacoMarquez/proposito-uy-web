@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CookieBanner from "../components/CookieBanner.astro";
@@ -52,6 +53,7 @@ const imagenOg = new URL(imagen ?? site.ogImagen, baseUrl).href;
     <meta name="twitter:title" content={tituloFinal} />
     <meta name="twitter:description" content={desc} />
     <meta name="twitter:image" content={imagenOg} />
+    <ClientRouter />
   </head>
   <body class="flex min-h-screen flex-col font-sans">
     <Header />

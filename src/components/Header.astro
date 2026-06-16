@@ -3,28 +3,55 @@ import { nav, site } from "../data/site";
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/" ? path === "/" : path.startsWith(href);
+// En Inicio el nav va centrado y se oculta el nombre de la marca.
+const isHome = path === "/";
 ---
 
 <header class="sticky top-0 z-50 border-b border-marca-100 bg-crema/90 backdrop-blur">
-  <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-    <a href="/" class="text-lg font-bold tracking-tight text-marca-700">{site.nombre}</a>
+  <div class="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    {isHome ? (
+      <!-- Inicio: nav centrado (posición absoluta, centrado por márgenes), sin nombre de marca. -->
+      <nav transition:name="site-nav" class="site-nav absolute inset-x-0 mx-auto hidden w-max gap-1 md:flex">
+        {nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+              isActive(item.href)
+                ? "bg-marca-600 text-white"
+                : "text-marca-700 hover:bg-marca-100",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    ) : (
+      <a href="/" transition:name="site-logo" class="flex items-center gap-2 text-lg font-bold tracking-tight text-marca-700">
+        <span>{site.nombre}</span>
+        <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-6 w-6" />
+      </a>
+    )}
 
-    <div class="flex items-center gap-3">
-    <nav class="hidden gap-1 md:flex">
-      {nav.map((item) => (
-        <a
-          href={item.href}
-          class:list={[
-            "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-            isActive(item.href)
-              ? "bg-marca-600 text-white"
-              : "text-marca-700 hover:bg-marca-100",
-          ]}
-        >
-          {item.label}
-        </a>
-      ))}
-    </nav>
+    <div class:list={["flex items-center gap-3", isHome && "ml-auto"]}>
+    {!isHome && (
+      <!-- Resto de páginas: nav agrupado a la derecha (estado actual). -->
+      <nav transition:name="site-nav" class="site-nav hidden gap-1 md:flex">
+        {nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+              isActive(item.href)
+                ? "bg-marca-600 text-white"
+                : "text-marca-700 hover:bg-marca-100",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    )}
 
     <!-- Menú mobile simple (detalle nativo, sin JS) -->
     <details class="relative md:hidden">
@@ -80,11 +107,18 @@ const isActive = (href: string) =>
     el.classList.toggle("hidden", n === 0);
   }
 
-  const actualizarCarrito = () => badge("cart-count", contar());
-  const actualizarFav = () => badge("fav-count", contarFav());
+  // Re-consulta los badges actuales (cambian de nodo en cada navegación con
+  // View Transitions) y los actualiza con el conteo vigente.
+  function actualizarBadges() {
+    badge("cart-count", contar());
+    badge("fav-count", contarFav());
+  }
 
-  actualizarCarrito();
-  actualizarFav();
-  document.addEventListener("carrito:cambio", actualizarCarrito);
-  document.addEventListener("favoritos:cambio", actualizarFav);
+  // Listeners globales (document persiste entre navegaciones): se registran una
+  // sola vez al cargar el módulo, así no se duplican al navegar.
+  document.addEventListener("carrito:cambio", actualizarBadges);
+  document.addEventListener("favoritos:cambio", actualizarBadges);
+
+  // En cada página (carga inicial y navegaciones SPA) re-sincronizamos los badges.
+  document.addEventListener("astro:page-load", actualizarBadges);
 </script>

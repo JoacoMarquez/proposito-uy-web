@@ -24,11 +24,11 @@ import Layout from "../layouts/Layout.astro";
 <script>
   import { getFavoritos, quitar, formatoPrecio } from "../scripts/favoritos";
 
-  const grid = document.getElementById("grid")!;
-  const gridWrap = document.getElementById("grid-wrap")!;
-  const vacio = document.getElementById("vacio")!;
-
   function render() {
+    const grid = document.getElementById("grid");
+    const gridWrap = document.getElementById("grid-wrap");
+    const vacio = document.getElementById("vacio");
+    if (!grid || !gridWrap || !vacio) return;
     const items = getFavoritos();
     vacio.classList.toggle("hidden", items.length > 0);
     gridWrap.classList.toggle("hidden", items.length === 0);
@@ -63,6 +63,6 @@ import Layout from "../layouts/Layout.astro";
     }
   }
 
-  render();
   document.addEventListener("favoritos:cambio", render);
+  document.addEventListener("astro:page-load", render);
 </script>
