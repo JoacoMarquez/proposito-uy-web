@@ -6,6 +6,7 @@ interface Props {
 }
 const { titulo } = Astro.props;
 const email = Astro.locals.adminUser?.email;
+const inicial = (email ?? "?").trim().charAt(0).toUpperCase() || "?";
 const path = Astro.url.pathname;
 
 const nav = [
@@ -29,7 +30,7 @@ const activo = (href: string) =>
   </head>
   <body class="min-h-screen bg-crema font-sans text-marca-900">
     <div class="flex min-h-screen">
-      <aside class="w-56 shrink-0 border-r border-marca-100 bg-white p-4">
+      <aside class="sticky top-0 flex h-screen w-56 shrink-0 flex-col overflow-y-auto border-r border-marca-100 bg-white p-4">
         <p class="px-2 text-lg font-bold text-marca-700">Propósito UY</p>
         <p class="px-2 text-xs text-marca-500">Panel de administración</p>
         <nav class="mt-6 flex flex-col gap-1">
@@ -45,10 +46,24 @@ const activo = (href: string) =>
             </a>
           ))}
         </nav>
-        <div class="mt-8 border-t border-marca-100 pt-4 text-xs text-marca-500">
-          <p class="truncate px-2">{email}</p>
-          <a href="/admin/logout" class="mt-2 block px-2 text-marca-700 hover:underline">Cerrar sesión</a>
-          <a href="/" target="_blank" class="mt-1 block px-2 text-marca-700 hover:underline">Ver sitio ↗</a>
+
+        {/* Usuario + acciones, anclado abajo */}
+        <div class="mt-auto border-t border-marca-100 pt-3">
+          <div class="flex items-center gap-2 rounded-xl bg-marca-50 px-2.5 py-2">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-marca-600 text-sm font-semibold text-white">
+              {inicial}
+            </span>
+            <div class="min-w-0">
+              <p class="text-[10px] uppercase tracking-wide text-marca-500">Sesión</p>
+              <p class="truncate text-xs font-medium text-marca-900" title={email}>{email}</p>
+            </div>
+          </div>
+          <a href="/admin/logout" class="mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-50">
+            <span aria-hidden="true">⎋</span> Cerrar sesión
+          </a>
+          <a href="/" target="_blank" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-50">
+            <span aria-hidden="true">↗</span> Ver sitio
+          </a>
         </div>
       </aside>
 
