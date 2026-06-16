@@ -33,5 +33,6 @@
   });
 
   document.addEventListener("favoritos:cambio", syncAll);
-  syncAll();
+  // Re-sincroniza los botones en cada página (carga inicial y navegaciones SPA).
+  document.addEventListener("astro:page-load", syncAll);
 </script>

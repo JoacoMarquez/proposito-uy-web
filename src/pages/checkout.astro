@@ -108,7 +108,9 @@ const direcciones = cliente?.direcciones ?? [];
   const ENVIO = 250;
   const ENVIO_GRATIS_DESDE = 3000;
 
-  const form = document.getElementById("checkout") as HTMLFormElement;
+  function setup() {
+  const form = document.getElementById("checkout") as HTMLFormElement | null;
+  if (!form) return;
   const itemsEl = document.getElementById("resumen-items")!;
   const errorEl = document.getElementById("error")!;
   const confirmar = document.getElementById("confirmar") as HTMLButtonElement;
@@ -240,4 +242,7 @@ const direcciones = cliente?.direcciones ?? [];
       confirmar.textContent = "Confirmar pedido";
     }
   });
+  }
+
+  document.addEventListener("astro:page-load", setup);
 </script>

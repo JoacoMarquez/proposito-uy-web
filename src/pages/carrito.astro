@@ -39,10 +39,12 @@ import Layout from "../layouts/Layout.astro";
 <script>
   import { getCarrito, setCantidad, quitar, subtotal, formatoPrecio } from "../scripts/cart";
 
-  const itemsEl = document.getElementById("items")!;
-  const vacioEl = document.getElementById("vacio")!;
-  const contenidoEl = document.getElementById("contenido")!;
-  const subtotalEl = document.getElementById("subtotal")!;
+  function setup() {
+  const itemsEl = document.getElementById("items");
+  const vacioEl = document.getElementById("vacio");
+  const contenidoEl = document.getElementById("contenido");
+  const subtotalEl = document.getElementById("subtotal");
+  if (!itemsEl || !vacioEl || !contenidoEl || !subtotalEl) return;
 
   function render() {
     const items = getCarrito();
@@ -77,4 +79,7 @@ import Layout from "../layouts/Layout.astro";
   }
 
   render();
+  }
+
+  document.addEventListener("astro:page-load", setup);
 </script>

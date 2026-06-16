@@ -239,10 +239,12 @@ const esMix = producto.slug === MIX_SLUG;
 <script>
   import { agregar, formatoPrecio } from "../../scripts/cart";
 
+  function setup() {
   const select = document.getElementById("presentacion") as HTMLSelectElement | null;
+  const agregarBtn = document.getElementById("agregar") as HTMLButtonElement | null;
+  if (!select && !agregarBtn) return;
   const precioEl = document.getElementById("precio");
   const pedir = document.getElementById("pedir") as HTMLAnchorElement | null;
-  const agregarBtn = document.getElementById("agregar") as HTMLButtonElement | null;
   const cantidadEl = document.getElementById("cantidad") as HTMLInputElement | null;
   const numero = "59897174174";
   const base = "¡Hola Propósito! Quiero hacer un pedido:";
@@ -279,6 +281,9 @@ const esMix = producto.slug === MIX_SLUG;
     agregarBtn.textContent = "✓ Agregado";
     setTimeout(() => (agregarBtn.textContent = original), 1200);
   });
+  }
+
+  document.addEventListener("astro:page-load", setup);
 </script>
 
 <script>
@@ -291,6 +296,7 @@ const esMix = producto.slug === MIX_SLUG;
     type SaboresMix,
   } from "../../lib/barrasMix";
 
+  function setup() {
   const cfg = document.getElementById("mix-config");
   if (cfg) {
     const tamanoSel = document.getElementById("mix-tamano") as HTMLSelectElement;
@@ -357,4 +363,7 @@ const esMix = producto.slug === MIX_SLUG;
       setTimeout(() => (btn.textContent = original), 1200);
     });
   }
+  }
+
+  document.addEventListener("astro:page-load", setup);
 </script>
