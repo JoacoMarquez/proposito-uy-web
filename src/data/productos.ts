@@ -128,6 +128,7 @@ export const productos: Producto[] = [
   // ── SECOS ──────────────────────────────────────────────
   {
     slug: "mix-frutos-secos-clasico",
+    imagen: "/productos/mix-frutos-secos-clasico.webp",
     nombre: "Mix Frutos Secos",
     variante: "Clásico",
     categoria: "secos",
@@ -143,6 +144,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "galletas-artesanales-cracker",
+    imagen: "/productos/galletas-artesanales-cracker.webp",
     nombre: "Galletas Artesanales",
     variante: "Cracker",
     categoria: "secos",
@@ -163,6 +165,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "granola-del-dia-clasica",
+    imagen: "/productos/granola-del-dia-clasica.webp",
     nombre: "Granola Del Día",
     variante: "Clásica",
     categoria: "secos",
@@ -185,6 +188,7 @@ export const productos: Producto[] = [
   // ── HÚMEDOS ────────────────────────────────────────────
   {
     slug: "hummus-garbanzo",
+    imagen: "/productos/hummus-garbanzo.webp",
     nombre: "Hummus",
     variante: "Garbanzo",
     categoria: "humedos",
@@ -223,6 +227,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "hummus-mix",
+    imagen: "/productos/hummus-mix.webp",
     nombre: "Hummus",
     variante: "Mix",
     categoria: "humedos",
@@ -240,6 +245,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "crema-caju",
+    imagen: "/productos/crema-caju.webp",
     nombre: "Crema",
     variante: "Cajú",
     categoria: "humedos",
@@ -258,6 +264,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "crema-mani",
+    imagen: "/productos/crema-mani.webp",
     nombre: "Crema",
     variante: "Maní",
     categoria: "humedos",
@@ -279,6 +286,7 @@ export const productos: Producto[] = [
   // ── BARRAS ─────────────────────────────────────────────
   {
     slug: "barras-proteicas-clasica",
+    imagen: "/productos/barras-proteicas-clasica.webp",
     nombre: "Barras Proteicas",
     variante: "Clásica",
     categoria: "barras",
@@ -295,6 +303,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "barras-proteicas-coco",
+    imagen: "/productos/barras-proteicas-coco.webp",
     nombre: "Barras Proteicas",
     variante: "Coco",
     categoria: "barras",
@@ -310,6 +319,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "barras-proteicas-chocolate",
+    imagen: "/productos/barras-proteicas-chocolate.webp",
     nombre: "Barras Proteicas",
     variante: "Chocolate",
     categoria: "barras",
@@ -325,6 +335,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "barras-proteicas-caju",
+    imagen: "/productos/barras-proteicas-caju.webp",
     nombre: "Barras Proteicas",
     variante: "Cajú",
     categoria: "barras",
@@ -340,6 +351,7 @@ export const productos: Producto[] = [
   },
   {
     slug: "barras-proteicas-mix",
+    imagen: "/productos/barras-proteicas-mix.webp",
     nombre: "Barras Proteicas",
     variante: "Mix",
     categoria: "barras",
