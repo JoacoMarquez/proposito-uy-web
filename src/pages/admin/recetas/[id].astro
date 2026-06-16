@@ -8,6 +8,7 @@ import {
   deleteReceta,
   type RecetaInput,
 } from "../../../db/queries";
+import { procesarImagenSubida } from "../../../lib/upload";
 
 const { id: idParam } = Astro.params;
 const esNuevo = idParam === "nuevo";
@@ -36,6 +37,9 @@ if (Astro.request.method === "POST") {
   const rendimiento: Record<string, string> = {};
   for (const k of rendKeys) if (s(`rend_${k}`)) rendimiento[k] = s(`rend_${k}`);
 
+  // Imagen: archivo nuevo → se guarda y se usa su URL; si no, se conserva la actual.
+  const subida = await procesarImagenSubida(form);
+
   const data: RecetaInput = {
     slug: s("slug"),
     titulo: s("titulo"),
@@ -46,10 +50,12 @@ if (Astro.request.method === "POST") {
     rendimiento: Object.keys(rendimiento).length ? rendimiento : null,
     ingredientes: lineas("ingredientes"),
     procedimiento: lineas("procedimiento"),
-    imagen: sn("imagen"),
+    imagen: subida.url ?? sn("imagen"),
   };
 
-  if (!data.slug || !data.titulo) {
+  if (subida.error) {
+    error = subida.error;
+  } else if (!data.slug || !data.titulo) {
     error = "Completá al menos slug y título.";
   } else {
     await upsertReceta(id, data);
@@ -71,7 +77,7 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
 
   {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
-  <form method="POST" class="mt-4 max-w-3xl space-y-5">
+  <form method="POST" enctype="multipart/form-data" class="mt-4 max-w-3xl space-y-5">
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
         <label class="text-sm font-medium text-marca-700">Título</label>
@@ -86,6 +92,20 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     <div>
       <label class="text-sm font-medium text-marca-700">Descripción</label>
       <textarea name="descripcion" rows="3" class={campoBase}>{r?.descripcion ?? ""}</textarea>
+    </div>
+
+    <!-- Imagen -->
+    <div>
+      <label class="text-sm font-medium text-marca-700">Imagen</label>
+      {r?.imagen && (
+        <div class="mt-2 flex items-center gap-3">
+          <img src={r.imagen} alt={r?.titulo ?? "imagen"} class="h-20 w-20 rounded-xl border border-marca-100 object-cover" />
+          <span class="text-xs text-marca-500">Imagen actual. Subí una nueva para reemplazarla.</span>
+        </div>
+      )}
+      <input type="hidden" name="imagen" value={r?.imagen ?? ""} />
+      <input type="file" name="imagenFile" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" class="mt-2 block w-full text-sm" />
+      <p class="text-xs text-marca-500">JPG, PNG, WebP, AVIF o GIF. Máx 2 MB. Subí la foto ya optimizada.</p>
     </div>
 
     <div>

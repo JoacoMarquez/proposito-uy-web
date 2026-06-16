@@ -1,7 +1,7 @@
 // Capa de acceso a datos. Las páginas y el panel leen el contenido desde acá.
 
 import { db } from "./index";
-import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores } from "./schema";
+import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores, imagenes } from "./schema";
 import { asc, desc, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
@@ -246,6 +246,26 @@ export async function suscribirNewsletter(email: string): Promise<"ok" | "duplic
     .onConflictDoNothing({ target: suscriptores.email })
     .returning({ id: suscriptores.id });
   return row ? "ok" : "duplicado";
+}
+
+// ── Imágenes (subidas desde el panel, guardadas en la base) ──
+// Tipos permitidos y tamaño máximo del archivo subido (validación compartida
+// entre el form del panel y, si hiciera falta, otros llamadores).
+export const IMAGEN_MIMES = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"] as const;
+export const IMAGEN_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+
+export async function guardarImagen(dataBase64: string, mime: string): Promise<number> {
+  const [row] = await db.insert(imagenes).values({ data: dataBase64, mime }).returning({ id: imagenes.id });
+  return row.id;
+}
+
+export async function getImagen(id: number): Promise<{ data: string; mime: string } | undefined> {
+  const [row] = await db
+    .select({ data: imagenes.data, mime: imagenes.mime })
+    .from(imagenes)
+    .where(eq(imagenes.id, id))
+    .limit(1);
+  return row;
 }
 
 // ── Helpers (puros) ──
