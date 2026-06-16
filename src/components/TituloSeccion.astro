@@ -1,0 +1,14 @@
+---
+// Subtítulo de sección: banda verde de ancho completo con el título en crema.
+// Unifica el formato de los títulos de sección del sitio público.
+interface Props {
+  titulo: string;
+  /** Clases extra para el contenedor (por ej. ajustar el margen inferior). */
+  class?: string;
+}
+const { titulo, class: clase } = Astro.props;
+---
+
+<div class:list={["rounded-xl bg-marca-600 px-5 py-4", clase]}>
+  <h2 class="text-2xl font-bold text-crema">{titulo}</h2>
+</div>
