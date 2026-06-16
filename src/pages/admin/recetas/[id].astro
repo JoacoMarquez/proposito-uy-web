@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
+import ImageField from "../../../components/ImageField.astro";
 import {
   getRecetaById,
   getProductos,
@@ -95,18 +96,7 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     </div>
 
     <!-- Imagen -->
-    <div>
-      <label class="text-sm font-medium text-marca-700">Imagen</label>
-      {r?.imagen && (
-        <div class="mt-2 flex items-center gap-3">
-          <img src={r.imagen} alt={r?.titulo ?? "imagen"} class="h-20 w-20 rounded-xl border border-marca-100 object-cover" />
-          <span class="text-xs text-marca-500">Imagen actual. Subí una nueva para reemplazarla.</span>
-        </div>
-      )}
-      <input type="hidden" name="imagen" value={r?.imagen ?? ""} />
-      <input type="file" name="imagenFile" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" class="mt-2 block w-full text-sm" />
-      <p class="text-xs text-marca-500">JPG, PNG, WebP, AVIF o GIF. Máx 2 MB. Subí la foto ya optimizada.</p>
-    </div>
+    <ImageField imagen={r?.imagen} alt={r?.titulo ?? "imagen"} />
 
     <div>
       <label class="text-sm font-medium text-marca-700">Productos aliados</label>
