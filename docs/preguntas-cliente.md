@@ -9,7 +9,7 @@ Cada ítem referencia su ticket de Jira (proyecto PROP).
 | 2 | ⬜ Pendiente | [PROP-41](https://joaco1119.atlassian.net/browse/PROP-41) | **Datos bancarios para transferencia:** banco, titular, nº de cuenta / sucursal, y alias si tiene. Hoy figura "datos bancarios: pendientes de cargar" en la página de pedido y en el mail. |
 | 3 | ⬜ Pendiente | [PROP-31](https://joaco1119.atlassian.net/browse/PROP-31) | **Calculadora Barras Mix:** ya implementada con la regla base + **$16 por barra de Cajú** (suma exacta al tamaño). Falta que Pedro **confirme el monto final** del recargo. Si cambia, es una sola constante (`RECARGO_CAJU`). |
 | 4 | ⬜ Pendiente | [PROP-63](https://joaco1119.atlassian.net/browse/PROP-63) | **Textos/copys finales:** ¿hay versión final de textos institucionales, descripciones de producto, etc., o se usan los actuales? |
-| 5 | ⬜ Pendiente | [PROP-11](https://joaco1119.atlassian.net/browse/PROP-11) | **Fotos pendientes:** faltan fotos de recetas (recetario) y de la sección Nosotros (valores/equipo). Pedir el material. |
+| 5 | ⬜ Pendiente | [PROP-11](https://joaco1119.atlassian.net/browse/PROP-11) / [PROP-55](https://joaco1119.atlassian.net/browse/PROP-55) | **Fotos pendientes:** faltan fotos de recetas (recetario) y de la sección Nosotros (valores/equipo). Novedad: la **subida de fotos desde el panel ya está implementada** (PROP-55), así que Pedro puede cargar/cambiar las fotos de productos y recetas él mismo desde `/admin`. Igual conviene pedirle el material que falte. |
 | 6 | ⬜ Pendiente | [PROP-56](https://joaco1119.atlassian.net/browse/PROP-56) | **Email real de Pedro** para crear el usuario admin del panel. |
 | 7 | ⬜ Pendiente | [PROP-57](https://joaco1119.atlassian.net/browse/PROP-57) | **Resend / emails:** confirmar dominio de envío y quién hace la verificación DNS. Necesito acceso o que él agregue los registros. |
 | 8 | ⬜ Pendiente | [PROP-65](https://joaco1119.atlassian.net/browse/PROP-65) / [PROP-76](https://joaco1119.atlassian.net/browse/PROP-76) | **Dominio propositouy.com.uy:** acceso al panel DNS (Hostinger) para apuntar el sitio y configurar el correo `@propositouy.com.uy`. |
@@ -17,4 +17,7 @@ Cada ítem referencia su ticket de Jira (proyecto PROP).
 | 10 | ⬜ Pendiente | [PROP-68](https://joaco1119.atlassian.net/browse/PROP-68) | **Revisión de textos legales:** las páginas de Privacidad, Términos y Cookies ya están armadas con textos base. Falta que el cliente/un abogado los **revise y apruebe**, y complete datos formales (razón social, RUT, responsable de datos). Definir quién redacta/valida. |
 
 ---
-_Última actualización: 2026-06-09_
+
+**Versión para enviarle a Pedro** (en lenguaje no técnico, sin Jira): ver [`docs/para-pedro.md`](./para-pedro.md).
+
+_Última actualización: 2026-06-15_
