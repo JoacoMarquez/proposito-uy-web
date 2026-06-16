@@ -29,9 +29,16 @@ const nombreCat = (slug: string) => cats.find((c) => c.slug === slug)?.nombre ??
         {productos.map((p) => (
           <tr class="border-b border-marca-50 last:border-0">
             <td class="p-3">
-              <span class="font-medium text-marca-900">{p.nombre}</span>
-              <span class="text-marca-500"> | {p.variante}</span>
-              {p.destacado && <span class="ml-2 rounded-full bg-marca-100 px-2 py-0.5 text-xs">★ destacado</span>}
+              <div class="flex items-center gap-3">
+                {p.imagen
+                  ? <img src={p.imagen} alt={p.nombre} class="h-10 w-10 shrink-0 rounded-lg border border-marca-100 object-cover" />
+                  : <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-marca-100 bg-marca-50 text-marca-300" aria-hidden="true">🖼️</div>}
+                <div>
+                  <span class="font-medium text-marca-900">{p.nombre}</span>
+                  <span class="text-marca-500"> | {p.variante}</span>
+                  {p.destacado && <span class="ml-2 rounded-full bg-marca-100 px-2 py-0.5 text-xs">★ destacado</span>}
+                </div>
+              </div>
             </td>
             <td class="p-3 text-marca-900/70">{nombreCat(p.categoriaSlug)}</td>
             <td class="p-3">{p.presentaciones.length ? formatoPrecio(precioDesde(p)) : "—"}</td>
