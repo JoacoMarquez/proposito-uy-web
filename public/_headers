@@ -1,0 +1,22 @@
+# Cabeceras de caché para los assets estáticos (Cloudflare Workers Assets).
+# Por defecto Cloudflare sirve los assets con `max-age=0, must-revalidate`, lo
+# que obliga al navegador a revalidar CADA imagen en CADA navegación. Acá les
+# damos caché real para que las visitas repetidas no toquen la red.
+
+# Assets con hash de Astro (el nombre cambia si cambia el contenido) → inmutables.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Imágenes de contenido (mismo nombre de archivo, se reemplazan rara vez por
+# deploy). Caché de 1 semana: navegación instantánea; si se cambia una foto,
+# se propaga en ≤7 días.
+/productos/*
+  Cache-Control: public, max-age=604800
+/categorias/*
+  Cache-Control: public, max-age=604800
+/inicio/*
+  Cache-Control: public, max-age=604800
+/valores/*
+  Cache-Control: public, max-age=604800
+/retornables/*
+  Cache-Control: public, max-age=604800
