@@ -30,6 +30,7 @@ async function seed() {
       descripcionGeneral: c.editorial.descripcionGeneral,
       caracteristicas: c.editorial.caracteristicas,
       notasCreador: c.editorial.notasCreador,
+      imagen: c.imagen ?? null,
       orden: i,
     });
   }

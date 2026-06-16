@@ -39,11 +39,12 @@ export interface EditorialCategoria {
 
 export const categorias: Record<
   Categoria,
-  { nombre: string; descripcion: string; editorial: EditorialCategoria }
+  { nombre: string; descripcion: string; imagen: string; editorial: EditorialCategoria }
 > = {
   secos: {
     nombre: "Secos",
     descripcion: "Nuestra dispensa para acompañar tu rutina.",
+    imagen: "/categorias/secos.webp",
     editorial: {
       descripcionGeneral:
         "Una dispensa de secos pensada para que puedas disfrutar a diario sin cansarte. Dentro de esta categoría conviven tres tipos de productos: frutos secos, galletas y granola.",
@@ -65,6 +66,7 @@ export const categorias: Record<
   humedos: {
     nombre: "Húmedos",
     descripcion: "La frescura de nuestra identidad.",
+    imagen: "/categorias/humedos.webp",
     editorial: {
       descripcionGeneral:
         "Elaboraciones que nacen del equilibrio entre sabor, nutrición y nobleza. Dentro de esta categoría conviven dos familias distintas: Hummus, elaboraciones frescas a base de legumbres; y Cremas, untables obtenidos a partir de la molienda de frutos secos.",
@@ -85,6 +87,7 @@ export const categorias: Record<
   barras: {
     nombre: "Barras",
     descripcion: "Lo opuesto a una barra seca y artificial. Cremosa. Rica. Real.",
+    imagen: "/categorias/barras.webp",
     editorial: {
       descripcionGeneral:
         "Energía real en formato simple. Nada de texturas secas ni sabores artificiales: solo lo esencial. Dentro de esta categoría conviven dos familias de productos: barras a base de crema de maní y una barra a base de crema de cajú.",

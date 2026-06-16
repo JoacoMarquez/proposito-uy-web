@@ -21,6 +21,7 @@ export const categorias = pgTable("categorias", {
   descripcionGeneral: text("descripcion_general").notNull().default(""),
   caracteristicas: jsonb("caracteristicas").$type<string[]>().notNull().default([]),
   notasCreador: jsonb("notas_creador").$type<string[]>().notNull().default([]),
+  imagen: text("imagen"),
   orden: integer("orden").notNull().default(0),
 });
 
