@@ -176,6 +176,13 @@ export const suscriptores = pgTable("suscriptores", {
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
+// Configuración editable del sitio (clave/valor). Hoy guarda los horarios por
+// modalidad (retiro/entrega) que se muestran en el checkout; editable desde /admin.
+export const configuracion = pgTable("configuracion", {
+  clave: text("clave").primaryKey(),
+  valor: text("valor").notNull(),
+});
+
 // Tipos inferidos para usar en la app
 export type Producto = typeof productos.$inferSelect;
 export type Presentacion = typeof presentaciones.$inferSelect;

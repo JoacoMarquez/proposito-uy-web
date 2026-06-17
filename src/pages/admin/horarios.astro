@@ -1,0 +1,57 @@
+---
+export const prerender = false;
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getHorarios, setHorarios } from "../../db/queries";
+
+let guardado = false;
+let error = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const s = (k: string) => String(form.get(k) ?? "").trim();
+  const retiro = s("retiro");
+  const entrega = s("entrega");
+  if (!retiro || !entrega) {
+    error = "Completá ambos horarios.";
+  } else {
+    await setHorarios({ retiro, entrega });
+    guardado = true;
+  }
+}
+
+const horarios = await getHorarios();
+const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
+---
+
+<AdminLayout titulo="Horarios">
+  <p class="max-w-2xl text-sm text-marca-900/70">
+    Franja horaria que se le muestra al cliente en el checkout según la modalidad que elija.
+    Los días disponibles son <strong>miércoles y viernes</strong>. Si el cliente no puede dentro
+    de la franja, en el checkout puede elegir <em>Coordinación personalizada</em>.
+  </p>
+
+  {guardado && (
+    <p class="mt-4 max-w-xl rounded-lg bg-green-50 p-3 text-sm text-green-700">Horarios guardados.</p>
+  )}
+  {error && (
+    <p class="mt-4 max-w-xl rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
+  )}
+
+  <form method="POST" class="mt-4 max-w-xl space-y-5">
+    <div>
+      <label class="text-sm font-medium text-marca-700">Retiro en planta</label>
+      <input name="retiro" value={horarios.retiro} required class={campoBase} />
+      <p class="mt-1 text-xs text-marca-500">Ej: 12:00 a 15:00</p>
+    </div>
+    <div>
+      <label class="text-sm font-medium text-marca-700">Entrega a domicilio</label>
+      <input name="entrega" value={horarios.entrega} required class={campoBase} />
+      <p class="mt-1 text-xs text-marca-500">Ej: 15:00 a 18:00</p>
+    </div>
+    <div class="pt-2">
+      <button type="submit" class="rounded-full bg-marca-600 px-6 py-2.5 font-medium text-white hover:bg-marca-700">
+        Guardar
+      </button>
+    </div>
+  </form>
+</AdminLayout>
