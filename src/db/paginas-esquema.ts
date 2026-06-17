@@ -71,6 +71,17 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "presentacionP2", label: "Párrafo secundario", tipo: "richtext" },
         ],
       },
+      {
+        titulo: "Atajos (3 accesos rápidos)",
+        campos: [
+          { key: "atajo1Titulo", label: "Atajo 1 · Título", tipo: "text" },
+          { key: "atajo1Href", label: "Atajo 1 · Link", tipo: "link" },
+          { key: "atajo2Titulo", label: "Atajo 2 · Título", tipo: "text" },
+          { key: "atajo2Href", label: "Atajo 2 · Link", tipo: "link" },
+          { key: "atajo3Titulo", label: "Atajo 3 · Título", tipo: "text" },
+          { key: "atajo3Href", label: "Atajo 3 · Link", tipo: "link" },
+        ],
+      },
     ],
     defaults: {
       heroImagen: "/inicio/portada.webp",
@@ -83,6 +94,12 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       tituloDestacados: "Los más pedidos por ustedes",
       presentacionP1: "Queremos resolver tus desayunos, meriendas y picadas con alimentos que tu cuerpo pueda reconocer.",
       presentacionP2: "Nuestras elaboraciones nacen de una decisión innegociable: usar únicamente ingredientes naturales.",
+      atajo1Titulo: "Recetario",
+      atajo1Href: "/recetario",
+      atajo2Titulo: "Retornables",
+      atajo2Href: "/retornables",
+      atajo3Titulo: "Preguntas",
+      atajo3Href: "/preguntas",
     },
   },
   {
@@ -208,6 +225,176 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       newsletterBoton: "Suscribirme",
       copyright: "© 2026 Propósito UY. Todos los derechos reservados.",
       fraseFinal: "Alimentos reales, honestos y nutritivos elaborados en Montevideo, Uruguay.",
+    },
+  },
+  {
+    slug: "nosotros",
+    titulo: "Nosotros",
+    descripcion: "Declaración, promesas y los 5 valores (el ícono de cada valor queda fijo).",
+    secciones: [
+      {
+        titulo: "Encabezado",
+        campos: [{ key: "declaracionIntro", label: "Declaración (texto destacado)", tipo: "richtext" }],
+      },
+      {
+        titulo: "Nuestras promesas",
+        campos: [
+          { key: "tituloPromesas", label: "Título", tipo: "text" },
+          { key: "subtituloPromesas", label: "Subtítulo", tipo: "richtext" },
+        ],
+      },
+      {
+        titulo: "Los valores en acción",
+        campos: [
+          { key: "tituloValoresAccion", label: "Título", tipo: "text" },
+          { key: "subtituloValoresAccion", label: "Subtítulo", tipo: "richtext" },
+        ],
+      },
+      {
+        titulo: "Valor 1",
+        campos: [
+          { key: "valor1Titulo", label: "Título", tipo: "text" },
+          { key: "valor1Detalle", label: "Detalle", tipo: "text" },
+          { key: "valor1Imagen", label: "Imagen", tipo: "imagen" },
+        ],
+      },
+      {
+        titulo: "Valor 2",
+        campos: [
+          { key: "valor2Titulo", label: "Título", tipo: "text" },
+          { key: "valor2Detalle", label: "Detalle", tipo: "text" },
+          { key: "valor2Imagen", label: "Imagen", tipo: "imagen" },
+        ],
+      },
+      {
+        titulo: "Valor 3",
+        campos: [
+          { key: "valor3Titulo", label: "Título", tipo: "text" },
+          { key: "valor3Detalle", label: "Detalle", tipo: "text" },
+          { key: "valor3Imagen", label: "Imagen", tipo: "imagen" },
+        ],
+      },
+      {
+        titulo: "Valor 4",
+        campos: [
+          { key: "valor4Titulo", label: "Título", tipo: "text" },
+          { key: "valor4Detalle", label: "Detalle", tipo: "text" },
+          { key: "valor4Imagen", label: "Imagen", tipo: "imagen" },
+        ],
+      },
+      {
+        titulo: "Valor 5",
+        campos: [
+          { key: "valor5Titulo", label: "Título", tipo: "text" },
+          { key: "valor5Detalle", label: "Detalle", tipo: "text" },
+          { key: "valor5Imagen", label: "Imagen", tipo: "imagen" },
+        ],
+      },
+    ],
+    defaults: {
+      declaracionIntro:
+        "Creemos que lo que comemos puede transformar nuestra forma de vivir. Por eso, cada parte de nuestro trabajo está guiada por una promesa: cuidar lo que comés.",
+      tituloPromesas: "Nuestras promesas",
+      subtituloPromesas:
+        "Es nuestro compromiso con ustedes, los que nos apoyan y nos hacen dar latido a nuestro proyecto.",
+      tituloValoresAccion: "Los valores en acción",
+      subtituloValoresAccion: "Los valores no son solo palabras, sino parte del trabajo cotidiano.",
+      valor1Titulo: "Cercanía",
+      valor1Detalle: "Cocinar como para alguien querido.",
+      valor1Imagen: "/valores/real-cercania.webp",
+      valor2Titulo: "Autenticidad",
+      valor2Detalle: "Ser como somos, y que eso se note en nuestra forma.",
+      valor2Imagen: "/valores/real-autenticidad.webp",
+      valor3Titulo: "Responsabilidad",
+      valor3Detalle: "Cuidar nuestros procesos, tu cuerpo y nuestro entorno.",
+      valor3Imagen: "/valores/real-responsabilidad.webp",
+      valor4Titulo: "Transparencia",
+      valor4Detalle: "Mostrarte nuestra esencia, lo que nos motiva y cómo trabajamos.",
+      valor4Imagen: "/valores/real-transparencia.webp",
+      valor5Titulo: "Alineación",
+      valor5Detalle: "Mantener la coherencia entre lo que hacemos, decimos y creemos.",
+      valor5Imagen: "/valores/real-alineacion.webp",
+    },
+  },
+  {
+    slug: "retornables",
+    titulo: "Retornables",
+    descripcion: "Encabezado, bloque de la grilla y las 7 preguntas (acordeones).",
+    secciones: [
+      {
+        titulo: "Encabezado",
+        campos: [
+          { key: "titulo", label: "Título", tipo: "text" },
+          { key: "intro", label: "Texto de introducción", tipo: "richtext" },
+          { key: "heroImagen", label: "Imagen", tipo: "imagen" },
+          { key: "heroAlt", label: "Texto alternativo de la imagen", tipo: "text" },
+        ],
+      },
+      {
+        titulo: "Bloque grilla de retornabilidad",
+        campos: [
+          { key: "grillaTitulo", label: "Título del bloque", tipo: "text" },
+          { key: "grillaDescripcion", label: "Descripción del bloque", tipo: "text" },
+        ],
+      },
+      { titulo: "Acordeón 1", campos: [
+        { key: "acordeon1Titulo", label: "Pregunta", tipo: "text" },
+        { key: "acordeon1Cuerpo", label: "Respuesta (un párrafo por línea)", tipo: "richtext" },
+      ] },
+      { titulo: "Acordeón 2", campos: [
+        { key: "acordeon2Titulo", label: "Pregunta", tipo: "text" },
+        { key: "acordeon2Cuerpo", label: "Respuesta (un párrafo por línea)", tipo: "richtext" },
+      ] },
+      { titulo: "Acordeón 3", campos: [
+        { key: "acordeon3Titulo", label: "Pregunta", tipo: "text" },
+        { key: "acordeon3Cuerpo", label: "Respuesta (un párrafo por línea)", tipo: "richtext" },
+      ] },
+      { titulo: "Acordeón 4", campos: [
+        { key: "acordeon4Titulo", label: "Pregunta", tipo: "text" },
+        { key: "acordeon4Cuerpo", label: "Respuesta (un párrafo por línea)", tipo: "richtext" },
+      ] },
+      { titulo: "Acordeón 5", campos: [
+        { key: "acordeon5Titulo", label: "Pregunta", tipo: "text" },
+        { key: "acordeon5Cuerpo", label: "Respuesta (un párrafo por línea)", tipo: "richtext" },
+      ] },
+      { titulo: "Acordeón 6", campos: [
+        { key: "acordeon6Titulo", label: "Pregunta", tipo: "text" },
+        { key: "acordeon6Cuerpo", label: "Respuesta (un párrafo por línea)", tipo: "richtext" },
+      ] },
+      { titulo: "Acordeón 7", campos: [
+        { key: "acordeon7Titulo", label: "Pregunta", tipo: "text" },
+        { key: "acordeon7Cuerpo", label: "Respuesta (un párrafo por línea)", tipo: "richtext" },
+      ] },
+    ],
+    defaults: {
+      titulo: "Retornables",
+      intro:
+        "Creemos en envases que vuelven. Devolver nuestros frascos de vidrio es una forma simple y concreta de cuidar el planeta y participar de un sistema más consciente con nuestro entorno.",
+      heroImagen: "/retornables/retornables.webp",
+      heroAlt: "Frascos de vidrio retornables de Propósito",
+      grillaTitulo: "Grilla de retornabilidad",
+      grillaDescripcion: "Ver la cantidad de envases por producto para acceder a la bonificación.",
+      acordeon1Titulo: "¿Qué envases participan?",
+      acordeon1Cuerpo:
+        "Participan únicamente frascos de vidrio retornables. Por eso el sistema aplica exclusivamente a productos de la categoría Húmedos. No aplican bolsas kraft ni otros envases.\nProductos incluidos: Crema | Cajú (180 g y 330 g), Crema | Maní (390 g y 1 kg), Hummus | Garbanzo (280 g) y Hummus | Lentejón (280 g).",
+      acordeon2Titulo: "¿Cómo funciona el sistema?",
+      acordeon2Cuerpo:
+        "Se activa cuando hacés un pedido y querés devolver envases de vidrio acumulados en compras anteriores.\nPara usar el beneficio, indicalo en el campo Notas del pedido antes de finalizar: qué envases vas a devolver y qué bonificación corresponde según la grilla vigente.\nEjemplo: “Quiero devolver los frascos necesarios de Crema | Maní - 390 g para recibir 1 Crema | Maní - 390 g gratis.” No agregás al carrito el producto gratis; solo cargás lo que comprás.\nLa devolución se organiza por tipo de producto: los envases no se suman entre productos distintos, y la bonificación aplica solo al alcanzar la cantidad completa requerida.",
+      acordeon3Titulo: "Límite de devolución por pedido",
+      acordeon3Cuerpo:
+        "Para cuidar la manipulación y evitar roturas, se admite como máximo una bonificación por tipo de producto en cada pedido.\nSi querés seguir devolviendo más envases del mismo tipo, podés hacerlo en pedidos posteriores.",
+      acordeon4Titulo: "Condiciones para la devolución",
+      acordeon4Cuerpo:
+        "Para que un envase pueda reutilizarse debe entregarse: limpio y sin restos de alimento; sin fisuras, golpes ni óxido; con tapa en buen estado; y transportado de forma segura (caja, bolsa resistente o recipiente que evite golpes).\nLos envases que no cumplan estas condiciones no podrán ingresar al circuito ni computarse para la bonificación.",
+      acordeon5Titulo: "¿Qué hacemos con los envases?",
+      acordeon5Cuerpo:
+        "Una vez recibidos, pasan por un proceso de limpieza, desinfección y control, y vuelven a incorporarse al circuito productivo.\nCada envase reutilizado reduce la necesidad de producir uno nuevo y disminuye el impacto ambiental.",
+      acordeon6Titulo: "¿Por qué lo hacemos?",
+      acordeon6Cuerpo:
+        "Para nosotros, optimiza el uso de recursos y reduce el impacto ambiental, permitiéndonos sostener una producción más consciente.\nPara vos, es un beneficio claro y directo, y una forma de participar de un sistema coherente con lo que consumís.",
+      acordeon7Titulo: "Validez",
+      acordeon7Cuerpo:
+        "Aplica únicamente a frascos de vidrio de productos de la categoría Húmedos.\nEl beneficio se gestiona junto con tu pedido: indicalo en Notas del pedido, aclarando qué producto y presentación querés bonificar. Ante cualquier duda, consultanos antes de finalizar la compra.",
     },
   },
 ];

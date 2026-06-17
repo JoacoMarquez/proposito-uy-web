@@ -2,73 +2,28 @@
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import { site } from "../data/site";
+import { getContenido } from "../db/queries";
 
-const acordeones = [
-  {
-    titulo: "¿Qué envases participan?",
-    cuerpo: [
-      "Participan únicamente frascos de vidrio retornables. Por eso el sistema aplica exclusivamente a productos de la categoría Húmedos. No aplican bolsas kraft ni otros envases.",
-      "Productos incluidos: Crema | Cajú (180 g y 330 g), Crema | Maní (390 g y 1 kg), Hummus | Garbanzo (280 g) y Hummus | Lentejón (280 g).",
-    ],
-  },
-  {
-    titulo: "¿Cómo funciona el sistema?",
-    cuerpo: [
-      "Se activa cuando hacés un pedido y querés devolver envases de vidrio acumulados en compras anteriores.",
-      "Para usar el beneficio, indicalo en el campo Notas del pedido antes de finalizar: qué envases vas a devolver y qué bonificación corresponde según la grilla vigente.",
-      "Ejemplo: “Quiero devolver los frascos necesarios de Crema | Maní - 390 g para recibir 1 Crema | Maní - 390 g gratis.” No agregás al carrito el producto gratis; solo cargás lo que comprás.",
-      "La devolución se organiza por tipo de producto: los envases no se suman entre productos distintos, y la bonificación aplica solo al alcanzar la cantidad completa requerida.",
-    ],
-  },
-  {
-    titulo: "Límite de devolución por pedido",
-    cuerpo: [
-      "Para cuidar la manipulación y evitar roturas, se admite como máximo una bonificación por tipo de producto en cada pedido.",
-      "Si querés seguir devolviendo más envases del mismo tipo, podés hacerlo en pedidos posteriores.",
-    ],
-  },
-  {
-    titulo: "Condiciones para la devolución",
-    cuerpo: [
-      "Para que un envase pueda reutilizarse debe entregarse: limpio y sin restos de alimento; sin fisuras, golpes ni óxido; con tapa en buen estado; y transportado de forma segura (caja, bolsa resistente o recipiente que evite golpes).",
-      "Los envases que no cumplan estas condiciones no podrán ingresar al circuito ni computarse para la bonificación.",
-    ],
-  },
-  {
-    titulo: "¿Qué hacemos con los envases?",
-    cuerpo: [
-      "Una vez recibidos, pasan por un proceso de limpieza, desinfección y control, y vuelven a incorporarse al circuito productivo.",
-      "Cada envase reutilizado reduce la necesidad de producir uno nuevo y disminuye el impacto ambiental.",
-    ],
-  },
-  {
-    titulo: "¿Por qué lo hacemos?",
-    cuerpo: [
-      "Para nosotros, optimiza el uso de recursos y reduce el impacto ambiental, permitiéndonos sostener una producción más consciente.",
-      "Para vos, es un beneficio claro y directo, y una forma de participar de un sistema coherente con lo que consumís.",
-    ],
-  },
-  {
-    titulo: "Validez",
-    cuerpo: [
-      "Aplica únicamente a frascos de vidrio de productos de la categoría Húmedos.",
-      "El beneficio se gestiona junto con tu pedido: indicalo en Notas del pedido, aclarando qué producto y presentación querés bonificar. Ante cualquier duda, consultanos antes de finalizar la compra.",
-    ],
-  },
-];
+const c = await getContenido("retornables");
+const acordeones = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
+  titulo: c[`acordeon${n}Titulo`],
+  cuerpo: String(c[`acordeon${n}Cuerpo`] ?? "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean),
+}));
 ---
 
 <Layout titulo="Retornables" descripcion="Sistema de envases retornables de Propósito UY.">
   <section class="mx-auto max-w-3xl px-4 py-16">
-    <h1 class="text-3xl font-bold text-marca-700">Retornables</h1>
+    <h1 class="text-3xl font-bold text-marca-700">{c.titulo}</h1>
     <p class="mt-4 text-lg text-marca-900/80">
-      Creemos en envases que vuelven. Devolver nuestros frascos de vidrio es una forma simple y
-      concreta de cuidar el planeta y participar de un sistema más consciente con nuestro entorno.
+      {c.intro}
     </p>
 
     <img
-      src="/retornables/retornables.webp"
-      alt="Frascos de vidrio retornables de Propósito"
+      src={c.heroImagen}
+      alt={c.heroAlt}
       loading="lazy"
       class="mt-8 aspect-[3/2] w-full rounded-2xl object-cover"
     />
@@ -80,8 +35,8 @@ const acordeones = [
       rel="noopener"
       class="mt-8 block rounded-2xl border border-marca-100 bg-marca-100 p-8 text-center hover:shadow-md"
     >
-      <span class="text-lg font-semibold text-marca-700">Grilla de retornabilidad</span>
-      <p class="mt-1 text-sm text-marca-900/70">Ver la cantidad de envases por producto para acceder a la bonificación.</p>
+      <span class="text-lg font-semibold text-marca-700">{c.grillaTitulo}</span>
+      <p class="mt-1 text-sm text-marca-900/70">{c.grillaDescripcion}</p>
     </a>
 
     <!-- Acordeones -->

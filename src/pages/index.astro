@@ -11,9 +11,9 @@ const categoriasLista = await getCategorias();
 const c = await getContenido("inicio");
 
 const atajos = [
-  { href: "/recetario", titulo: "Recetario" },
-  { href: "/retornables", titulo: "Retornables" },
-  { href: "/preguntas", titulo: "Preguntas" },
+  { href: c.atajo1Href, titulo: c.atajo1Titulo },
+  { href: c.atajo2Href, titulo: c.atajo2Titulo },
+  { href: c.atajo3Href, titulo: c.atajo3Titulo },
 ];
 ---
 
