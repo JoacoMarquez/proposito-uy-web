@@ -110,6 +110,106 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       textoRedes: "También nos encontrás en",
     },
   },
+  {
+    slug: "tienda",
+    titulo: "Tienda",
+    descripcion: "Encabezado de la tienda y el bloque de Catálogo.",
+    secciones: [
+      {
+        titulo: "Encabezado",
+        campos: [
+          { key: "titulo", label: "Título", tipo: "text" },
+          { key: "intro", label: "Texto de introducción", tipo: "text" },
+        ],
+      },
+      {
+        titulo: "Bloque Catálogo",
+        campos: [
+          { key: "catalogoImagen", label: "Imagen del bloque", tipo: "imagen", ayuda: "Imagen del recuadro “Catálogo”." },
+          { key: "catalogoTitulo", label: "Título del bloque", tipo: "text" },
+          { key: "catalogoDescripcion", label: "Descripción del bloque", tipo: "text" },
+        ],
+      },
+    ],
+    defaults: {
+      titulo: "Tienda",
+      intro: "Elegí una categoría o mirá el catálogo completo.",
+      catalogoImagen: "/marca/proposito-isotipo.webp",
+      catalogoTitulo: "Catálogo",
+      catalogoDescripcion: "Todos los productos en un solo lugar.",
+    },
+  },
+  {
+    slug: "recetario",
+    titulo: "Recetario",
+    descripcion: "Encabezado del recetario.",
+    secciones: [
+      {
+        titulo: "Encabezado",
+        campos: [
+          { key: "titulo", label: "Título", tipo: "text" },
+          { key: "intro", label: "Texto de introducción", tipo: "richtext" },
+          { key: "leyendaAutor", label: "Leyenda de autor (en cada receta)", tipo: "text" },
+        ],
+      },
+    ],
+    defaults: {
+      titulo: "Recetario",
+      intro:
+        "Te invitamos a poner las manos en la masa y preparar recetas simples, ricas y nutritivas con nuestros productos.",
+      leyendaAutor: "Por Propósito UY",
+    },
+  },
+  {
+    slug: "preguntas",
+    titulo: "Preguntas",
+    descripcion: "Encabezado de la página de preguntas. Las preguntas se editan en la sección Preguntas.",
+    secciones: [
+      {
+        titulo: "Encabezado",
+        campos: [
+          { key: "titulo", label: "Título", tipo: "text" },
+          { key: "intro", label: "Texto de introducción", tipo: "richtext" },
+        ],
+      },
+    ],
+    defaults: {
+      titulo: "Preguntas",
+      intro:
+        "Acá reunimos lo más consultado por ustedes: cómo funcionan los pedidos, cómo elaboramos nuestros productos y cómo leer la información nutricional. Todo claro, directo y simple.",
+    },
+  },
+  {
+    slug: "footer",
+    titulo: "Pie de página",
+    descripcion: "Textos del pie de página (visible en todo el sitio).",
+    secciones: [
+      {
+        titulo: "Marca y newsletter",
+        campos: [
+          { key: "tagline", label: "Frase bajo el nombre", tipo: "text" },
+          { key: "newsletterLabel", label: "Título del newsletter", tipo: "text" },
+          { key: "newsletterPlaceholder", label: "Placeholder del email", tipo: "text" },
+          { key: "newsletterBoton", label: "Texto del botón", tipo: "text" },
+        ],
+      },
+      {
+        titulo: "Pie",
+        campos: [
+          { key: "copyright", label: "Línea de copyright", tipo: "text" },
+          { key: "fraseFinal", label: "Frase final", tipo: "text" },
+        ],
+      },
+    ],
+    defaults: {
+      tagline: "Alimentos con propósito.",
+      newsletterLabel: "Sumate a las novedades",
+      newsletterPlaceholder: "Tu email",
+      newsletterBoton: "Suscribirme",
+      copyright: "© 2026 Propósito UY. Todos los derechos reservados.",
+      fraseFinal: "Alimentos reales, honestos y nutritivos elaborados en Montevideo, Uruguay.",
+    },
+  },
 ];
 
 // Devuelve el esquema de una página, o undefined si el slug no existe.
