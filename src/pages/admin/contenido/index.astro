@@ -1,0 +1,30 @@
+---
+export const prerender = false;
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { ESQUEMA_PAGINAS } from "../../../db/paginas-esquema";
+---
+
+<AdminLayout titulo="Contenido">
+  <p class="max-w-2xl text-sm text-marca-900/70">
+    Editá los textos e imágenes de cada página del sitio. Lo que no edites mantiene
+    el contenido actual.
+  </p>
+
+  <div class="mt-6 max-w-2xl overflow-hidden rounded-2xl border border-marca-100 bg-white">
+    {ESQUEMA_PAGINAS.map((p, i) => (
+      <a
+        href={`/admin/contenido/${p.slug}`}
+        class:list={[
+          "flex items-center justify-between gap-4 px-5 py-4 hover:bg-marca-50",
+          i > 0 && "border-t border-marca-100",
+        ]}
+      >
+        <div class="min-w-0">
+          <p class="font-medium text-marca-900">{p.titulo}</p>
+          {p.descripcion && <p class="mt-0.5 truncate text-sm text-marca-900/60">{p.descripcion}</p>}
+        </div>
+        <span class="shrink-0 text-sm font-medium text-marca-700">Editar →</span>
+      </a>
+    ))}
+  </div>
+</AdminLayout>

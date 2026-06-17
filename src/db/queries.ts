@@ -1,7 +1,8 @@
 // Capa de acceso a datos. Las páginas y el panel leen el contenido desde acá.
 
 import { db } from "./index";
-import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores, imagenes, configuracion } from "./schema";
+import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores, imagenes, configuracion, paginas } from "./schema";
+import { esquemaDePagina } from "./paginas-esquema";
 import { asc, desc, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
@@ -267,6 +268,26 @@ export async function setHorarios(h: Horarios): Promise<void> {
       .values(e)
       .onConflictDoUpdate({ target: configuracion.clave, set: { valor: e.valor } });
   }
+}
+
+// ── Contenido editable de páginas (CMS liviano) ──
+// Mezcla los defaults del esquema (los literales actuales) con lo guardado en la
+// tabla `paginas`. Toda clave no guardada cae a su default → nada se rompe aunque
+// la tabla esté vacía. Las páginas .astro llaman getContenido("inicio"), etc.
+export async function getContenido(slug: string): Promise<Record<string, any>> {
+  const defaults = esquemaDePagina(slug)?.defaults ?? {};
+  const [row] = await db.select().from(paginas).where(eq(paginas.slug, slug)).limit(1);
+  const guardado = (row?.bloques as Record<string, unknown> | undefined) ?? {};
+  return { ...defaults, ...guardado };
+}
+
+// Guarda (o actualiza) el contenido de una página. Upsert por slug, mismo idiom
+// que setHorarios. Llamado desde /admin/contenido/[slug].
+export async function upsertPagina(slug: string, bloques: Record<string, unknown>): Promise<void> {
+  await db
+    .insert(paginas)
+    .values({ slug, bloques })
+    .onConflictDoUpdate({ target: paginas.slug, set: { bloques, actualizadoEn: new Date() } });
 }
 
 // ── Newsletter ──

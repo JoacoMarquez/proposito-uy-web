@@ -183,6 +183,18 @@ export const configuracion = pgTable("configuracion", {
   valor: text("valor").notNull(),
 });
 
+// Contenido editable de las páginas estáticas (textos, links, imágenes, listas).
+// Un row por página; `bloques` guarda el objeto JSON de esa página. La FORMA de
+// cada página y sus defaults (= los literales hoy hardcodeados) viven en el
+// esquema en código src/db/paginas-esquema.ts, no en la DB. Por eso esta tabla
+// NO se seedea: arranca vacía (getContenido cae a los defaults) y la primera
+// fila se crea al primer "Guardar" del panel — re-seedear nunca pisa ediciones.
+export const paginas = pgTable("paginas", {
+  slug: text("slug").primaryKey(), // "inicio" | "contacto" | "nosotros" | "ajustes" ...
+  bloques: jsonb("bloques").$type<Record<string, unknown>>().notNull().default({}),
+  actualizadoEn: timestamp("actualizado_en").notNull().defaultNow(),
+});
+
 // Tipos inferidos para usar en la app
 export type Producto = typeof productos.$inferSelect;
 export type Presentacion = typeof presentaciones.$inferSelect;
@@ -194,3 +206,4 @@ export type PedidoItem = typeof pedidoItems.$inferSelect;
 export type Cliente = typeof clientes.$inferSelect;
 export type Suscriptor = typeof suscriptores.$inferSelect;
 export type Imagen = typeof imagenes.$inferSelect;
+export type Pagina = typeof paginas.$inferSelect;
