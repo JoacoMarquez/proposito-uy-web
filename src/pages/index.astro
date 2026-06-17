@@ -39,9 +39,9 @@ const atajos = [
 
   <!-- Categorías de productos -->
   <section class="bg-marca-50">
-    <div class="mx-auto max-w-6xl px-4 py-16">
+    <div class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
       <TituloSeccion titulo="Categorías" />
-      <div class="mt-6 grid gap-5 sm:grid-cols-3">
+      <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
         {categoriasLista.map((c) => (
           <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} />
         ))}
@@ -50,9 +50,9 @@ const atajos = [
   </section>
 
   <!-- Atajos -->
-  <section class="mx-auto max-w-6xl px-4 py-16">
+  <section class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
     <TituloSeccion titulo="Atajos" />
-    <div class="mt-6 grid gap-5 sm:grid-cols-3">
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
       {atajos.map((a) => (
         <a href={a.href} class="overflow-hidden rounded-2xl border border-marca-100 bg-white hover:shadow-md">
           <div class="flex aspect-video items-center justify-center bg-marca-100 text-sm text-marca-600">
@@ -77,9 +77,9 @@ const atajos = [
   </section>
 
   <!-- Los más pedidos (cierre comercial) -->
-  <section class="mx-auto max-w-6xl px-4 pb-20">
+  <section class="mx-auto max-w-6xl px-4 pb-12 sm:pb-20">
     <TituloSeccion titulo="Los más pedidos por ustedes" />
-    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
       {destacados.map((p) => <ProductCard producto={p} />)}
     </div>
   </section>
