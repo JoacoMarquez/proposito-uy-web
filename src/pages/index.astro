@@ -17,7 +17,7 @@ const atajos = [
 ---
 
 <Layout>
-  <!-- Banner principal: placa de marca -->
+  <!-- Hero principal: placa de marca + frase principal + CTA -->
   <section class="bg-marca-100 text-center">
     <img
       src="/inicio/portada.webp"
@@ -25,35 +25,23 @@ const atajos = [
       class="h-64 w-full object-cover sm:h-80 lg:h-96"
     />
     <div class="px-4 pb-14">
+      <h1 class="mx-auto max-w-3xl pt-8 text-2xl font-bold leading-tight text-marca-700 sm:text-3xl">
+        Elaboramos alimentos artesanales para acompañar tu rutina.
+      </h1>
       <a
         href="/tienda"
-        class="inline-block rounded-full bg-marca-600 px-8 py-3 font-medium text-white hover:bg-marca-700"
+        class="mt-8 inline-block rounded-full bg-marca-600 px-8 py-3 font-medium text-white hover:bg-marca-700"
       >
         Ver catálogo
       </a>
     </div>
   </section>
 
-  <!-- Mensaje de marca -->
-  <section class="mx-auto max-w-3xl px-4 pt-16 text-center">
-    <h1 class="text-2xl font-bold leading-tight text-marca-700 sm:text-3xl">
-      Elaboramos alimentos reales, honestos y nutritivos, pensados para acompañarte en el día a día.
-    </h1>
-  </section>
-
-  <!-- Los más pedidos -->
-  <section class="mx-auto max-w-6xl px-4 py-16">
-    <TituloSeccion titulo="Los más pedidos por ustedes" />
-    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {destacados.map((p) => <ProductCard producto={p} />)}
-    </div>
-  </section>
-
   <!-- Categorías de productos -->
   <section class="bg-marca-50">
-    <div class="mx-auto max-w-6xl px-4 py-16">
+    <div class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
       <TituloSeccion titulo="Categorías" />
-      <div class="mt-6 grid gap-5 sm:grid-cols-3">
+      <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
         {categoriasLista.map((c) => (
           <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} />
         ))}
@@ -61,22 +49,10 @@ const atajos = [
     </div>
   </section>
 
-  <!-- Cierre emocional -->
-  <section class="mx-auto max-w-3xl px-4 py-20 text-center">
-    <p class="text-2xl font-medium leading-relaxed text-marca-700">
-      Queremos alimentarte en tu rutina, en tus momentos de descanso, en tus desayunos, tus meriendas
-      y también cuando no tenés tiempo de sentarte a comer.
-    </p>
-    <p class="mt-4 text-lg text-marca-900/70">
-      Nuestros productos están pensados para acompañarte en lo cotidiano, con soluciones prácticas,
-      ricas y reales.
-    </p>
-  </section>
-
   <!-- Atajos -->
-  <section class="mx-auto max-w-6xl px-4 pb-20">
+  <section class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
     <TituloSeccion titulo="Atajos" />
-    <div class="mt-6 grid gap-5 sm:grid-cols-3">
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
       {atajos.map((a) => (
         <a href={a.href} class="overflow-hidden rounded-2xl border border-marca-100 bg-white hover:shadow-md">
           <div class="flex aspect-video items-center justify-center bg-marca-100 text-sm text-marca-600">
@@ -87,6 +63,24 @@ const atajos = [
           </div>
         </a>
       ))}
+    </div>
+  </section>
+
+  <!-- Texto de presentación -->
+  <section class="mx-auto max-w-3xl px-4 py-20 text-center">
+    <p class="text-2xl font-medium leading-relaxed text-marca-700">
+      Queremos resolver tus desayunos, meriendas y picadas con alimentos que tu cuerpo pueda reconocer.
+    </p>
+    <p class="mt-4 text-lg text-marca-900/70">
+      Nuestras elaboraciones nacen de una decisión innegociable: usar únicamente ingredientes naturales.
+    </p>
+  </section>
+
+  <!-- Los más pedidos (cierre comercial) -->
+  <section class="mx-auto max-w-6xl px-4 pb-12 sm:pb-20">
+    <TituloSeccion titulo="Los más pedidos por ustedes" />
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      {destacados.map((p) => <ProductCard producto={p} />)}
     </div>
   </section>
 </Layout>
