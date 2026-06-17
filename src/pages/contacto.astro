@@ -1,10 +1,10 @@
 ---
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
-import { site } from "../data/site";
 import { getContenido } from "../db/queries";
 
 const c = await getContenido("contacto");
+const aj = await getContenido("ajustes");
 ---
 
 <Layout titulo="Contacto" descripcion="Estamos para escucharte. Escribinos por WhatsApp.">
@@ -15,7 +15,7 @@ const c = await getContenido("contacto");
     </p>
 
     <a
-      href={site.whatsappConversacion}
+      href={aj.whatsappConversacion}
       target="_blank"
       rel="noopener"
       class="mt-8 inline-flex items-center gap-2 rounded-full bg-marca-600 px-8 py-4 text-lg font-medium text-white hover:bg-marca-700"
@@ -23,11 +23,11 @@ const c = await getContenido("contacto");
       {c.textoBotonWhatsapp}
     </a>
 
-    <p class="mt-4 text-sm text-marca-900/60">{c.textoHorario} {site.horarioAtencion}</p>
+    <p class="mt-4 text-sm text-marca-900/60">{c.textoHorario} {aj.horarioAtencion}</p>
 
     <p class="mt-10 text-sm text-marca-900/60">
       {c.textoRedes}
-      <a href={site.redes.instagram} class="font-medium text-marca-700 hover:underline">Instagram</a>.
+      <a href={aj.instagram} class="font-medium text-marca-700 hover:underline">Instagram</a>.
     </p>
   </section>
 </Layout>

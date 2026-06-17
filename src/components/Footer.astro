@@ -4,6 +4,7 @@ import { navLegales } from "../data/legales";
 import { getContenido } from "../db/queries";
 
 const c = await getContenido("footer");
+const aj = await getContenido("ajustes");
 ---
 
 <footer class="mt-20 border-t border-marca-100 bg-marca-50">
@@ -43,7 +44,7 @@ const c = await getContenido("footer");
 
     <div class="flex flex-col gap-2 text-sm">
       <a href={whatsappLink()} class="font-medium text-marca-700 hover:underline">WhatsApp</a>
-      <a href={site.redes.instagram} class="text-marca-700 hover:underline">Instagram</a>
+      <a href={aj.instagram} class="text-marca-700 hover:underline">Instagram</a>
     </div>
   </div>
   <div class="border-t border-marca-100 px-4 py-4 text-center text-xs text-marca-900/60">

@@ -397,6 +397,33 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         "Aplica únicamente a frascos de vidrio de productos de la categoría Húmedos.\nEl beneficio se gestiona junto con tu pedido: indicalo en Notas del pedido, aclarando qué producto y presentación querés bonificar. Ante cualquier duda, consultanos antes de finalizar la compra.",
     },
   },
+  {
+    slug: "ajustes",
+    titulo: "Ajustes generales",
+    descripcion: "Datos de contacto que se muestran en el sitio (WhatsApp, horario, Instagram, retiro).",
+    secciones: [
+      {
+        titulo: "Contacto y redes",
+        campos: [
+          { key: "whatsappConversacion", label: "Link de WhatsApp (conversación)", tipo: "link", ayuda: "Botón “Contacto directo a WhatsApp” de la página de Contacto." },
+          { key: "horarioAtencion", label: "Horario de atención", tipo: "text" },
+          { key: "instagram", label: "Link de Instagram", tipo: "link" },
+        ],
+      },
+      {
+        titulo: "Retiro en planta",
+        campos: [
+          { key: "direccionRetiro", label: "Dirección de retiro", tipo: "text" },
+        ],
+      },
+    ],
+    defaults: {
+      whatsappConversacion: "https://wa.me/message/YWJV7R5QSYRND1",
+      horarioAtencion: "Lunes a viernes de 12:00 a 18:00 hs.",
+      instagram: "https://instagram.com/proposito_uy",
+      direccionRetiro: "Volteadores 1742, Punta Gorda, Montevideo",
+    },
+  },
 ];
 
 // Devuelve el esquema de una página, o undefined si el slug no existe.
