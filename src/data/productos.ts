@@ -80,7 +80,7 @@ export const categorias: Record<
       notasCreador: [
         "Esta categoría nació para resolver algo simple: tener aliados reales en tus comidas. Untables que suman sabor y nutrición sin volverse pesados.",
         "Los Hummus fueron el punto de partida: aliados saludables en picadas o almuerzos, con un sabor honesto, la suavidad justa y sin perder profundidad.",
-        "Las Cremas nacieron con la idea de lograr un untable suave, con un tostado leve que respete la nobleza del fruto seco. La de maní se elabora 100% pura; en la de cajú se incorpora un toque de aceite de oliva para una textura más cremosa.",
+        "Las Cremas nacieron con la idea de lograr un untable suave, con un tostado leve que respete la nobleza del fruto seco. La de maní se elabora 100% pura; en la de cajú se incorpora un toque de aceite de oliva para lograr una textura más cremosa.",
       ],
     },
   },
