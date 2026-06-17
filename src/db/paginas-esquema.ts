@@ -83,6 +83,31 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       presentacionP2: "Nuestras elaboraciones nacen de una decisión innegociable: usar únicamente ingredientes naturales.",
     },
   },
+  {
+    slug: "contacto",
+    titulo: "Contacto",
+    descripcion: "Título, texto de presentación y leyendas de la página de contacto.",
+    secciones: [
+      {
+        titulo: "Textos",
+        campos: [
+          { key: "titulo", label: "Título", tipo: "text" },
+          { key: "parrafo", label: "Párrafo de presentación", tipo: "richtext" },
+          { key: "textoBotonWhatsapp", label: "Texto del botón de WhatsApp", tipo: "text" },
+          { key: "textoHorario", label: "Leyenda de horario", tipo: "text", ayuda: "Se le agrega automáticamente el horario configurado." },
+          { key: "textoRedes", label: "Leyenda de redes", tipo: "text", ayuda: "Antes del enlace a Instagram." },
+        ],
+      },
+    ],
+    defaults: {
+      titulo: "Estamos para escucharte",
+      parrafo:
+        "Nuestro enfoque está en la calidad de lo que hacemos, por eso cada consulta, comentario o sugerencia nos importa. Nos ayuda a mejorar, crecer y ofrecerte un producto y servicio que realmente aporten valor.",
+      textoBotonWhatsapp: "Contacto directo a WhatsApp",
+      textoHorario: "Te recordamos que nuestro horario de atención es de",
+      textoRedes: "También nos encontrás en",
+    },
+  },
 ];
 
 // Devuelve el esquema de una página, o undefined si el slug no existe.

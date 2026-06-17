@@ -2,15 +2,16 @@
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import { site } from "../data/site";
+import { getContenido } from "../db/queries";
+
+const c = await getContenido("contacto");
 ---
 
 <Layout titulo="Contacto" descripcion="Estamos para escucharte. Escribinos por WhatsApp.">
   <section class="mx-auto max-w-2xl px-4 py-20 text-center">
-    <h1 class="text-3xl font-bold text-marca-700">Estamos para escucharte</h1>
+    <h1 class="text-3xl font-bold text-marca-700">{c.titulo}</h1>
     <p class="mt-4 text-lg text-marca-900/80">
-      Nuestro enfoque está en la calidad de lo que hacemos, por eso cada consulta, comentario o
-      sugerencia nos importa. Nos ayuda a mejorar, crecer y ofrecerte un producto y servicio que
-      realmente aporten valor.
+      {c.parrafo}
     </p>
 
     <a
@@ -19,13 +20,13 @@ import { site } from "../data/site";
       rel="noopener"
       class="mt-8 inline-flex items-center gap-2 rounded-full bg-marca-600 px-8 py-4 text-lg font-medium text-white hover:bg-marca-700"
     >
-      Contacto directo a WhatsApp
+      {c.textoBotonWhatsapp}
     </a>
 
-    <p class="mt-4 text-sm text-marca-900/60">Te recordamos que nuestro horario de atención es de {site.horarioAtencion}</p>
+    <p class="mt-4 text-sm text-marca-900/60">{c.textoHorario} {site.horarioAtencion}</p>
 
     <p class="mt-10 text-sm text-marca-900/60">
-      También nos encontrás en
+      {c.textoRedes}
       <a href={site.redes.instagram} class="font-medium text-marca-700 hover:underline">Instagram</a>.
     </p>
   </section>
