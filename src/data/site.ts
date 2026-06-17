@@ -14,7 +14,7 @@ export const site = {
   direccionRetiro: "Volteadores 1742, Punta Gorda, Montevideo",
   telefonoRetiro: "097 174 174",
   redes: {
-    instagram: "https://instagram.com/propositouy",
+    instagram: "https://instagram.com/proposito_uy",
   },
   // Imagen por defecto para previews al compartir (Open Graph / Twitter).
   // Ideal: reemplazar por una imagen de marca dedicada de 1200x630 (PROP-66).
