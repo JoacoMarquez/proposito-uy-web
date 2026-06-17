@@ -27,7 +27,8 @@ export const site = {
     "https://docs.google.com/spreadsheets/d/1bUN7BbojfdpoWQeLc0byjdodWaWVOXTOUTKMG5ltcYQ/edit?usp=sharing",
   // Enlace a las tablas nutricionales (Google Sheets/Drive público o PDF en /public).
   // Dejar "" mientras no esté cargado: el botón en /preguntas se oculta solo. (PROP-34)
-  tablasNutricionalesUrl: "",
+  tablasNutricionalesUrl:
+    "https://docs.google.com/spreadsheets/d/1DBTJ-qCtW44dBdJHQcK2xHr0Y0IeWocrqexi7ssH2g8/edit?usp=sharing",
   // Envío
   costoEnvio: 250,
   envioGratisDesde: 3000,
