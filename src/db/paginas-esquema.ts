@@ -49,6 +49,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       {
         titulo: "Portada",
         campos: [
+          { key: "heroImagen", label: "Imagen de portada", tipo: "imagen", ayuda: "Se muestra arriba de todo en la página de inicio." },
           { key: "heroAlt", label: "Texto alternativo de la imagen", tipo: "text", ayuda: "Descripción de la imagen de portada (accesibilidad / SEO)." },
           { key: "presentacionFrase", label: "Frase principal", tipo: "text" },
           { key: "heroCtaTexto", label: "Texto del botón", tipo: "text" },
@@ -72,6 +73,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       },
     ],
     defaults: {
+      heroImagen: "/inicio/portada.webp",
       heroAlt: "Propósito — cuidamos lo que comés",
       presentacionFrase: "Elaboramos alimentos artesanales para acompañar tu rutina.",
       heroCtaTexto: "Ver catálogo",
