@@ -16,8 +16,19 @@ const lista = await getCategorias();
       {lista.map((c) => (
         <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} />
       ))}
-      <a href="/tienda/catalogo" class="rounded-2xl border border-marca-100 bg-marca-100 p-6 hover:shadow-md sm:col-span-2">
-        <h2 class="text-xl font-semibold text-marca-900">Catálogo completo</h2>
+      {/* Catálogo: bloque visual de marca, mismo tamaño que las categorías para equilibrar la grilla.
+          Placeholder con el isotipo; reemplazar por la foto de productos o el isotipo invertido del cliente (PROP-83). */}
+      <a
+        href="/tienda/catalogo"
+        class="group relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-2xl bg-marca-100 p-6 text-center transition-shadow hover:shadow-md"
+      >
+        <img
+          src="/marca/proposito-isotipo.webp"
+          alt=""
+          loading="lazy"
+          class="h-20 w-20 object-contain transition-transform duration-300 group-hover:scale-105"
+        />
+        <h2 class="mt-4 text-lg font-semibold text-marca-900">Catálogo</h2>
         <p class="mt-1 text-sm text-marca-900/70">Todos los productos en un solo lugar.</p>
       </a>
     </div>
