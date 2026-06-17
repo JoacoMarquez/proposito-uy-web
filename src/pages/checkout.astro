@@ -3,7 +3,9 @@ export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import { site } from "../data/site";
 import { getClientePorId } from "../lib/cliente-auth";
+import { getHorarios } from "../db/queries";
 
+const horarios = await getHorarios();
 const sesion = Astro.locals.cliente;
 const cliente = sesion ? await getClientePorId(sesion.id) : undefined;
 const pre = {
@@ -66,6 +68,13 @@ const direcciones = cliente?.direcciones ?? [];
           <input type="hidden" name="agenda" />
           <input type="hidden" name="fechaAgenda" />
           <p id="agenda-error" class="mt-2 hidden text-sm text-red-600">Elegí una opción de agenda.</p>
+          <p
+            id="agenda-horario"
+            data-retiro={horarios.retiro}
+            data-entrega={horarios.entrega}
+            class="mt-3 hidden rounded-lg bg-marca-50 p-3 text-sm text-marca-700"
+          >
+          </p>
         </fieldset>
 
         <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
@@ -156,6 +165,26 @@ const direcciones = cliente?.direcciones ?? [];
   const agendaError = document.getElementById("agenda-error")!;
   const agendaInput = form.elements.namedItem("agenda") as HTMLInputElement;
   const fechaInput = form.elements.namedItem("fechaAgenda") as HTMLInputElement;
+  const horarioEl = document.getElementById("agenda-horario")!;
+  const HORARIO = { retiro: horarioEl.dataset.retiro!, entrega: horarioEl.dataset.entrega! };
+
+  // Muestra la franja horaria según la modalidad + el día elegido (PROP-81).
+  function updateHorario() {
+    const ag = agendaInput.value;
+    if (ag === "coordinacion") {
+      horarioEl.textContent = "Coordinación personalizada: lo coordinamos por WhatsApp.";
+      horarioEl.classList.remove("hidden");
+    } else if (ag === "miercoles" || ag === "viernes") {
+      const esRetiro = modalidad() === "retiro";
+      const lugar = esRetiro ? "Retiro en planta" : "Entrega a domicilio";
+      const franja = esRetiro ? HORARIO.retiro : HORARIO.entrega;
+      horarioEl.textContent = `${lugar}: ${franja}. Si no te queda bien, elegí "Coordinación personalizada".`;
+      horarioEl.classList.remove("hidden");
+    } else {
+      horarioEl.classList.add("hidden");
+    }
+  }
+  form.querySelectorAll('input[name="modalidad"]').forEach((r) => r.addEventListener("change", updateHorario));
 
   function proximosDias(cantidad: number) {
     const out: { iso: string; tipo: string; label: string }[] = [];
@@ -193,11 +222,13 @@ const direcciones = cliente?.direcciones ?? [];
     agendaInput.value = btn.dataset.tipo!;
     fechaInput.value = btn.dataset.iso!;
     seleccionar(btn);
+    updateHorario();
   });
   coordBtn.addEventListener("click", () => {
     agendaInput.value = "coordinacion";
     fechaInput.value = "";
     seleccionar(coordBtn);
+    updateHorario();
   });
 
   form.addEventListener("submit", async (e) => {
