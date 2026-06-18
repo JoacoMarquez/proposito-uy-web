@@ -15,12 +15,12 @@ const hay = columnas.length > 0 && filas.length > 0;
 ---
 
 {hay ? (
-  <div class="overflow-x-auto rounded-2xl border border-marca-100">
+  <div class="overflow-hidden rounded-2xl border border-marca-100">
     <table class="w-full border-collapse text-left text-sm">
       <thead>
         <tr class="bg-marca-600 text-white">
           {columnas.map((c) => (
-            <th class="whitespace-nowrap px-3 py-2.5 font-semibold">{c}</th>
+            <th class="break-words px-2.5 py-2.5 align-bottom font-semibold">{c}</th>
           ))}
         </tr>
       </thead>
@@ -28,7 +28,7 @@ const hay = columnas.length > 0 && filas.length > 0;
         {filas.map((fila, i) => (
           <tr class:list={[i % 2 === 1 ? "bg-marca-50" : "bg-white", "border-t border-marca-100"]}>
             {columnas.map((_, j) => (
-              <td class="whitespace-nowrap px-3 py-2 align-top text-marca-900/80">{fila[j] ?? ""}</td>
+              <td class="break-words px-2.5 py-2 align-top text-marca-900/80">{fila[j] ?? ""}</td>
             ))}
           </tr>
         ))}
