@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
+import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
 import ImageField from "../../../components/ImageField.astro";
 import {
   getRecetaById,
@@ -59,10 +60,12 @@ if (Astro.request.method === "POST") {
   } else if (!data.slug || !data.titulo) {
     error = "Completá al menos slug y título.";
   } else {
-    await upsertReceta(id, data);
-    return Astro.redirect("/admin/recetas");
+    const nuevoId = await upsertReceta(id, data);
+    return Astro.redirect(`/admin/recetas/${nuevoId}?ok=1`);
   }
 }
+
+const guardado = Astro.url.searchParams.get("ok") === "1";
 
 const receta = id ? await getRecetaById(id) : undefined;
 if (!esNuevo && !receta) return Astro.redirect("/admin/recetas");
@@ -73,12 +76,32 @@ const rend = (r?.rendimiento ?? {}) as Record<string, string>;
 const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
 ---
 
-<AdminLayout titulo={esNuevo ? "Nueva receta" : `Editar: ${r?.titulo}`}>
-  <a href="/admin/recetas" class="text-sm text-marca-700 hover:underline">← Volver a recetas</a>
+<AdminLayout titulo={esNuevo ? "Nueva receta" : `Editar: ${r?.titulo}`} ocultarTitulo>
+  <AdminEditorHeader
+    slot="antetitulo"
+    titulo={esNuevo ? "Nueva receta" : r?.titulo ?? "Editar receta"}
+    volverHref="/admin/recetas"
+    volverLabel="Volver a recetas"
+    formId="editor-receta"
+    guardado={guardado}
+  >
+    {!esNuevo && (
+      <form slot="acciones" method="POST">
+        <input type="hidden" name="_action" value="delete" />
+        <button
+          type="submit"
+          onclick="return confirm('¿Eliminar esta receta?')"
+          class="rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+        >
+          Eliminar
+        </button>
+      </form>
+    )}
+  </AdminEditorHeader>
 
   {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
-  <form method="POST" enctype="multipart/form-data" class="mt-4 max-w-3xl space-y-5">
+  <form id="editor-receta" method="POST" enctype="multipart/form-data" class="max-w-3xl space-y-5">
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
         <label class="text-sm font-medium text-marca-700">Título</label>
@@ -138,18 +161,5 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
       <textarea name="procedimiento" rows="8" class={campoBase}>{(r?.procedimiento ?? []).join("\n")}</textarea>
     </div>
 
-    <div class="flex items-center gap-3 pt-2">
-      <button type="submit" class="rounded-full bg-marca-600 px-6 py-2.5 font-medium text-white hover:bg-marca-700">Guardar</button>
-      <a href="/admin/recetas" class="text-sm text-marca-700 hover:underline">Cancelar</a>
-    </div>
   </form>
-
-  {!esNuevo && (
-    <form method="POST" class="mt-8 max-w-3xl border-t border-marca-100 pt-4">
-      <input type="hidden" name="_action" value="delete" />
-      <button type="submit" class="text-sm text-red-600 hover:underline" onclick="return confirm('¿Eliminar esta receta?')">
-        Eliminar receta
-      </button>
-    </form>
-  )}
 </AdminLayout>
