@@ -8,14 +8,29 @@
 // Para hacer editable un texto nuevo: agregá el campo acá (con su default) y
 // reemplazá el literal del .astro por {c.<key>}. No hace falta tocar el editor.
 
-export type CampoTipo = "text" | "richtext" | "link" | "imagen" | "lista";
+export type CampoTipo = "text" | "richtext" | "link" | "ruta" | "imagen" | "lista";
 
 export interface CampoSimple {
   key: string;
   label: string;
   ayuda?: string;
-  tipo: "text" | "richtext" | "link" | "imagen";
+  // "link" = URL libre (externa). "ruta" = página interna del sitio (desplegable).
+  tipo: "text" | "richtext" | "link" | "ruta" | "imagen";
 }
+
+// Páginas internas seleccionables para los campos tipo "ruta" (links de botones).
+export const RUTAS_SITIO: { value: string; label: string }[] = [
+  { value: "/", label: "Inicio" },
+  { value: "/tienda", label: "Tienda" },
+  { value: "/tienda/catalogo", label: "Catálogo" },
+  { value: "/recetario", label: "Recetario" },
+  { value: "/retornables", label: "Retornables" },
+  { value: "/preguntas", label: "Preguntas" },
+  { value: "/nosotros", label: "Nosotros" },
+  { value: "/contacto", label: "Contacto" },
+  { value: "/favoritos", label: "Favoritos" },
+  { value: "/carrito", label: "Carrito" },
+];
 
 export interface CampoLista {
   key: string;
@@ -53,7 +68,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "heroAlt", label: "Texto alternativo de la imagen", tipo: "text", ayuda: "Descripción de la imagen de portada (accesibilidad / SEO)." },
           { key: "presentacionFrase", label: "Frase principal", tipo: "text" },
           { key: "heroCtaTexto", label: "Texto del botón", tipo: "text" },
-          { key: "heroCtaLink", label: "Link del botón", tipo: "link", ayuda: "Ej: /tienda" },
+          { key: "heroCtaLink", label: "Link del botón", tipo: "ruta" },
         ],
       },
       {
@@ -75,11 +90,11 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         titulo: "Atajos (3 accesos rápidos)",
         campos: [
           { key: "atajo1Titulo", label: "Atajo 1 · Título", tipo: "text" },
-          { key: "atajo1Href", label: "Atajo 1 · Link", tipo: "link" },
+          { key: "atajo1Href", label: "Atajo 1 · Link", tipo: "ruta" },
           { key: "atajo2Titulo", label: "Atajo 2 · Título", tipo: "text" },
-          { key: "atajo2Href", label: "Atajo 2 · Link", tipo: "link" },
+          { key: "atajo2Href", label: "Atajo 2 · Link", tipo: "ruta" },
           { key: "atajo3Titulo", label: "Atajo 3 · Título", tipo: "text" },
-          { key: "atajo3Href", label: "Atajo 3 · Link", tipo: "link" },
+          { key: "atajo3Href", label: "Atajo 3 · Link", tipo: "ruta" },
         ],
       },
     ],

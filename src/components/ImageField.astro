@@ -11,6 +11,7 @@ interface Props {
   name?: string; // name del hidden que guarda la URL actual
   fieldId?: string; // id/name del <input type="file">
   label?: string;
+  ayuda?: string; // aclaración que se muestra junto al label
 }
 const {
   imagen,
@@ -18,14 +19,19 @@ const {
   name = "imagen",
   fieldId = "imagenFile",
   label = "Imagen",
+  ayuda,
 } = Astro.props;
 ---
 
 <div data-img-field>
-  <label class="text-sm font-medium text-marca-700">{label}</label>
+  <label class="text-sm font-medium text-marca-700">
+    {label}{ayuda && <span class="font-normal text-marca-500"> — {ayuda}</span>}
+  </label>
 
-  {imagen && (
-    <div class="mt-2 flex items-center gap-3">
+  <input type="hidden" name={name} value={imagen ?? ""} />
+
+  <div class="mt-2 flex flex-wrap items-center gap-3">
+    {imagen && (
       <button type="button" data-img-open class="shrink-0 rounded-xl" title="Ver imagen grande / cambiarla">
         <img
           src={imagen}
@@ -34,13 +40,7 @@ const {
           class="h-20 w-20 cursor-zoom-in rounded-xl border border-marca-100 object-cover transition hover:opacity-90"
         />
       </button>
-      <span class="text-xs text-marca-500">Tocá la imagen para verla grande o cambiarla.</span>
-    </div>
-  )}
-
-  <input type="hidden" name={name} value={imagen ?? ""} />
-
-  <div class="mt-2 flex flex-wrap items-center gap-3">
+    )}
     <input
       type="file"
       id={fieldId}
@@ -56,7 +56,6 @@ const {
     </label>
     <span data-img-filename class="text-sm text-marca-500">Ningún archivo seleccionado</span>
   </div>
-  <p class="mt-1 text-xs text-marca-500">JPG, PNG, WebP, AVIF o GIF. Máx 2 MB. Subí la foto ya optimizada.</p>
 
   {imagen && (
     <div

@@ -3,8 +3,9 @@ import "../styles/global.css";
 
 interface Props {
   titulo: string;
+  ocultarTitulo?: boolean; // si la página renderiza su propio título (ej. header sticky)
 }
-const { titulo } = Astro.props;
+const { titulo, ocultarTitulo = false } = Astro.props;
 const email = Astro.locals.adminUser?.email;
 const inicial = (email ?? "?").trim().charAt(0).toUpperCase() || "?";
 const path = Astro.url.pathname;
@@ -72,8 +73,9 @@ const activo = (href: string) =>
       </aside>
 
       <main class="flex-1 p-8">
-        <h1 class="text-2xl font-bold text-marca-700">{titulo}</h1>
-        <div class="mt-6">
+        <slot name="antetitulo" />
+        {!ocultarTitulo && <h1 class="text-2xl font-bold text-marca-700">{titulo}</h1>}
+        <div class:list={[!ocultarTitulo && "mt-6"]}>
           <slot />
         </div>
       </main>
