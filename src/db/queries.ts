@@ -1,7 +1,7 @@
 // Capa de acceso a datos. Las páginas y el panel leen el contenido desde acá.
 
 import { db } from "./index";
-import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores, imagenes, configuracion, paginas } from "./schema";
+import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores, imagenes, paginas } from "./schema";
 import { esquemaDePagina } from "./paginas-esquema";
 import { asc, desc, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
@@ -238,38 +238,6 @@ export async function actualizarEstadoPedido(id: number, estado: string) {
   await db.update(pedidos).set({ estado }).where(eq(pedidos.id, id));
 }
 
-// ── Configuración: horarios por modalidad ──
-// Franja horaria que ve el cliente en el checkout según la modalidad. Editable
-// desde /admin/horarios; si no hay valor guardado, se usan estos defaults.
-export const HORARIOS_DEFAULT = {
-  retiro: "12:00 a 15:00",
-  entrega: "15:00 a 18:00",
-} as const;
-
-export type Horarios = { retiro: string; entrega: string };
-
-export async function getHorarios(): Promise<Horarios> {
-  const rows = await db.select().from(configuracion);
-  const map = new Map(rows.map((r) => [r.clave, r.valor]));
-  return {
-    retiro: map.get("horario_retiro") ?? HORARIOS_DEFAULT.retiro,
-    entrega: map.get("horario_entrega") ?? HORARIOS_DEFAULT.entrega,
-  };
-}
-
-export async function setHorarios(h: Horarios): Promise<void> {
-  const entradas = [
-    { clave: "horario_retiro", valor: h.retiro },
-    { clave: "horario_entrega", valor: h.entrega },
-  ];
-  for (const e of entradas) {
-    await db
-      .insert(configuracion)
-      .values(e)
-      .onConflictDoUpdate({ target: configuracion.clave, set: { valor: e.valor } });
-  }
-}
-
 // ── Contenido editable de páginas (CMS liviano) ──
 // Mezcla los defaults del esquema (los literales actuales) con lo guardado en la
 // tabla `paginas`. Toda clave no guardada cae a su default → nada se rompe aunque
@@ -281,8 +249,8 @@ export async function getContenido(slug: string): Promise<Record<string, any>> {
   return { ...defaults, ...guardado };
 }
 
-// Guarda (o actualiza) el contenido de una página. Upsert por slug, mismo idiom
-// que setHorarios. Llamado desde /admin/contenido/[slug].
+// Guarda (o actualiza) el contenido de una página. Upsert por slug
+// (onConflictDoUpdate). Llamado desde /admin/contenido/[slug].
 export async function upsertPagina(slug: string, bloques: Record<string, unknown>): Promise<void> {
   await db
     .insert(paginas)

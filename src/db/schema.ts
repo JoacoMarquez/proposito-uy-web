@@ -176,8 +176,9 @@ export const suscriptores = pgTable("suscriptores", {
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
-// Configuración editable del sitio (clave/valor). Hoy guarda los horarios por
-// modalidad (retiro/entrega) que se muestran en el checkout; editable desde /admin.
+// Tabla genérica de configuración clave/valor. Reservada para flags de sistema.
+// (Los horarios de retiro/entrega ahora viven en el contenido de la página
+// "tienda", tabla `paginas`.) Se mantiene para no forzar un DROP en la base.
 export const configuracion = pgTable("configuracion", {
   clave: text("clave").primaryKey(),
   valor: text("valor").notNull(),

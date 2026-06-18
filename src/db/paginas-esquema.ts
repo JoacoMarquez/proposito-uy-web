@@ -130,7 +130,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
   {
     slug: "tienda",
     titulo: "Tienda",
-    descripcion: "Encabezado de la tienda y el bloque de Catálogo.",
+    descripcion: "Encabezado, bloque de Catálogo y horarios de retiro/entrega del checkout.",
     secciones: [
       {
         titulo: "Encabezado",
@@ -147,6 +147,13 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "catalogoDescripcion", label: "Descripción del bloque", tipo: "text" },
         ],
       },
+      {
+        titulo: "Horarios de retiro y entrega",
+        campos: [
+          { key: "horarioRetiro", label: "Retiro en planta", tipo: "text", ayuda: "Franja que se muestra en el checkout (miércoles y viernes). Ej: 12:00 a 15:00" },
+          { key: "horarioEntrega", label: "Entrega a domicilio", tipo: "text", ayuda: "Franja que se muestra en el checkout (miércoles y viernes). Ej: 15:00 a 18:00" },
+        ],
+      },
     ],
     defaults: {
       titulo: "Tienda",
@@ -154,6 +161,8 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       catalogoImagen: "/marca/proposito-isotipo.webp",
       catalogoTitulo: "Catálogo",
       catalogoDescripcion: "Todos los productos en un solo lugar.",
+      horarioRetiro: "12:00 a 15:00",
+      horarioEntrega: "15:00 a 18:00",
     },
   },
   {

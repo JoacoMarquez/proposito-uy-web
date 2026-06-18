@@ -2,10 +2,11 @@
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import { getClientePorId } from "../lib/cliente-auth";
-import { getHorarios, getContenido } from "../db/queries";
+import { getContenido } from "../db/queries";
 
-const horarios = await getHorarios();
 const aj = await getContenido("ajustes");
+const tienda = await getContenido("tienda");
+const horarios = { retiro: tienda.horarioRetiro, entrega: tienda.horarioEntrega };
 const sesion = Astro.locals.cliente;
 const cliente = sesion ? await getClientePorId(sesion.id) : undefined;
 const pre = {
