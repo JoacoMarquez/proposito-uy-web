@@ -13,7 +13,7 @@ const c = await getContenido("nutricional");
     <h1 class="mt-2 text-3xl font-bold text-marca-700">{c.titulo}</h1>
     {c.intro && <p class="mt-2 max-w-2xl text-marca-900/70">{c.intro}</p>}
     <div class="mt-8">
-      <TablaContenido tabla={c.tabla} />
+      <TablaContenido tabla={c.tabla} tituloCol={1} grupoCol={0} />
     </div>
   </section>
 </Layout>
