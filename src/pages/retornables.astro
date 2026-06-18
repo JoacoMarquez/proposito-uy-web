@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
-import { site } from "../data/site";
+import TablaContenido from "../components/TablaContenido.astro";
 import { getContenido } from "../db/queries";
 
 const c = await getContenido("retornables");
@@ -28,16 +28,12 @@ const acordeones = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
       class="mt-8 aspect-[3/2] w-full rounded-2xl object-cover"
     />
 
-    <!-- Bloque visual: grilla de retornabilidad -->
-    <a
-      href={site.grillaRetornablesUrl}
-      target="_blank"
-      rel="noopener"
-      class="mt-8 block rounded-2xl border border-marca-100 bg-marca-100 p-8 text-center hover:shadow-md"
-    >
-      <span class="text-lg font-semibold text-marca-700">{c.grillaTitulo}</span>
-      <p class="mt-1 text-sm text-marca-900/70">{c.grillaDescripcion}</p>
-    </a>
+    <!-- Grilla de retornabilidad (tabla on-site) -->
+    <div class="mt-8">
+      <h2 class="text-lg font-semibold text-marca-700">{c.grillaTitulo}</h2>
+      <p class="mt-1 mb-3 text-sm text-marca-900/70">{c.grillaDescripcion}</p>
+      <TablaContenido tabla={c.grillaTabla} />
+    </div>
 
     <!-- Acordeones -->
     <div class="mt-10 space-y-3">

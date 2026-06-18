@@ -2,6 +2,7 @@
 export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
 import ImageField from "../../../components/ImageField.astro";
+import TablaEditor from "../../../components/TablaEditor.astro";
 import { esquemaDePagina, camposSimples, RUTAS_SITIO } from "../../../db/paginas-esquema";
 import { getContenido, upsertPagina } from "../../../db/queries";
 import { procesarImagenSubida } from "../../../lib/upload";
@@ -23,6 +24,13 @@ if (Astro.request.method === "POST") {
       const sub = await procesarImagenSubida(form, `file_${campo.key}`);
       if (sub.error) error = sub.error;
       bloques[campo.key] = sub.url ?? String(form.get(campo.key) ?? "");
+    } else if (campo.tipo === "tabla") {
+      try {
+        const parsed = JSON.parse(String(form.get(campo.key) ?? "{}"));
+        bloques[campo.key] = { columnas: parsed.columnas ?? [], filas: parsed.filas ?? [] };
+      } catch {
+        bloques[campo.key] = { columnas: [], filas: [] };
+      }
     } else {
       bloques[campo.key] = String(form.get(campo.key) ?? "").trim();
     }
@@ -85,6 +93,14 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
             campo.tipo === "imagen" ? (
               <div>
                 <ImageField name={campo.key} fieldId={`file_${campo.key}`} imagen={c[campo.key]} label={campo.label} ayuda={campo.ayuda} />
+              </div>
+            ) : campo.tipo === "tabla" ? (
+              <div>
+                <label class="text-sm font-medium text-marca-700">{campo.label}</label>
+                {campo.ayuda && <p class="text-xs text-marca-500">{campo.ayuda}</p>}
+                <div class="mt-1">
+                  <TablaEditor name={campo.key} valor={c[campo.key]} />
+                </div>
               </div>
             ) : (
               <div>

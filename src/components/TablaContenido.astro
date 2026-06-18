@@ -1,0 +1,42 @@
+---
+// Render público de una tabla editable del CMS: { columnas, filas }.
+// Estilo de marca, con scroll horizontal en mobile para que no se rompa.
+interface Tabla {
+  columnas?: string[];
+  filas?: string[][];
+}
+interface Props {
+  tabla?: Tabla | null;
+}
+const { tabla } = Astro.props;
+const columnas = tabla?.columnas ?? [];
+const filas = tabla?.filas ?? [];
+const hay = columnas.length > 0 && filas.length > 0;
+---
+
+{hay ? (
+  <div class="overflow-x-auto rounded-2xl border border-marca-100">
+    <table class="w-full border-collapse text-left text-sm">
+      <thead>
+        <tr class="bg-marca-600 text-white">
+          {columnas.map((c) => (
+            <th class="whitespace-nowrap px-3 py-2.5 font-semibold">{c}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {filas.map((fila, i) => (
+          <tr class:list={[i % 2 === 1 ? "bg-marca-50" : "bg-white", "border-t border-marca-100"]}>
+            {columnas.map((_, j) => (
+              <td class="whitespace-nowrap px-3 py-2 align-top text-marca-900/80">{fila[j] ?? ""}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+) : (
+  <p class="rounded-xl border border-marca-100 bg-marca-50 p-4 text-sm text-marca-900/60">
+    Todavía no hay datos cargados en esta tabla.
+  </p>
+)}

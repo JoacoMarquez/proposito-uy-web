@@ -8,14 +8,21 @@
 // Para hacer editable un texto nuevo: agregá el campo acá (con su default) y
 // reemplazá el literal del .astro por {c.<key>}. No hace falta tocar el editor.
 
-export type CampoTipo = "text" | "richtext" | "link" | "ruta" | "imagen" | "lista";
+export type CampoTipo = "text" | "richtext" | "link" | "ruta" | "imagen" | "tabla" | "lista";
 
 export interface CampoSimple {
   key: string;
   label: string;
   ayuda?: string;
   // "link" = URL libre (externa). "ruta" = página interna del sitio (desplegable).
-  tipo: "text" | "richtext" | "link" | "ruta" | "imagen";
+  // "tabla" = grilla editable { columnas, filas } (valores/filas/columnas).
+  tipo: "text" | "richtext" | "link" | "ruta" | "imagen" | "tabla";
+}
+
+// Forma de los valores de un campo tipo "tabla".
+export interface TablaValor {
+  columnas: string[];
+  filas: string[][];
 }
 
 // Páginas internas seleccionables para los campos tipo "ruta" (links de botones).
@@ -355,10 +362,11 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         ],
       },
       {
-        titulo: "Bloque grilla de retornabilidad",
+        titulo: "Grilla de retornabilidad",
         campos: [
           { key: "grillaTitulo", label: "Título del bloque", tipo: "text" },
           { key: "grillaDescripcion", label: "Descripción del bloque", tipo: "text" },
+          { key: "grillaTabla", label: "Tabla", tipo: "tabla", ayuda: "Se muestra dentro de la página de Retornables." },
         ],
       },
       { titulo: "Acordeón 1", campos: [
@@ -397,7 +405,18 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       heroImagen: "/retornables/retornables.webp",
       heroAlt: "Frascos de vidrio retornables de Propósito",
       grillaTitulo: "Grilla de retornabilidad",
-      grillaDescripcion: "Ver la cantidad de envases por producto para acceder a la bonificación.",
+      grillaDescripcion: "Cantidad de envases por producto para acceder a la bonificación.",
+      grillaTabla: {
+        columnas: ["Productos", "Frascos retornados para recibir 1 producto gratis"],
+        filas: [
+          ["Hummus | Lentejón - 280 g", "5"],
+          ["Hummus | Garbanzo - 280 g", "5"],
+          ["Crema | Cajú - 180 g", "6"],
+          ["Crema | Cajú - 330 g", "9"],
+          ["Crema | Maní - 390 g", "6"],
+          ["Crema | Maní - 1 kg", "6"],
+        ],
+      },
       acordeon1Titulo: "¿Qué envases participan?",
       acordeon1Cuerpo:
         "Participan únicamente frascos de vidrio retornables. Por eso el sistema aplica exclusivamente a productos de la categoría Húmedos. No aplican bolsas kraft ni otros envases.\nProductos incluidos: Crema | Cajú (180 g y 330 g), Crema | Maní (390 g y 1 kg), Hummus | Garbanzo (280 g) y Hummus | Lentejón (280 g).",
@@ -446,6 +465,55 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       horarioAtencion: "Lunes a viernes de 12:00 a 18:00 hs.",
       instagram: "https://instagram.com/proposito_uy",
       direccionRetiro: "Volteadores 1742, Punta Gorda, Montevideo",
+    },
+  },
+  {
+    slug: "nutricional",
+    titulo: "Tabla nutricional",
+    descripcion: "Página de información nutricional (la abre el botón de Preguntas).",
+    secciones: [
+      {
+        titulo: "Encabezado",
+        campos: [
+          { key: "titulo", label: "Título", tipo: "text" },
+          { key: "intro", label: "Texto de introducción", tipo: "richtext" },
+        ],
+      },
+      {
+        titulo: "Tabla",
+        campos: [{ key: "tabla", label: "Tabla nutricional", tipo: "tabla" }],
+      },
+    ],
+    defaults: {
+      titulo: "Tabla nutricional",
+      intro: "Información nutricional de nuestros productos (valores por la porción indicada).",
+      tabla: {
+        columnas: [
+          "Categoría",
+          "Productos",
+          "Porción (g/ml)",
+          "Valor Energético (Kcal)",
+          "Proteína (g)",
+          "Grasas Totales (g)",
+          "Saturadas (g)",
+          "Carbohidratos (g)",
+          "Fibra (g)",
+          "Sodio (mg)",
+        ],
+        filas: [
+          ["BARRAS", "Barras Proteicas | Clásicas", "100", "499", "37,98", "27,48", "3,66", "18,66", "5,9", "107,3"],
+          ["", "Barras Proteicas | Coco", "100", "503", "33,77", "30,26", "6,43", "18,63", "6,3", "87,3"],
+          ["", "Barras Proteicas | Chocolate", "100", "488", "31,82", "32,92", "6,63", "19,90", "9,2", "70,4"],
+          ["", "Barras Proteicas | Cajú", "100", "499", "28,73", "28,95", "5,12", "28,66", "3,8", "78,0"],
+          ["HÚMEDOS", "Hummus | Lentejón", "100", "169", "9,60", "4,69", "0,71", "23,19", "1,6", "401,6"],
+          ["", "Hummus | Garbanzo", "100", "279", "5,44", "21,79", "3,54", "16,57", "4,6", "369,1"],
+          ["", "Crema | Maní", "100", "608", "26,80", "52,00", "6,80", "4,00", "11,2", "0,0"],
+          ["", "Crema | Cajú", "100", "589", "18,75", "48,27", "8,46", "20,63", "6,3", "0,0"],
+          ["SECOS", "Granola Del Día | Clásica", "100", "364", "10,54", "11,03", "2,44", "58,14", "46,3", "21,6"],
+          ["", "Galletas Artesanales | Cracker", "100", "313", "7,06", "16,56", "2,63", "37,90", "4,7", "822,8"],
+          ["", "Mix Frutos Secos | Clásico", "100", "443", "13,23", "31,79", "5,44", "31,76", "6,0", "1,1"],
+        ],
+      },
     },
   },
 ];
