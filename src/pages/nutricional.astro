@@ -9,7 +9,12 @@ const c = await getContenido("nutricional");
 
 <Layout titulo={c.titulo} descripcion="Información nutricional de los productos de Propósito UY.">
   <section class="mx-auto max-w-5xl px-4 py-16">
-    <a href="/preguntas" class="text-sm text-marca-700 hover:underline">← Volver a Preguntas</a>
+    <a
+      href="/preguntas"
+      class="inline-flex items-center gap-1 rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-marca-700"
+    >
+      ← Volver a Preguntas
+    </a>
     <h1 class="mt-2 text-3xl font-bold text-marca-700">{c.titulo}</h1>
     {c.intro && <p class="mt-2 max-w-2xl text-marca-900/70">{c.intro}</p>}
     <div class="mt-8">
