@@ -22,13 +22,8 @@ export const site = {
   // URL de la política de cookies (página legal). El banner muestra el link
   // "Más información" apuntando aquí (PROP-67/PROP-68).
   cookiesPolicyUrl: "/legales/cookies",
-  // Grilla de retornabilidad (documento externo del cliente).
-  grillaRetornablesUrl:
-    "https://docs.google.com/spreadsheets/d/1bUN7BbojfdpoWQeLc0byjdodWaWVOXTOUTKMG5ltcYQ/edit?usp=sharing",
-  // Enlace a las tablas nutricionales (Google Sheets/Drive público o PDF en /public).
-  // Dejar "" mientras no esté cargado: el botón en /preguntas se oculta solo. (PROP-34)
-  tablasNutricionalesUrl:
-    "https://docs.google.com/spreadsheets/d/1DBTJ-qCtW44dBdJHQcK2xHr0Y0IeWocrqexi7ssH2g8/edit?usp=sharing",
+  // (Las tablas nutricionales y la grilla de retornabilidad ahora son tablas
+  //  on-site editables desde /admin → Contenido; ya no se usan Google Sheets.)
   // Envío
   costoEnvio: 250,
   envioGratisDesde: 3000,
