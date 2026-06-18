@@ -407,7 +407,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       grillaTitulo: "Grilla de retornabilidad",
       grillaDescripcion: "Cantidad de envases por producto para acceder a la bonificación.",
       grillaTabla: {
-        columnas: ["Productos", "Frascos retornados para recibir 1 producto gratis"],
+        columnas: ["Productos", "Frascos para 1 gratis"],
         filas: [
           ["Hummus | Lentejón - 280 g", "5"],
           ["Hummus | Garbanzo - 280 g", "5"],

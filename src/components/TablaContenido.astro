@@ -12,8 +12,12 @@ interface Props {
   // hacia abajo cuando viene vacía. Por defecto, título = primera columna.
   tituloCol?: number;
   grupoCol?: number;
+  // Columna cuyo valor se muestra como "chip" destacado (ej. la cantidad).
+  chipCol?: number;
 }
-const { tabla, tituloCol = 0, grupoCol } = Astro.props;
+const { tabla, tituloCol = 0, grupoCol, chipCol } = Astro.props;
+const chipCls =
+  "inline-flex items-center rounded-full bg-marca-600 px-3 py-0.5 text-sm font-semibold text-white";
 const columnas = tabla?.columnas ?? [];
 const filas = tabla?.filas ?? [];
 const hay = columnas.length > 0 && filas.length > 0;
@@ -44,7 +48,9 @@ const gruposPorFila = filas.map((fila) => {
           {filas.map((fila, i) => (
             <tr class:list={[i % 2 === 1 ? "bg-marca-50" : "bg-white", "border-t border-marca-100"]}>
               {columnas.map((_, j) => (
-                <td class="break-words px-2.5 py-2 align-top text-marca-900/80">{fila[j] ?? ""}</td>
+                <td class="break-words px-2.5 py-2 align-top text-marca-900/80">
+                  {j === chipCol && fila[j] ? <span class={chipCls}>{fila[j]}</span> : (fila[j] ?? "")}
+                </td>
               ))}
             </tr>
           ))}
@@ -64,9 +70,13 @@ const gruposPorFila = filas.map((fila) => {
           </div>
           {columnas.map((col, j) =>
             j !== tituloCol && j !== grupoCol && fila[j] ? (
-              <div class="flex justify-between gap-4 border-b border-marca-100 px-4 py-2 text-sm last:border-0">
+              <div class="flex items-center justify-between gap-4 border-b border-marca-100 px-4 py-2 text-sm last:border-0">
                 <span class="text-marca-500">{col}</span>
-                <span class="text-right font-medium text-marca-900">{fila[j]}</span>
+                {j === chipCol ? (
+                  <span class={chipCls}>{fila[j]}</span>
+                ) : (
+                  <span class="text-right font-medium text-marca-900">{fila[j]}</span>
+                )}
               </div>
             ) : null,
           )}
