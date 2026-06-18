@@ -39,8 +39,8 @@ const gruposPorFila = filas.map((fila) => {
       <table class="w-full border-collapse text-left text-sm">
         <thead>
           <tr class="bg-marca-600 text-white">
-            {columnas.map((c) => (
-              <th class="break-words px-2.5 py-2.5 align-bottom font-semibold">{c}</th>
+            {columnas.map((c, j) => (
+              <th class:list={["break-words px-2.5 py-2.5 align-bottom font-semibold", j === chipCol && "text-center"]}>{c}</th>
             ))}
           </tr>
         </thead>
@@ -48,7 +48,7 @@ const gruposPorFila = filas.map((fila) => {
           {filas.map((fila, i) => (
             <tr class:list={[i % 2 === 1 ? "bg-marca-50" : "bg-white", "border-t border-marca-100"]}>
               {columnas.map((_, j) => (
-                <td class="break-words px-2.5 py-2 align-top text-marca-900/80">
+                <td class:list={["break-words px-2.5 py-2 align-top text-marca-900/80", j === chipCol && "text-center"]}>
                   {j === chipCol && fila[j] ? <span class={chipCls}>{fila[j]}</span> : (fila[j] ?? "")}
                 </td>
               ))}
