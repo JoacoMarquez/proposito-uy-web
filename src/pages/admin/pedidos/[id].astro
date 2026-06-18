@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
+import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
 import {
   getPedidoById,
   actualizarEstadoPedido,
@@ -17,8 +18,10 @@ if (Astro.request.method === "POST") {
   if ((ESTADOS_PEDIDO as readonly string[]).includes(estado)) {
     await actualizarEstadoPedido(id, estado);
   }
-  return Astro.redirect(`/admin/pedidos/${id}`);
+  return Astro.redirect(`/admin/pedidos/${id}?ok=1`);
 }
+
+const guardado = Astro.url.searchParams.get("ok") === "1";
 
 const pedido = await getPedidoById(id);
 if (!pedido) return Astro.redirect("/admin/pedidos");
@@ -36,10 +39,17 @@ const agendaTexto = agendaRaw.charAt(0).toUpperCase() + agendaRaw.slice(1);
 const waCliente = `https://wa.me/${pedido.celular.replace(/\D/g, "").replace(/^0/, "598")}`;
 ---
 
-<AdminLayout titulo={`Pedido ${pedido.numero}`}>
-  <a href="/admin/pedidos" class="text-sm text-marca-700 hover:underline">← Volver a pedidos</a>
+<AdminLayout titulo={`Pedido ${pedido.numero}`} ocultarTitulo>
+  <AdminEditorHeader
+    slot="antetitulo"
+    titulo={`Pedido ${pedido.numero}`}
+    volverHref="/admin/pedidos"
+    volverLabel="Volver a pedidos"
+    formId="form-estado"
+    guardado={guardado}
+  />
 
-  <div class="mt-4 grid gap-6 md:grid-cols-[1fr_300px]">
+  <div class="grid gap-6 md:grid-cols-[1fr_300px]">
     <!-- Detalle -->
     <div class="space-y-6">
       <div class="rounded-2xl border border-marca-100 bg-white p-5">
@@ -76,15 +86,12 @@ const waCliente = `https://wa.me/${pedido.celular.replace(/\D/g, "").replace(/^0
     <!-- Estado -->
     <aside class="h-fit rounded-2xl border border-marca-100 bg-white p-5">
       <h2 class="font-semibold text-marca-700">Estado del pedido</h2>
-      <form method="POST" class="mt-3 space-y-3">
+      <form id="form-estado" method="POST" class="mt-3">
         <select name="estado" class="w-full rounded-xl border border-marca-300 px-3 py-2 text-sm capitalize">
           {ESTADOS_PEDIDO.map((e) => (
             <option value={e} selected={pedido.estado === e}>{e}</option>
           ))}
         </select>
-        <button type="submit" class="w-full rounded-full bg-marca-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-marca-700">
-          Guardar estado
-        </button>
       </form>
     </aside>
   </div>
