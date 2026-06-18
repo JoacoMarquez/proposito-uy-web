@@ -33,6 +33,13 @@ body {
   color: var(--color-marca-900);
 }
 
+/* Tailwind v4 ya no aplica cursor pointer a los botones por defecto.
+   Lo restauramos para que muestren la “manito” (los `cursor-*` lo pisan). */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
 /* Botón de favorito (corazón). Estado activo = relleno y rojo. */
 .fav-btn[aria-pressed="true"] {
   color: #dc2626;
