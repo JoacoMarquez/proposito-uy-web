@@ -3,6 +3,7 @@ export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
 import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
 import ImageField from "../../../components/ImageField.astro";
+import ChipInput from "../../../components/ChipInput.astro";
 import {
   getRecetaById,
   getProductos,
@@ -164,15 +165,15 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     </div>
 
     <div>
-      <label class="text-sm font-medium text-marca-700">Utensilios (uno por línea)</label>
-      <p class="text-xs text-marca-500">Ej: Horno, Mixer. Se muestran como chips; dejá vacío si no aplica.</p>
-      <textarea name="materiales" rows="3" class={campoBase}>{(r?.materiales ?? []).join("\n")}</textarea>
+      <label class="text-sm font-medium text-marca-700">Utensilios</label>
+      <p class="text-xs text-marca-500">Ej: Horno, Mixer. Escribí y Enter para agregar cada uno.</p>
+      <ChipInput name="materiales" valor={r?.materiales ?? []} placeholder="Agregá un utensilio y Enter" />
     </div>
 
     <div>
-      <label class="text-sm font-medium text-marca-700">Notas (una por línea)</label>
-      <p class="text-xs text-marca-500">Aclaraciones que aparecen al final de la receta, después del procedimiento.</p>
-      <textarea name="notas" rows="4" class={campoBase}>{(r?.notas ?? []).join("\n")}</textarea>
+      <label class="text-sm font-medium text-marca-700">Notas</label>
+      <p class="text-xs text-marca-500">Aparecen al final de la receta. Escribí y Enter para agregar cada una.</p>
+      <ChipInput name="notas" valor={r?.notas ?? []} placeholder="Agregá una nota y Enter" />
     </div>
 
   </form>
