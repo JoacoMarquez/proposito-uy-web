@@ -4,7 +4,6 @@ import { db } from "./index";
 import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores, imagenes, paginas } from "./schema";
 import { esquemaDePagina } from "./paginas-esquema";
 import { asc, desc, eq } from "drizzle-orm";
-import { randomBytes } from "node:crypto";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
 
 export type { Categoria, Receta, Pregunta } from "./schema";
@@ -207,11 +206,34 @@ export interface ItemPedido {
   cantidad: number;
 }
 
+// Próximo número de pedido correlativo "P-N". N arranca en el "número inicial"
+// configurable (Contenido → Tienda) y sigue desde el mayor correlativo ya usado.
+export async function proximoNumeroPedido(): Promise<string> {
+  const tienda = await getContenido("tienda");
+  const inicial = Math.max(1, parseInt(String(tienda.pedidoNumeroInicial ?? "1"), 10) || 1);
+  const filas = await db.select({ numero: pedidos.numero }).from(pedidos);
+  let maxN = inicial - 1;
+  for (const f of filas) {
+    const m = /^P-(\d+)$/.exec(f.numero);
+    if (m) maxN = Math.max(maxN, parseInt(m[1], 10));
+  }
+  return "P-" + (maxN + 1);
+}
+
 export async function crearPedido(data: NuevoPedido, items: ItemPedido[]): Promise<string> {
-  const numero = "P-" + randomBytes(4).toString("hex").toUpperCase();
-  const [row] = await db.insert(pedidos).values({ numero, ...data }).returning({ id: pedidos.id });
-  await db.insert(pedidoItems).values(items.map((i) => ({ pedidoId: row.id, ...i })));
-  return numero;
+  // Reintenta si dos pedidos casi simultáneos calculan el mismo número (unique).
+  for (let intento = 0; intento < 5; intento++) {
+    const numero = await proximoNumeroPedido();
+    try {
+      const [row] = await db.insert(pedidos).values({ numero, ...data }).returning({ id: pedidos.id });
+      await db.insert(pedidoItems).values(items.map((i) => ({ pedidoId: row.id, ...i })));
+      return numero;
+    } catch (e: any) {
+      const colision = e?.code === "23505" || /unique|duplicad|duplicate/i.test(String(e?.message ?? ""));
+      if (!colision || intento === 4) throw e;
+    }
+  }
+  throw new Error("No se pudo generar el número de pedido.");
 }
 
 export async function getPedidoByNumero(numero: string) {

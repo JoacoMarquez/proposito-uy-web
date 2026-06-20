@@ -176,6 +176,12 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "horarioEntrega", label: "Entrega a domicilio", tipo: "text", ayuda: "Franja que se muestra en el checkout (miércoles y viernes). Ej: 15:00 a 18:00" },
         ],
       },
+      {
+        titulo: "Numeración de pedidos",
+        campos: [
+          { key: "pedidoNumeroInicial", label: "Número inicial de pedido", tipo: "text", ayuda: "El próximo pedido tomará este número (ej: 170 → P-170) y de ahí sigue correlativo. Si ya hay pedidos más altos, continúa desde el mayor." },
+        ],
+      },
     ],
     defaults: {
       titulo: "Tienda",
@@ -185,6 +191,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       catalogoDescripcion: "Todos los productos en un solo lugar.",
       horarioRetiro: "12:00 a 15:00",
       horarioEntrega: "15:00 a 18:00",
+      pedidoNumeroInicial: "1",
     },
   },
   {
