@@ -161,6 +161,8 @@ export interface RecetaInput {
   rendimiento: Record<string, string> | null;
   ingredientes: string[];
   procedimiento: string[];
+  materiales: string[];
+  notas: string[];
   imagen: string | null;
 }
 

@@ -52,6 +52,8 @@ if (Astro.request.method === "POST") {
     rendimiento: Object.keys(rendimiento).length ? rendimiento : null,
     ingredientes: lineas("ingredientes"),
     procedimiento: lineas("procedimiento"),
+    materiales: lineas("materiales"),
+    notas: lineas("notas"),
     imagen: subida.url ?? sn("imagen"),
   };
 
@@ -159,6 +161,18 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     <div>
       <label class="text-sm font-medium text-marca-700">Procedimiento (un paso por línea)</label>
       <textarea name="procedimiento" rows="8" class={campoBase}>{(r?.procedimiento ?? []).join("\n")}</textarea>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Utensilios (uno por línea)</label>
+      <p class="text-xs text-marca-500">Ej: Horno, Mixer. Se muestran como chips; dejá vacío si no aplica.</p>
+      <textarea name="materiales" rows="3" class={campoBase}>{(r?.materiales ?? []).join("\n")}</textarea>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Notas (una por línea)</label>
+      <p class="text-xs text-marca-500">Aclaraciones que aparecen al final de la receta, después del procedimiento.</p>
+      <textarea name="notas" rows="4" class={campoBase}>{(r?.notas ?? []).join("\n")}</textarea>
     </div>
 
   </form>
