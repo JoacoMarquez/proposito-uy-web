@@ -156,6 +156,12 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     </div>
 
     <div>
+      <label class="text-sm font-medium text-marca-700">Utensilios</label>
+      <p class="text-xs text-marca-500">Ej: Horno, Mixer. Escribí y Enter para agregar cada uno.</p>
+      <ChipInput name="materiales" valor={r?.materiales ?? []} placeholder="Agregá un utensilio y Enter" />
+    </div>
+
+    <div>
       <label class="text-sm font-medium text-marca-700">Ingredientes (uno por línea)</label>
       <p class="text-xs text-marca-500">Tocá una fracción o unidad para insertarla donde está el cursor.</p>
       <InsertarMedidas target="ingredientes" />
@@ -165,12 +171,6 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     <div>
       <label class="text-sm font-medium text-marca-700">Procedimiento (un paso por línea)</label>
       <textarea name="procedimiento" rows="8" class={campoBase}>{(r?.procedimiento ?? []).join("\n")}</textarea>
-    </div>
-
-    <div>
-      <label class="text-sm font-medium text-marca-700">Utensilios</label>
-      <p class="text-xs text-marca-500">Ej: Horno, Mixer. Escribí y Enter para agregar cada uno.</p>
-      <ChipInput name="materiales" valor={r?.materiales ?? []} placeholder="Agregá un utensilio y Enter" />
     </div>
 
     <div>
