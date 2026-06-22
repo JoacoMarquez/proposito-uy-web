@@ -1,9 +1,10 @@
 ---
 export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { getPedidos, formatoPrecio } from "../../../db/queries";
+import { getPedidos, getContenido, formatoPrecio } from "../../../db/queries";
 
 const pedidos = await getPedidos();
+const tienda = await getContenido("tienda");
 
 const estadoClase: Record<string, string> = {
   pendiente: "bg-amber-100 text-amber-800",
@@ -13,6 +14,25 @@ const estadoClase: Record<string, string> = {
 };
 const fmtFecha = (d: Date) =>
   new Date(d).toLocaleDateString("es-UY", { day: "2-digit", month: "2-digit", year: "2-digit" });
+
+// Fecha en que corresponde preparar/entregar/retirar (la elegida en el checkout).
+const fmtDistribucion = (p: { fechaAgenda: string | null }) =>
+  p.fechaAgenda
+    ? new Date(p.fechaAgenda + "T12:00:00Z").toLocaleDateString("es-UY", {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+        timeZone: "UTC",
+      })
+    : "A coordinar";
+
+// Franja horaria según modalidad (valores editables en Contenido › Tienda).
+const horarioPedido = (p: { modalidad: string; agenda: string }) =>
+  p.agenda === "coordinacion"
+    ? "A definir por WhatsApp"
+    : p.modalidad === "retiro"
+      ? String(tienda.horarioRetiro)
+      : String(tienda.horarioEntrega);
 ---
 
 <AdminLayout titulo="Pedidos">
@@ -21,31 +41,39 @@ const fmtFecha = (d: Date) =>
       Todavía no hay pedidos.
     </p>
   ) : (
-    <div class="overflow-hidden rounded-2xl border border-marca-100 bg-white">
+    <div class="overflow-x-auto rounded-2xl border border-marca-100 bg-white">
       <table class="w-full text-sm">
         <thead class="border-b border-marca-100 bg-marca-50 text-left text-marca-700">
           <tr>
             <th class="p-3">Pedido</th>
             <th class="p-3">Fecha</th>
             <th class="p-3">Cliente</th>
-            <th class="p-3">Entrega</th>
+            <th class="p-3">Distribución</th>
+            <th class="p-3">Fecha distrib.</th>
+            <th class="p-3">Horario</th>
             <th class="p-3">Total</th>
             <th class="p-3">Estado</th>
+            <th class="p-3">Notas</th>
             <th class="p-3"></th>
           </tr>
         </thead>
         <tbody>
           {pedidos.map((p) => (
-            <tr class="border-b border-marca-50 last:border-0">
+            <tr class="border-b border-marca-50 last:border-0 align-top">
               <td class="p-3 font-medium text-marca-900">{p.numero}</td>
-              <td class="p-3 text-marca-900/70">{fmtFecha(p.creadoEn)}</td>
+              <td class="p-3 whitespace-nowrap text-marca-900/70">{fmtFecha(p.creadoEn)}</td>
               <td class="p-3 text-marca-900/70">{p.nombre}</td>
               <td class="p-3 text-marca-900/70">{p.modalidad === "entrega" ? "Entrega" : "Retiro"}</td>
-              <td class="p-3">{formatoPrecio(p.total)}</td>
+              <td class="p-3 whitespace-nowrap text-marca-900/70">{fmtDistribucion(p)}</td>
+              <td class="p-3 whitespace-nowrap text-marca-900/70">{horarioPedido(p)}</td>
+              <td class="p-3 whitespace-nowrap">{formatoPrecio(p.total)}</td>
               <td class="p-3">
                 <span class:list={["rounded-full px-2 py-0.5 text-xs font-medium", estadoClase[p.estado] ?? "bg-marca-100"]}>
                   {p.estado}
                 </span>
+              </td>
+              <td class="p-3 text-marca-900/70">
+                <span class="block max-w-[14rem] truncate" title={p.notas ?? ""}>{p.notas || "—"}</span>
               </td>
               <td class="p-3 text-right">
                 <a href={`/admin/pedidos/${p.id}`} class="font-medium text-marca-700 hover:underline">Ver</a>
