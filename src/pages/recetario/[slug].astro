@@ -62,8 +62,16 @@ const fichas = [
     <div class="mt-10">
       {receta.materiales.length > 0 && (
         <div class="mb-5">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-marca-500">Utensilios</h3>
-          <div class="mt-2 flex flex-wrap gap-2">
+          <h3 class="inline-flex items-center gap-2 rounded-full bg-acento/15 px-3.5 py-1.5 text-base font-semibold text-marca-700">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2" />
+              <path d="M5 11v11" />
+              <path d="M16 2v20" />
+              <path d="M16 8c0-3.3 1.3-6 3-6s3 2.7 3 6-1.3 5-3 5h-3" />
+            </svg>
+            Utensilios
+          </h3>
+          <div class="mt-2.5 flex flex-wrap gap-2">
             {receta.materiales.map((m) => (
               <span class="rounded-full bg-marca-100 px-3 py-1 text-sm font-medium text-marca-700">{m}</span>
             ))}
