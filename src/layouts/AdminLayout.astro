@@ -54,12 +54,24 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
     <title>{titulo} · Admin Propósito UY</title>
   </head>
   <body class="min-h-screen bg-crema font-sans text-marca-900">
-    <div class="flex min-h-screen">
-      <aside class="sticky top-0 flex h-screen w-56 shrink-0 flex-col overflow-y-auto border-r border-marca-100 bg-white p-4">
-        <a href="/admin" class="flex items-center gap-2 px-2">
-          <span class="text-lg font-bold tracking-tight text-marca-700">Propósito</span>
-          <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-6 w-6" />
-        </a>
+    <div class="flex min-h-screen" data-shell>
+      <aside data-sidebar class="sticky top-0 flex h-screen w-56 shrink-0 flex-col overflow-y-auto border-r border-marca-100 bg-white p-4">
+        <div class="flex items-center justify-between gap-2">
+          <a href="/admin" class="flex items-center gap-2 px-2">
+            <span class="text-lg font-bold tracking-tight text-marca-700">Propósito</span>
+            <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-6 w-6" />
+          </a>
+          <button
+            type="button"
+            data-sidebar-collapse
+            aria-label="Colapsar menú"
+            class="shrink-0 rounded-lg p-1.5 text-marca-500 hover:bg-marca-50"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
         <p class="mt-1 px-2 text-xs text-marca-500">Panel de administración</p>
         <nav class="mt-6 flex flex-col gap-1">
           {nav.map((n) => (
@@ -140,6 +152,19 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
         </div>
       </aside>
 
+      <button
+        type="button"
+        data-sidebar-expand
+        aria-label="Abrir menú"
+        class="fixed left-3 top-3 z-30 hidden rounded-lg border border-marca-100 bg-white p-2 text-marca-700 shadow-sm hover:bg-marca-50"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+
       <main class="flex-1 p-8">
         <slot name="antetitulo" />
         {!ocultarTitulo && <h1 class="text-2xl font-bold text-marca-700">{titulo}</h1>}
@@ -150,6 +175,32 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
     </div>
 
     <script>
+      // Colapsar/expandir toda la barra lateral. Recuerda el estado en
+      // localStorage; al colapsar aparece un botón flotante para reabrirla.
+      (() => {
+        const KEY = "admin-sidebar-collapsed";
+        const aside = document.querySelector<HTMLElement>("[data-sidebar]");
+        const expandBtn = document.querySelector<HTMLElement>("[data-sidebar-expand]");
+        const collapseBtn = document.querySelector<HTMLElement>("[data-sidebar-collapse]");
+        if (!aside || !expandBtn || !collapseBtn) return;
+        let colapsado = localStorage.getItem(KEY) === "1";
+        const aplicar = () => {
+          aside.classList.toggle("hidden", colapsado);
+          expandBtn.classList.toggle("hidden", !colapsado);
+        };
+        aplicar();
+        collapseBtn.addEventListener("click", () => {
+          colapsado = true;
+          localStorage.setItem(KEY, "1");
+          aplicar();
+        });
+        expandBtn.addEventListener("click", () => {
+          colapsado = false;
+          localStorage.setItem(KEY, "0");
+          aplicar();
+        });
+      })();
+
       // Expandir/colapsar las secciones del sidebar que tienen subitems.
       // Recuerda el estado por sección en localStorage (sin View Transitions
       // el panel recarga en cada navegación, así que persistimos la preferencia).
