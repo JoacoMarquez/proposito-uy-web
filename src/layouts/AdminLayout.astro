@@ -64,21 +64,33 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
         <nav class="mt-6 flex flex-col gap-1">
           {nav.map((n) => (
             n.sub ? (
-              <div>
-                <a
-                  href={n.href}
-                  class:list={[
-                    "block rounded-lg px-3 py-2 text-sm font-medium",
-                    enSeccion(n.href) && !algunSubActivo(n.sub)
-                      ? "bg-marca-600 text-white"
-                      : enSeccion(n.href)
-                        ? "text-marca-900"
-                        : "text-marca-700 hover:bg-marca-50",
-                  ]}
-                >
-                  {n.label}
-                </a>
-                <div class="ml-3 mt-0.5 flex flex-col gap-0.5 border-l border-marca-100 pl-2">
+              <div data-collapsible data-key={n.label}>
+                <div class="flex items-center gap-1">
+                  <a
+                    href={n.href}
+                    class:list={[
+                      "block flex-1 rounded-lg px-3 py-2 text-sm font-medium",
+                      enSeccion(n.href) && !algunSubActivo(n.sub)
+                        ? "bg-marca-600 text-white"
+                        : enSeccion(n.href)
+                          ? "text-marca-900"
+                          : "text-marca-700 hover:bg-marca-50",
+                    ]}
+                  >
+                    {n.label}
+                  </a>
+                  <button
+                    type="button"
+                    data-collapse-toggle
+                    aria-label={`Mostrar u ocultar ${n.label}`}
+                    class="shrink-0 rounded-lg p-1.5 text-marca-500 hover:bg-marca-50"
+                  >
+                    <svg data-chevron class="h-4 w-4 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                </div>
+                <div data-collapse-panel class="ml-3 mt-0.5 flex flex-col gap-0.5 border-l border-marca-100 pl-2">
                   {n.sub.map((s) => (
                     <a
                       href={s.href}
@@ -136,5 +148,30 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
         </div>
       </main>
     </div>
+
+    <script>
+      // Expandir/colapsar las secciones del sidebar que tienen subitems.
+      // Recuerda el estado por sección en localStorage (sin View Transitions
+      // el panel recarga en cada navegación, así que persistimos la preferencia).
+      document.querySelectorAll<HTMLElement>("[data-collapsible]").forEach((root) => {
+        const key = "admin-nav:" + (root.dataset.key ?? "");
+        const btn = root.querySelector<HTMLElement>("[data-collapse-toggle]");
+        const panel = root.querySelector<HTMLElement>("[data-collapse-panel]");
+        const chevron = root.querySelector<HTMLElement>("[data-chevron]");
+        if (!btn || !panel) return;
+        const guardado = localStorage.getItem(key);
+        let abierto = guardado === null ? true : guardado === "1";
+        const aplicar = () => {
+          panel.classList.toggle("hidden", !abierto);
+          if (chevron) chevron.style.transform = abierto ? "" : "rotate(-90deg)";
+        };
+        aplicar();
+        btn.addEventListener("click", () => {
+          abierto = !abierto;
+          localStorage.setItem(key, abierto ? "1" : "0");
+          aplicar();
+        });
+      });
+    </script>
   </body>
 </html>
