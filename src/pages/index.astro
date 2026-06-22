@@ -11,9 +11,9 @@ const categoriasLista = await getCategorias();
 const c = await getContenido("inicio");
 
 const atajos = [
-  { href: c.atajo1Href, titulo: c.atajo1Titulo },
-  { href: c.atajo2Href, titulo: c.atajo2Titulo },
-  { href: c.atajo3Href, titulo: c.atajo3Titulo },
+  { href: c.atajo1Href, titulo: c.atajo1Titulo, imagen: c.atajo1Imagen },
+  { href: c.atajo2Href, titulo: c.atajo2Titulo, imagen: c.atajo2Imagen },
+  { href: c.atajo3Href, titulo: c.atajo3Titulo, imagen: c.atajo3Imagen },
 ];
 ---
 
@@ -56,9 +56,13 @@ const atajos = [
     <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
       {atajos.map((a) => (
         <a href={a.href} class="overflow-hidden rounded-2xl border border-marca-100 bg-white hover:shadow-md">
-          <div class="flex aspect-video items-center justify-center bg-marca-100 text-sm text-marca-600">
-            Foto pendiente
-          </div>
+          {a.imagen ? (
+            <img src={a.imagen} alt={a.titulo} class="aspect-video w-full object-cover" loading="lazy" />
+          ) : (
+            <div class="flex aspect-video items-center justify-center bg-marca-100 text-sm text-marca-600">
+              Foto pendiente
+            </div>
+          )}
           <div class="p-4">
             <h3 class="font-semibold text-marca-900">{a.titulo}</h3>
           </div>
