@@ -163,6 +163,7 @@ const nombreImagen = (() => {
     // Quitar imagen: vacía el hidden (al guardar queda sin imagen), limpia el
     // archivo elegido y oculta la miniatura. No sube nada.
     const quitar = () => {
+      if (!confirm("¿Quitar esta imagen? Va a quedar sin imagen cuando guardes.")) return;
       if (hidden) {
         hidden.value = "";
         hidden.dispatchEvent(new Event("input", { bubbles: true })); // marca el form como sucio
