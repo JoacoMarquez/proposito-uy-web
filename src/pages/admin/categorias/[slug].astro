@@ -1,0 +1,100 @@
+---
+export const prerender = false;
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
+import ImageField from "../../../components/ImageField.astro";
+import ChipInput from "../../../components/ChipInput.astro";
+import {
+  getCategoria,
+  actualizarCategoria,
+  type CategoriaContenidoInput,
+} from "../../../db/queries";
+import { procesarImagenSubida } from "../../../lib/upload";
+
+const { slug } = Astro.params;
+const categoria = slug ? await getCategoria(slug) : undefined;
+if (!categoria) return Astro.redirect("/admin/categorias");
+
+let error = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const s = (k: string) => String(form.get(k) ?? "").trim();
+  const lineas = (k: string) =>
+    s(k)
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+  // Imagen: archivo nuevo → se guarda y se usa su URL; si no, se conserva la actual.
+  const subida = await procesarImagenSubida(form);
+
+  const data: CategoriaContenidoInput = {
+    nombre: s("nombre"),
+    descripcion: s("descripcion"),
+    descripcionGeneral: s("descripcionGeneral"),
+    caracteristicas: lineas("caracteristicas"),
+    notasCreador: lineas("notasCreador"),
+    imagen: subida.url ?? (s("imagen") === "" ? null : s("imagen")),
+  };
+
+  if (subida.error) {
+    error = subida.error;
+  } else if (!data.nombre) {
+    error = "El nombre no puede quedar vacío.";
+  } else {
+    await actualizarCategoria(categoria.slug, data);
+    return Astro.redirect(`/admin/categorias/${categoria.slug}?ok=1`);
+  }
+}
+
+const guardado = Astro.url.searchParams.get("ok") === "1";
+const c = categoria;
+const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
+---
+
+<AdminLayout titulo={`Editar: ${c.nombre}`} ocultarTitulo>
+  <AdminEditorHeader
+    slot="antetitulo"
+    titulo={c.nombre}
+    volverHref="/admin/categorias"
+    volverLabel="Volver a categorías"
+    formId="editor-categoria"
+    guardado={guardado}
+  />
+
+  {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+
+  <form id="editor-categoria" method="POST" enctype="multipart/form-data" class="max-w-3xl space-y-5">
+    <div>
+      <label class="text-sm font-medium text-marca-700">Nombre</label>
+      <input name="nombre" value={c.nombre} required class={campoBase} />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Descripción corta</label>
+      <p class="text-xs text-marca-500">Aparece debajo del título de la categoría.</p>
+      <textarea name="descripcion" rows="2" class={campoBase}>{c.descripcion}</textarea>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Descripción general</label>
+      <p class="text-xs text-marca-500">Bloque editorial al pie de la categoría.</p>
+      <textarea name="descripcionGeneral" rows="3" class={campoBase}>{c.descripcionGeneral}</textarea>
+    </div>
+
+    <!-- Imagen -->
+    <ImageField imagen={c.imagen} alt={c.nombre} />
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Características</label>
+      <p class="text-xs text-marca-500">Se muestran como chips. Escribí y Enter para agregar cada una.</p>
+      <ChipInput name="caracteristicas" valor={c.caracteristicas} placeholder="Agregá una característica y Enter" />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-marca-700">Notas del creador (un párrafo por línea)</label>
+      <textarea name="notasCreador" rows="6" class={campoBase}>{c.notasCreador.join("\n")}</textarea>
+    </div>
+  </form>
+</AdminLayout>

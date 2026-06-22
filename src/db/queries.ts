@@ -50,6 +50,20 @@ export async function getCategoria(slug: string): Promise<Categoria | undefined>
   return c;
 }
 
+// Edición de contenido de una categoría (no se crean/eliminan: son fijas).
+export interface CategoriaContenidoInput {
+  nombre: string;
+  descripcion: string;
+  descripcionGeneral: string;
+  caracteristicas: string[];
+  notasCreador: string[];
+  imagen: string | null;
+}
+
+export async function actualizarCategoria(slug: string, data: CategoriaContenidoInput): Promise<void> {
+  await db.update(categorias).set(data).where(eq(categorias.slug, slug));
+}
+
 // ── Recetas ──
 export async function getRecetas(): Promise<Receta[]> {
   return db.select().from(recetas).orderBy(asc(recetas.orden));
