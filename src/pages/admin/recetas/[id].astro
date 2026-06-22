@@ -4,7 +4,6 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
 import ImageField from "../../../components/ImageField.astro";
 import ChipInput from "../../../components/ChipInput.astro";
-import AutoFraccion from "../../../components/AutoFraccion.astro";
 import {
   getRecetaById,
   getProductos,
@@ -174,8 +173,6 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
       <label class="text-sm font-medium text-marca-700">Procedimiento (un paso por línea)</label>
       <textarea id="procedimiento" name="procedimiento" rows="8" class={campoBase}>{(r?.procedimiento ?? []).join("\n")}</textarea>
     </div>
-
-    <AutoFraccion target="ingredientes,procedimiento" />
 
     <div>
       <label class="text-sm font-medium text-marca-700">Notas</label>
