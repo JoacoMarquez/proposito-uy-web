@@ -1,11 +1,15 @@
 ---
 import "../styles/global.css";
+import { getCategorias } from "../db/queries";
 
 interface Props {
   titulo: string;
   ocultarTitulo?: boolean; // si la página renderiza su propio título (ej. header sticky)
 }
 const { titulo, ocultarTitulo = false } = Astro.props;
+
+// Subitems de Productos: "Todos" + una entrada por categoría (lleva a su editor).
+const categorias = await getCategorias();
 const email = Astro.locals.adminUser?.email;
 const inicial = (email ?? "?").trim().charAt(0).toUpperCase() || "?";
 const path = Astro.url.pathname;
@@ -19,7 +23,10 @@ const nav: NavItem[] = [
     href: "/admin/productos",
     sub: [
       { label: "Todos los productos", href: "/admin/productos" },
-      { label: "Categorías", href: "/admin/productos/categorias" },
+      ...categorias.map((c) => ({
+        label: c.nombre,
+        href: `/admin/productos/categorias/${c.slug}`,
+      })),
     ],
   },
   { label: "Recetas", href: "/admin/recetas" },
