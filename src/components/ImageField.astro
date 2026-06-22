@@ -39,16 +39,19 @@ const nombreImagen = (() => {
   <input type="hidden" name={name} value={imagen ?? ""} data-img-hidden />
 
   <div class="mt-2 flex flex-wrap items-start gap-3">
-    {imagen && (
-      <button type="button" data-img-open class="shrink-0 rounded-xl" title="Ver imagen grande / cambiarla">
-        <img
-          src={imagen}
-          alt={alt}
-          data-img-thumb
-          class="h-20 w-20 cursor-zoom-in rounded-xl border border-marca-100 object-cover transition hover:opacity-90"
-        />
-      </button>
-    )}
+    <button
+      type="button"
+      data-img-open
+      class:list={["shrink-0 rounded-xl", !imagen && "hidden"]}
+      title="Ver imagen grande / cambiarla"
+    >
+      <img
+        src={imagen ?? ""}
+        alt={alt}
+        data-img-thumb
+        class="h-20 w-20 cursor-zoom-in rounded-xl border border-marca-100 object-cover transition hover:opacity-90"
+      />
+    </button>
     <input
       type="file"
       id={fieldId}
@@ -79,14 +82,13 @@ const nombreImagen = (() => {
     </div>
   </div>
 
-  {imagen && (
-    <div
-      data-img-modal
-      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
-    >
+  <div
+    data-img-modal
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
+  >
       <div class="relative max-h-[90vh] max-w-[92vw] overflow-auto rounded-2xl bg-marca-50 p-3 shadow-xl">
         <img
-          src={imagen}
+          src={imagen ?? ""}
           alt={alt}
           data-img-big
           class="mx-auto max-h-[74vh] w-auto rounded-xl object-contain"
@@ -114,8 +116,7 @@ const nombreImagen = (() => {
           </button>
         </div>
       </div>
-    </div>
-  )}
+  </div>
 </div>
 
 <script>
@@ -152,6 +153,7 @@ const nombreImagen = (() => {
           const url = URL.createObjectURL(f);
           if (thumb) thumb.src = url;
           if (big) big.src = url;
+          (openBtn as HTMLElement | null)?.classList.remove("hidden"); // mostrar miniatura
           removeBtns.forEach((b) => b.classList.remove("hidden"));
         }
         close();
