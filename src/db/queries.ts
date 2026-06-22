@@ -271,9 +271,14 @@ export async function getPedidoById(id: number) {
 }
 
 export const ESTADOS_PEDIDO = ["pendiente", "confirmado", "entregado", "cancelado"] as const;
+export const ESTADOS_PAGO = ["pendiente", "pagado"] as const;
 
 export async function actualizarEstadoPedido(id: number, estado: string) {
   await db.update(pedidos).set({ estado }).where(eq(pedidos.id, id));
+}
+
+export async function actualizarEstadoPago(id: number, estadoPago: string) {
+  await db.update(pedidos).set({ estadoPago }).where(eq(pedidos.id, id));
 }
 
 // ── Contenido editable de páginas (CMS liviano) ──

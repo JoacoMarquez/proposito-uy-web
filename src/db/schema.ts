@@ -108,6 +108,7 @@ export const pedidos = pgTable("pedidos", {
   costoEnvio: integer("costo_envio").notNull().default(0),
   total: integer("total").notNull(),
   estado: text("estado").notNull().default("pendiente"), // pendiente | confirmado | entregado | cancelado
+  estadoPago: text("estado_pago").notNull().default("pendiente"), // pendiente | pagado (separado del estado del pedido)
   clienteId: integer("cliente_id"), // cuenta del cliente, si compró logueado (null si invitado)
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });

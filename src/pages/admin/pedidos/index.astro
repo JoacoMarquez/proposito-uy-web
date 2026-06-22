@@ -12,6 +12,10 @@ const estadoClase: Record<string, string> = {
   entregado: "bg-green-100 text-green-800",
   cancelado: "bg-red-100 text-red-700",
 };
+const pagoClase: Record<string, string> = {
+  pendiente: "bg-amber-100 text-amber-800",
+  pagado: "bg-green-100 text-green-800",
+};
 const fmtFecha = (d: Date) =>
   new Date(d).toLocaleDateString("es-UY", { day: "2-digit", month: "2-digit", year: "2-digit" });
 
@@ -53,6 +57,7 @@ const horarioPedido = (p: { modalidad: string; agenda: string }) =>
             <th class="p-3">Horario</th>
             <th class="p-3">Total</th>
             <th class="p-3">Estado</th>
+            <th class="p-3">Pago</th>
             <th class="p-3">Notas</th>
             <th class="p-3"></th>
           </tr>
@@ -70,6 +75,11 @@ const horarioPedido = (p: { modalidad: string; agenda: string }) =>
               <td class="p-3">
                 <span class:list={["rounded-full px-2 py-0.5 text-xs font-medium", estadoClase[p.estado] ?? "bg-marca-100"]}>
                   {p.estado}
+                </span>
+              </td>
+              <td class="p-3">
+                <span class:list={["rounded-full px-2 py-0.5 text-xs font-medium capitalize", pagoClase[p.estadoPago] ?? "bg-marca-100"]}>
+                  {p.estadoPago}
                 </span>
               </td>
               <td class="p-3 text-marca-900/70">
