@@ -6,7 +6,10 @@ import ImageField from "../../../../components/ImageField.astro";
 import ChipInput from "../../../../components/ChipInput.astro";
 import {
   getCategoria,
+  getProductosPorCategoria,
   actualizarCategoria,
+  precioDesde,
+  formatoPrecio,
   type CategoriaContenidoInput,
 } from "../../../../db/queries";
 import { procesarImagenSubida } from "../../../../lib/upload";
@@ -44,57 +47,151 @@ if (Astro.request.method === "POST") {
     error = "El nombre no puede quedar vacío.";
   } else {
     await actualizarCategoria(categoria.slug, data);
-    return Astro.redirect(`/admin/productos/categorias/${categoria.slug}?ok=1`);
+    return Astro.redirect(`/admin/productos/categorias/${categoria.slug}?ok=1#contenido`);
   }
 }
 
 const guardado = Astro.url.searchParams.get("ok") === "1";
 const c = categoria;
+const productos = await getProductosPorCategoria(c.slug);
+// Tras guardar (o con error), abrir en la pestaña de Contenido; si no, en la lista.
+const tabInicial = guardado || error ? "contenido" : "lista";
 const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
+const tabBtn =
+  "px-4 py-2 text-sm font-medium border-b-2 border-transparent -mb-px text-marca-500 hover:text-marca-700 transition";
 ---
 
-<AdminLayout titulo={`Editar: ${c.nombre}`} ocultarTitulo>
+<AdminLayout titulo={`Categoría: ${c.nombre}`} ocultarTitulo>
   <AdminEditorHeader
     slot="antetitulo"
     titulo={c.nombre}
-    volverHref="/admin/productos/categorias"
-    volverLabel="Volver a categorías"
+    volverHref="/admin/productos"
+    volverLabel="Volver a productos"
     formId="editor-categoria"
     guardado={guardado}
   />
 
   {error && <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
-  <form id="editor-categoria" method="POST" enctype="multipart/form-data" class="max-w-3xl space-y-5">
-    <div>
-      <label class="text-sm font-medium text-marca-700">Nombre</label>
-      <input name="nombre" value={c.nombre} required class={campoBase} />
+  <div data-tabs data-inicial={tabInicial} class="mt-2">
+    {/* Pestañas */}
+    <div class="flex border-b border-marca-100">
+      <button type="button" data-tab="lista" class={tabBtn}>Lista de productos</button>
+      <button type="button" data-tab="contenido" class={tabBtn}>Contenido</button>
     </div>
 
-    <div>
-      <label class="text-sm font-medium text-marca-700">Descripción corta</label>
-      <p class="text-xs text-marca-500">Aparece debajo del título de la categoría.</p>
-      <textarea name="descripcion" rows="2" class={campoBase}>{c.descripcion}</textarea>
+    {/* Panel: lista de productos de la categoría */}
+    <div data-panel="lista" class="mt-5">
+      <div class="mb-4 flex items-center justify-between">
+        <p class="text-sm text-marca-500">{productos.length} producto{productos.length === 1 ? "" : "s"} en esta categoría.</p>
+        <a href="/admin/productos/nuevo" class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
+          + Nuevo producto
+        </a>
+      </div>
+
+      {productos.length === 0 ? (
+        <p class="rounded-xl border border-marca-100 bg-marca-50 p-4 text-sm text-marca-900/60">
+          Todavía no hay productos en esta categoría.
+        </p>
+      ) : (
+        <div class="overflow-hidden rounded-2xl border border-marca-100 bg-white">
+          <table class="w-full text-sm">
+            <thead class="border-b border-marca-100 bg-marca-50 text-left text-marca-700">
+              <tr>
+                <th class="p-3">Producto</th>
+                <th class="p-3">Desde</th>
+                <th class="p-3">Estado</th>
+                <th class="p-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {productos.map((p) => (
+                <tr class="border-b border-marca-50 last:border-0">
+                  <td class="p-3">
+                    <div class="flex items-center gap-3">
+                      {p.imagen
+                        ? <img src={p.imagen} alt={p.nombre} class="h-10 w-10 shrink-0 rounded-lg border border-marca-100 object-cover" />
+                        : <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-marca-100 bg-marca-50 text-marca-300" aria-hidden="true">🖼️</div>}
+                      <div>
+                        <span class="font-medium text-marca-900">{p.nombre}</span>
+                        <span class="text-marca-500"> | {p.variante}</span>
+                        {p.destacado && <span class="ml-2 rounded-full bg-marca-100 px-2 py-0.5 text-xs">★ destacado</span>}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="p-3">{p.presentaciones.length ? formatoPrecio(precioDesde(p)) : "—"}</td>
+                  <td class="p-3">
+                    {p.disponible
+                      ? <span class="text-marca-600">Disponible</span>
+                      : <span class="text-red-600">Agotado</span>}
+                  </td>
+                  <td class="p-3 text-right">
+                    <a href={`/admin/productos/${p.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
 
-    <div>
-      <label class="text-sm font-medium text-marca-700">Descripción general</label>
-      <p class="text-xs text-marca-500">Bloque editorial al pie de la categoría.</p>
-      <textarea name="descripcionGeneral" rows="3" class={campoBase}>{c.descripcionGeneral}</textarea>
-    </div>
+    {/* Panel: contenido editable de la categoría */}
+    <div data-panel="contenido" class="mt-5 hidden">
+      <form id="editor-categoria" method="POST" enctype="multipart/form-data" class="max-w-3xl space-y-5">
+        <div>
+          <label class="text-sm font-medium text-marca-700">Nombre</label>
+          <input name="nombre" value={c.nombre} required class={campoBase} />
+        </div>
 
-    <!-- Imagen -->
-    <ImageField imagen={c.imagen} alt={c.nombre} />
+        <div>
+          <label class="text-sm font-medium text-marca-700">Descripción corta</label>
+          <p class="text-xs text-marca-500">Aparece debajo del título de la categoría.</p>
+          <textarea name="descripcion" rows="2" class={campoBase}>{c.descripcion}</textarea>
+        </div>
 
-    <div>
-      <label class="text-sm font-medium text-marca-700">Características</label>
-      <p class="text-xs text-marca-500">Se muestran como chips. Escribí y Enter para agregar cada una.</p>
-      <ChipInput name="caracteristicas" valor={c.caracteristicas} placeholder="Agregá una característica y Enter" />
-    </div>
+        <div>
+          <label class="text-sm font-medium text-marca-700">Descripción general</label>
+          <p class="text-xs text-marca-500">Bloque editorial al pie de la categoría.</p>
+          <textarea name="descripcionGeneral" rows="3" class={campoBase}>{c.descripcionGeneral}</textarea>
+        </div>
 
-    <div>
-      <label class="text-sm font-medium text-marca-700">Notas del creador (un párrafo por línea)</label>
-      <textarea name="notasCreador" rows="6" class={campoBase}>{c.notasCreador.join("\n")}</textarea>
+        <!-- Imagen -->
+        <ImageField imagen={c.imagen} alt={c.nombre} />
+
+        <div>
+          <label class="text-sm font-medium text-marca-700">Características</label>
+          <p class="text-xs text-marca-500">Se muestran como chips. Escribí y Enter para agregar cada una.</p>
+          <ChipInput name="caracteristicas" valor={c.caracteristicas} placeholder="Agregá una característica y Enter" />
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-marca-700">Notas del creador (un párrafo por línea)</label>
+          <textarea name="notasCreador" rows="6" class={campoBase}>{c.notasCreador.join("\n")}</textarea>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 </AdminLayout>
+
+<script>
+  function setupTabs(root: HTMLElement) {
+    const tabs = [...root.querySelectorAll<HTMLElement>("[data-tab]")];
+    const panels = [...root.querySelectorAll<HTMLElement>("[data-panel]")];
+    const activar = (nombre: string) => {
+      tabs.forEach((t) => {
+        const on = t.dataset.tab === nombre;
+        t.classList.toggle("border-marca-600", on);
+        t.classList.toggle("text-marca-900", on);
+        t.classList.toggle("border-transparent", !on);
+        t.classList.toggle("text-marca-500", !on);
+        t.classList.toggle("hover:text-marca-700", !on);
+      });
+      panels.forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== nombre));
+    };
+    tabs.forEach((t) => t.addEventListener("click", () => activar(t.dataset.tab!)));
+    const inicial = location.hash === "#contenido" ? "contenido" : root.dataset.inicial || "lista";
+    activar(inicial);
+  }
+  document.querySelectorAll<HTMLElement>("[data-tabs]").forEach(setupTabs);
+</script>

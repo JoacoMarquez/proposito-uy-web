@@ -21,13 +21,10 @@ const nav: NavItem[] = [
   {
     label: "Productos",
     href: "/admin/productos",
-    sub: [
-      { label: "Todos los productos", href: "/admin/productos" },
-      ...categorias.map((c) => ({
-        label: c.nombre,
-        href: `/admin/productos/categorias/${c.slug}`,
-      })),
-    ],
+    sub: categorias.map((c) => ({
+      label: c.nombre,
+      href: `/admin/productos/categorias/${c.slug}`,
+    })),
   },
   { label: "Recetas", href: "/admin/recetas" },
   { label: "Preguntas", href: "/admin/preguntas" },
@@ -43,6 +40,9 @@ const subActivo = (subs: { href: string }[], href: string) => {
   if (!matches.length) return false;
   return matches.reduce((a, b) => (b.href.length > a.href.length ? b : a)).href === href;
 };
+// El padre está "directamente" activo (su propia lista) cuando estamos en su
+// sección pero en ningún subitem (ej. lista de productos o editar un producto).
+const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(subs, s.href));
 ---
 
 <!doctype html>
@@ -69,7 +69,11 @@ const subActivo = (subs: { href: string }[], href: string) => {
                   href={n.href}
                   class:list={[
                     "block rounded-lg px-3 py-2 text-sm font-medium",
-                    enSeccion(n.href) ? "text-marca-900" : "text-marca-700 hover:bg-marca-50",
+                    enSeccion(n.href) && !algunSubActivo(n.sub)
+                      ? "bg-marca-600 text-white"
+                      : enSeccion(n.href)
+                        ? "text-marca-900"
+                        : "text-marca-700 hover:bg-marca-50",
                   ]}
                 >
                   {n.label}
