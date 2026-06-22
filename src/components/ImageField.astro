@@ -21,6 +21,14 @@ const {
   label = "Imagen",
   ayuda,
 } = Astro.props;
+
+// Nombre a mostrar de la imagen actual: el nombre de archivo de la URL si lo
+// tiene; si es una imagen subida (/api/img/<id>, sin extensión) → "Imagen cargada".
+const nombreImagen = (() => {
+  if (!imagen) return "Ningún archivo seleccionado";
+  const base = imagen.split("?")[0].split("/").pop() ?? "";
+  return base.includes(".") ? decodeURIComponent(base) : "Imagen cargada";
+})();
 ---
 
 <div data-img-field>
@@ -30,7 +38,7 @@ const {
 
   <input type="hidden" name={name} value={imagen ?? ""} data-img-hidden />
 
-  <div class="mt-2 flex flex-wrap items-center gap-3">
+  <div class="mt-2 flex flex-wrap items-start gap-3">
     {imagen && (
       <button type="button" data-img-open class="shrink-0 rounded-xl" title="Ver imagen grande / cambiarla">
         <img
@@ -48,20 +56,27 @@ const {
       accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
       class="hidden"
     />
-    <label
-      for={fieldId}
-      class="cursor-pointer rounded-full bg-marca-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-marca-700"
-    >
-      Seleccionar imagen
-    </label>
-    <span data-img-filename class="text-sm text-marca-500">Ningún archivo seleccionado</span>
-    <button
-      type="button"
-      data-img-remove
-      class:list={["text-sm font-medium text-red-600 hover:underline", !imagen && "hidden"]}
-    >
-      Quitar imagen
-    </button>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-wrap items-center gap-3">
+        <label
+          for={fieldId}
+          class="cursor-pointer rounded-full bg-marca-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-marca-700"
+        >
+          Seleccionar imagen
+        </label>
+        <span data-img-filename class="text-sm text-marca-500">{nombreImagen}</span>
+      </div>
+      <button
+        type="button"
+        data-img-remove
+        class:list={[
+          "self-start cursor-pointer rounded-full bg-red-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-red-700",
+          !imagen && "hidden",
+        ]}
+      >
+        Quitar imagen
+      </button>
+    </div>
   </div>
 
   {imagen && (
