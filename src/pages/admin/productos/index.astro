@@ -8,10 +8,7 @@ const nombreCat = (slug: string) => cats.find((c) => c.slug === slug)?.nombre ??
 ---
 
 <AdminLayout titulo="Productos">
-  <div class="mb-4 flex justify-end gap-2">
-    <a href="/admin/productos/categorias" class="rounded-full border border-marca-300 px-4 py-2 text-sm font-medium text-marca-700 hover:bg-marca-50">
-      Categorías
-    </a>
+  <div class="mb-4 flex justify-end">
     <a href="/admin/productos/nuevo" class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
       + Nuevo producto
     </a>

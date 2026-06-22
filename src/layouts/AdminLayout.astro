@@ -10,16 +10,32 @@ const email = Astro.locals.adminUser?.email;
 const inicial = (email ?? "?").trim().charAt(0).toUpperCase() || "?";
 const path = Astro.url.pathname;
 
-const nav = [
+type NavItem = { label: string; href: string; sub?: { label: string; href: string }[] };
+const nav: NavItem[] = [
   { label: "Inicio", href: "/admin" },
   { label: "Pedidos", href: "/admin/pedidos" },
-  { label: "Productos", href: "/admin/productos" },
+  {
+    label: "Productos",
+    href: "/admin/productos",
+    sub: [
+      { label: "Todos los productos", href: "/admin/productos" },
+      { label: "Categorías", href: "/admin/productos/categorias" },
+    ],
+  },
   { label: "Recetas", href: "/admin/recetas" },
   { label: "Preguntas", href: "/admin/preguntas" },
   { label: "Contenido", href: "/admin/contenido" },
 ];
 const activo = (href: string) =>
   href === "/admin" ? path === "/admin" : path.startsWith(href);
+// ¿La sección (con subsecciones) contiene la ruta actual?
+const enSeccion = (href: string) => path === href || path.startsWith(href + "/");
+// De los subitems, el activo es el de href más específico que matchea la ruta.
+const subActivo = (subs: { href: string }[], href: string) => {
+  const matches = subs.filter((s) => path === s.href || path.startsWith(s.href + "/"));
+  if (!matches.length) return false;
+  return matches.reduce((a, b) => (b.href.length > a.href.length ? b : a)).href === href;
+};
 ---
 
 <!doctype html>
@@ -40,15 +56,44 @@ const activo = (href: string) =>
         <p class="mt-1 px-2 text-xs text-marca-500">Panel de administración</p>
         <nav class="mt-6 flex flex-col gap-1">
           {nav.map((n) => (
-            <a
-              href={n.href}
-              class:list={[
-                "rounded-lg px-3 py-2 text-sm font-medium",
-                activo(n.href) ? "bg-marca-600 text-white" : "text-marca-700 hover:bg-marca-50",
-              ]}
-            >
-              {n.label}
-            </a>
+            n.sub ? (
+              <div>
+                <a
+                  href={n.href}
+                  class:list={[
+                    "block rounded-lg px-3 py-2 text-sm font-medium",
+                    enSeccion(n.href) ? "text-marca-900" : "text-marca-700 hover:bg-marca-50",
+                  ]}
+                >
+                  {n.label}
+                </a>
+                <div class="ml-3 mt-0.5 flex flex-col gap-0.5 border-l border-marca-100 pl-2">
+                  {n.sub.map((s) => (
+                    <a
+                      href={s.href}
+                      class:list={[
+                        "rounded-lg px-3 py-1.5 text-sm",
+                        subActivo(n.sub!, s.href)
+                          ? "bg-marca-600 font-medium text-white"
+                          : "text-marca-700 hover:bg-marca-50",
+                      ]}
+                    >
+                      {s.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <a
+                href={n.href}
+                class:list={[
+                  "rounded-lg px-3 py-2 text-sm font-medium",
+                  activo(n.href) ? "bg-marca-600 text-white" : "text-marca-700 hover:bg-marca-50",
+                ]}
+              >
+                {n.label}
+              </a>
+            )
           ))}
         </nav>
 
