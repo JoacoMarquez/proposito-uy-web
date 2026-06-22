@@ -117,6 +117,32 @@ const nombreImagen = (() => {
         </div>
       </div>
   </div>
+
+  <!-- Confirmación de quitar imagen -->
+  <div data-img-confirm class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <h2 class="text-lg font-semibold text-marca-900">Quitar imagen</h2>
+      <p class="mt-2 text-sm text-marca-900/70">
+        ¿Seguro que querés quitar esta imagen? Va a quedar sin imagen cuando guardes.
+      </p>
+      <div class="mt-5 flex flex-wrap justify-end gap-3">
+        <button
+          type="button"
+          data-img-confirm-cancel
+          class="rounded-full border border-marca-300 px-5 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-50"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          data-img-confirm-yes
+          class="rounded-full bg-red-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+        >
+          Quitar imagen
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -162,8 +188,7 @@ const nombreImagen = (() => {
 
     // Quitar imagen: vacía el hidden (al guardar queda sin imagen), limpia el
     // archivo elegido y oculta la miniatura. No sube nada.
-    const quitar = () => {
-      if (!confirm("¿Quitar esta imagen? Va a quedar sin imagen cuando guardes.")) return;
+    const ejecutarQuitar = () => {
       if (hidden) {
         hidden.value = "";
         hidden.dispatchEvent(new Event("input", { bubbles: true })); // marca el form como sucio
@@ -174,7 +199,26 @@ const nombreImagen = (() => {
       removeBtns.forEach((b) => b.classList.add("hidden"));
       close();
     };
-    removeBtns.forEach((b) => b.addEventListener("click", quitar));
+
+    // Confirmación con modal del sistema.
+    const confirmModal = root.querySelector<HTMLElement>("[data-img-confirm]");
+    const abrirConfirm = () => {
+      confirmModal?.classList.remove("hidden");
+      confirmModal?.classList.add("flex");
+    };
+    const cerrarConfirm = () => {
+      confirmModal?.classList.add("hidden");
+      confirmModal?.classList.remove("flex");
+    };
+    removeBtns.forEach((b) => b.addEventListener("click", abrirConfirm));
+    root.querySelector("[data-img-confirm-yes]")?.addEventListener("click", () => {
+      ejecutarQuitar();
+      cerrarConfirm();
+    });
+    root.querySelector("[data-img-confirm-cancel]")?.addEventListener("click", cerrarConfirm);
+    confirmModal?.addEventListener("click", (e) => {
+      if (e.target === confirmModal) cerrarConfirm();
+    });
 
     if (openBtn) openBtn.addEventListener("click", open);
     if (modal) {
