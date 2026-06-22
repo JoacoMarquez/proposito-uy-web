@@ -4,6 +4,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
 import ImageField from "../../../components/ImageField.astro";
 import ChipInput from "../../../components/ChipInput.astro";
+import InsertarMedidas from "../../../components/InsertarMedidas.astro";
 import {
   getRecetaById,
   getProductos,
@@ -156,7 +157,9 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
 
     <div>
       <label class="text-sm font-medium text-marca-700">Ingredientes (uno por línea)</label>
-      <textarea name="ingredientes" rows="6" class={campoBase}>{(r?.ingredientes ?? []).join("\n")}</textarea>
+      <p class="text-xs text-marca-500">Tocá una fracción o unidad para insertarla donde está el cursor.</p>
+      <InsertarMedidas target="ingredientes" />
+      <textarea id="ingredientes" name="ingredientes" rows="6" class={campoBase}>{(r?.ingredientes ?? []).join("\n")}</textarea>
     </div>
 
     <div>
