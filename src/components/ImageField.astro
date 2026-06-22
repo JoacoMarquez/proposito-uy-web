@@ -28,7 +28,7 @@ const {
     {label}{ayuda && <span class="font-normal text-marca-500"> — {ayuda}</span>}
   </label>
 
-  <input type="hidden" name={name} value={imagen ?? ""} />
+  <input type="hidden" name={name} value={imagen ?? ""} data-img-hidden />
 
   <div class="mt-2 flex flex-wrap items-center gap-3">
     {imagen && (
@@ -55,6 +55,13 @@ const {
       Seleccionar imagen
     </label>
     <span data-img-filename class="text-sm text-marca-500">Ningún archivo seleccionado</span>
+    <button
+      type="button"
+      data-img-remove
+      class:list={["text-sm font-medium text-red-600 hover:underline", !imagen && "hidden"]}
+    >
+      Quitar imagen
+    </button>
   </div>
 
   {imagen && (
@@ -78,6 +85,13 @@ const {
           </label>
           <button
             type="button"
+            data-img-remove
+            class="rounded-full border border-red-300 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+          >
+            Quitar imagen
+          </button>
+          <button
+            type="button"
             data-img-close
             class="rounded-full border border-marca-300 px-5 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-100"
           >
@@ -96,11 +110,13 @@ const {
     if (root.dataset.imgInit) return; // evita doble init (initial + after-swap)
     root.dataset.imgInit = "1";
     const file = root.querySelector<HTMLInputElement>('input[type="file"]');
+    const hidden = root.querySelector<HTMLInputElement>("[data-img-hidden]");
     const nameEl = root.querySelector("[data-img-filename]");
     const modal = root.querySelector("[data-img-modal]");
     const openBtn = root.querySelector("[data-img-open]");
     const thumb = root.querySelector<HTMLImageElement>("[data-img-thumb]");
     const big = root.querySelector<HTMLImageElement>("[data-img-big]");
+    const removeBtns = root.querySelectorAll<HTMLElement>("[data-img-remove]");
 
     const open = () => {
       if (!modal) return;
@@ -121,10 +137,26 @@ const {
           const url = URL.createObjectURL(f);
           if (thumb) thumb.src = url;
           if (big) big.src = url;
+          removeBtns.forEach((b) => b.classList.remove("hidden"));
         }
         close();
       });
     }
+
+    // Quitar imagen: vacía el hidden (al guardar queda sin imagen), limpia el
+    // archivo elegido y oculta la miniatura. No sube nada.
+    const quitar = () => {
+      if (hidden) {
+        hidden.value = "";
+        hidden.dispatchEvent(new Event("input", { bubbles: true })); // marca el form como sucio
+      }
+      if (file) file.value = "";
+      if (nameEl) nameEl.textContent = "Ningún archivo seleccionado";
+      (openBtn as HTMLElement | null)?.classList.add("hidden");
+      removeBtns.forEach((b) => b.classList.add("hidden"));
+      close();
+    };
+    removeBtns.forEach((b) => b.addEventListener("click", quitar));
 
     if (openBtn) openBtn.addEventListener("click", open);
     if (modal) {
