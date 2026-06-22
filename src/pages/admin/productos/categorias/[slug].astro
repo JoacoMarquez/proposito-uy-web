@@ -1,19 +1,19 @@
 ---
 export const prerender = false;
-import AdminLayout from "../../../layouts/AdminLayout.astro";
-import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
-import ImageField from "../../../components/ImageField.astro";
-import ChipInput from "../../../components/ChipInput.astro";
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import AdminEditorHeader from "../../../../components/AdminEditorHeader.astro";
+import ImageField from "../../../../components/ImageField.astro";
+import ChipInput from "../../../../components/ChipInput.astro";
 import {
   getCategoria,
   actualizarCategoria,
   type CategoriaContenidoInput,
-} from "../../../db/queries";
-import { procesarImagenSubida } from "../../../lib/upload";
+} from "../../../../db/queries";
+import { procesarImagenSubida } from "../../../../lib/upload";
 
 const { slug } = Astro.params;
 const categoria = slug ? await getCategoria(slug) : undefined;
-if (!categoria) return Astro.redirect("/admin/categorias");
+if (!categoria) return Astro.redirect("/admin/productos/categorias");
 
 let error = "";
 
@@ -44,7 +44,7 @@ if (Astro.request.method === "POST") {
     error = "El nombre no puede quedar vacío.";
   } else {
     await actualizarCategoria(categoria.slug, data);
-    return Astro.redirect(`/admin/categorias/${categoria.slug}?ok=1`);
+    return Astro.redirect(`/admin/productos/categorias/${categoria.slug}?ok=1`);
   }
 }
 
@@ -57,7 +57,7 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
   <AdminEditorHeader
     slot="antetitulo"
     titulo={c.nombre}
-    volverHref="/admin/categorias"
+    volverHref="/admin/productos/categorias"
     volverLabel="Volver a categorías"
     formId="editor-categoria"
     guardado={guardado}
