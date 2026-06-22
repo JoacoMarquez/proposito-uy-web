@@ -1,0 +1,61 @@
+---
+// Galería simple: imagen principal grande + miniaturas para cambiarla.
+// Recibe varias imágenes (filtra las vacías). Con una sola, no muestra miniaturas;
+// con ninguna, muestra el placeholder "Foto pendiente".
+interface Props {
+  imagenes: (string | null | undefined)[];
+  alt: string;
+  marco?: string; // clases del marco (proporción), ej. "aspect-square" o "aspect-video"
+}
+const { imagenes, alt, marco = "aspect-square" } = Astro.props;
+const fotos = imagenes.filter((x): x is string => Boolean(x));
+---
+
+{fotos.length === 0 ? (
+  <div class:list={["flex items-center justify-center rounded-2xl bg-marca-50 text-marca-300", marco]}>
+    <span class="text-sm">Foto pendiente</span>
+  </div>
+) : (
+  <div data-galeria>
+    <div class:list={["overflow-hidden rounded-2xl bg-marca-50", marco]}>
+      <img data-galeria-main src={fotos[0]} alt={alt} class="h-full w-full object-cover" />
+    </div>
+    {fotos.length > 1 && (
+      <div class="mt-3 flex gap-2">
+        {fotos.map((f, i) => (
+          <button
+            type="button"
+            data-galeria-thumb={f}
+            class:list={[
+              "h-16 w-16 overflow-hidden rounded-lg border-2 transition",
+              i === 0 ? "border-marca-600" : "border-transparent hover:border-marca-300",
+            ]}
+          >
+            <img src={f} alt="" class="h-full w-full object-cover" />
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
+<script>
+  function setupGaleria(g: HTMLElement) {
+    const main = g.querySelector<HTMLImageElement>("[data-galeria-main]");
+    const thumbs = [...g.querySelectorAll<HTMLElement>("[data-galeria-thumb]")];
+    if (!main) return;
+    thumbs.forEach((t) => {
+      t.addEventListener("click", () => {
+        main.src = t.dataset.galeriaThumb ?? main.src;
+        thumbs.forEach((o) => {
+          o.classList.toggle("border-marca-600", o === t);
+          o.classList.toggle("border-transparent", o !== t);
+        });
+      });
+    });
+  }
+  document.querySelectorAll<HTMLElement>("[data-galeria]").forEach(setupGaleria);
+  document.addEventListener("astro:after-swap", () =>
+    document.querySelectorAll<HTMLElement>("[data-galeria]").forEach(setupGaleria),
+  );
+</script>

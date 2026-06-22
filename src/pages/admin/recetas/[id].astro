@@ -43,6 +43,7 @@ if (Astro.request.method === "POST") {
 
   // Imagen: archivo nuevo → se guarda y se usa su URL; si no, se conserva la actual.
   const subida = await procesarImagenSubida(form);
+  const subida2 = await procesarImagenSubida(form, "imagen2File");
 
   const data: RecetaInput = {
     slug: s("slug"),
@@ -57,10 +58,11 @@ if (Astro.request.method === "POST") {
     materiales: lineas("materiales"),
     notas: lineas("notas"),
     imagen: subida.url ?? sn("imagen"),
+    imagen2: subida2.url ?? sn("imagen2"),
   };
 
-  if (subida.error) {
-    error = subida.error;
+  if (subida.error || subida2.error) {
+    error = subida.error ?? subida2.error ?? "";
   } else if (!data.slug || !data.titulo) {
     error = "Completá al menos slug y título.";
   } else {
@@ -123,7 +125,8 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     </div>
 
     <!-- Imagen -->
-    <ImageField imagen={r?.imagen} alt={r?.titulo ?? "imagen"} />
+    <ImageField imagen={r?.imagen} alt={r?.titulo ?? "imagen"} label="Imagen principal" />
+    <ImageField imagen={r?.imagen2} alt={r?.titulo ?? "imagen"} name="imagen2" fieldId="imagen2File" label="Imagen 2 (opcional)" ayuda="Foto complementaria" />
 
     <div>
       <label class="text-sm font-medium text-marca-700">Productos aliados</label>

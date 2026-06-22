@@ -127,6 +127,7 @@ export interface ProductoInput {
   destacado: boolean;
   disponible: boolean;
   imagen: string | null;
+  imagen2: string | null;
 }
 
 export async function getProductoById(id: number): Promise<ProductoFull | undefined> {
@@ -178,6 +179,7 @@ export interface RecetaInput {
   materiales: string[];
   notas: string[];
   imagen: string | null;
+  imagen2: string | null;
 }
 
 export async function getRecetaById(id: number): Promise<Receta | undefined> {

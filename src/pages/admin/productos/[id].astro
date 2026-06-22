@@ -41,6 +41,7 @@ if (Astro.request.method === "POST") {
   // Imagen: si se subió un archivo nuevo, se guarda y se usa su URL; si no,
   // se conserva la actual (campo oculto `imagen`).
   const subida = await procesarImagenSubida(form);
+  const subida2 = await procesarImagenSubida(form, "imagen2File");
 
   const data: ProductoInput = {
     slug: s("slug"),
@@ -61,10 +62,11 @@ if (Astro.request.method === "POST") {
     destacado: form.get("destacado") === "on",
     disponible: form.get("disponible") === "on",
     imagen: subida.url ?? sn("imagen"),
+    imagen2: subida2.url ?? sn("imagen2"),
   };
 
-  if (subida.error) {
-    error = subida.error;
+  if (subida.error || subida2.error) {
+    error = subida.error ?? subida2.error ?? "";
   } else if (!data.slug || !data.nombre || !data.variante || !data.categoriaSlug) {
     error = "Completá al menos slug, nombre, variante y categoría.";
   } else if (pres.length === 0) {
@@ -143,7 +145,8 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     </div>
 
     <!-- Imagen -->
-    <ImageField imagen={p?.imagen} alt={p?.nombre ?? "imagen"} />
+    <ImageField imagen={p?.imagen} alt={p?.nombre ?? "imagen"} label="Imagen principal" />
+    <ImageField imagen={p?.imagen2} alt={p?.nombre ?? "imagen"} name="imagen2" fieldId="imagen2File" label="Imagen 2 (opcional)" ayuda="Packaging o foto complementaria" />
 
     <!-- Presentaciones -->
     <div>
