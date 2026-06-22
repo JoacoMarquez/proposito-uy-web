@@ -1,0 +1,116 @@
+---
+// Input de "chips/tags" para el panel: escribís un ítem + Enter (o coma) y se
+// agrega como chip; ✕ para quitar. Serializa a un input oculto name={name} con
+// un ítem por línea (compatible con el parseo `lineas()` del editor).
+interface Props {
+  name: string;
+  valor?: string[];
+  placeholder?: string;
+}
+const { name, valor = [], placeholder = "Escribí y Enter…" } = Astro.props;
+const chipCls =
+  "inline-flex max-w-full items-center gap-1.5 rounded-full bg-marca-100 px-3 py-1 text-sm font-medium text-marca-700";
+---
+
+<div data-chip-input>
+  <input type="hidden" name={name} value={valor.join("\n")} data-chip-hidden />
+  <div
+    data-chip-box
+    class="mt-1 flex cursor-text flex-wrap items-center gap-2 rounded-xl border border-marca-300 p-2"
+  >
+    {valor.map((v) => (
+      <span data-chip class={chipCls}>
+        <span data-chip-val class="whitespace-pre-wrap break-words">{v}</span>
+        <button type="button" data-chip-del class="shrink-0 text-marca-500 hover:text-red-600" title="Quitar">✕</button>
+      </span>
+    ))}
+    <input
+      type="text"
+      data-chip-text
+      placeholder={placeholder}
+      class="min-w-40 flex-1 border-0 bg-transparent px-1 py-1 text-sm focus:outline-none focus:ring-0"
+    />
+  </div>
+</div>
+
+<script>
+  const CHIP_CLS =
+    "inline-flex max-w-full items-center gap-1.5 rounded-full bg-marca-100 px-3 py-1 text-sm font-medium text-marca-700";
+
+  function setupChipInput(root: HTMLElement) {
+    if (root.dataset.init) return;
+    root.dataset.init = "1";
+    const box = root.querySelector("[data-chip-box]") as HTMLElement;
+    const text = root.querySelector("[data-chip-text]") as HTMLInputElement;
+    const hidden = root.querySelector("[data-chip-hidden]") as HTMLInputElement;
+    const form = root.closest("form");
+
+    const sync = () => {
+      const vals = [...root.querySelectorAll("[data-chip-val]")].map((s) => s.textContent ?? "");
+      hidden.value = vals.join("\n");
+      hidden.dispatchEvent(new Event("input", { bubbles: true })); // marca el form como "sucio"
+    };
+
+    function addChip(valor: string) {
+      const v = valor.trim();
+      if (!v) return;
+      const chip = document.createElement("span");
+      chip.setAttribute("data-chip", "");
+      chip.className = CHIP_CLS;
+      const val = document.createElement("span");
+      val.setAttribute("data-chip-val", "");
+      val.className = "whitespace-pre-wrap break-words";
+      val.textContent = v;
+      const del = document.createElement("button");
+      del.type = "button";
+      del.setAttribute("data-chip-del", "");
+      del.className = "shrink-0 text-marca-500 hover:text-red-600";
+      del.title = "Quitar";
+      del.textContent = "✕";
+      chip.append(val, del);
+      box.insertBefore(chip, text);
+      sync();
+    }
+
+    text.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === ",") {
+        e.preventDefault();
+        addChip(text.value);
+        text.value = "";
+      } else if (e.key === "Backspace" && text.value === "") {
+        const chips = root.querySelectorAll("[data-chip]");
+        chips[chips.length - 1]?.remove();
+        sync();
+      }
+    });
+
+    box.addEventListener("click", (e) => {
+      const del = (e.target as HTMLElement).closest("[data-chip-del]");
+      if (del) {
+        del.closest("[data-chip]")?.remove();
+        sync();
+      } else if (e.target === box) {
+        text.focus();
+      }
+    });
+
+    // Si quedó texto sin confirmar al guardar, lo agrega igual.
+    form?.addEventListener(
+      "submit",
+      () => {
+        if (text.value.trim()) {
+          addChip(text.value);
+          text.value = "";
+        }
+        sync();
+      },
+      true,
+    );
+  }
+
+  function init() {
+    document.querySelectorAll<HTMLElement>("[data-chip-input]").forEach(setupChipInput);
+  }
+  init();
+  document.addEventListener("astro:after-swap", init);
+</script>

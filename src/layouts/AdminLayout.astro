@@ -1,23 +1,48 @@
 ---
 import "../styles/global.css";
+import { getCategorias } from "../db/queries";
 
 interface Props {
   titulo: string;
+  ocultarTitulo?: boolean; // si la página renderiza su propio título (ej. header sticky)
 }
-const { titulo } = Astro.props;
+const { titulo, ocultarTitulo = false } = Astro.props;
+
+// Subitems de Productos: "Todos" + una entrada por categoría (lleva a su editor).
+const categorias = await getCategorias();
 const email = Astro.locals.adminUser?.email;
 const inicial = (email ?? "?").trim().charAt(0).toUpperCase() || "?";
 const path = Astro.url.pathname;
 
-const nav = [
+type NavItem = { label: string; href: string; sub?: { label: string; href: string }[] };
+const nav: NavItem[] = [
   { label: "Inicio", href: "/admin" },
   { label: "Pedidos", href: "/admin/pedidos" },
-  { label: "Productos", href: "/admin/productos" },
+  {
+    label: "Productos",
+    href: "/admin/productos",
+    sub: categorias.map((c) => ({
+      label: c.nombre,
+      href: `/admin/productos/categorias/${c.slug}`,
+    })),
+  },
   { label: "Recetas", href: "/admin/recetas" },
   { label: "Preguntas", href: "/admin/preguntas" },
+  { label: "Contenido", href: "/admin/contenido" },
 ];
 const activo = (href: string) =>
   href === "/admin" ? path === "/admin" : path.startsWith(href);
+// ¿La sección (con subsecciones) contiene la ruta actual?
+const enSeccion = (href: string) => path === href || path.startsWith(href + "/");
+// De los subitems, el activo es el de href más específico que matchea la ruta.
+const subActivo = (subs: { href: string }[], href: string) => {
+  const matches = subs.filter((s) => path === s.href || path.startsWith(s.href + "/"));
+  if (!matches.length) return false;
+  return matches.reduce((a, b) => (b.href.length > a.href.length ? b : a)).href === href;
+};
+// El padre está "directamente" activo (su propia lista) cuando estamos en su
+// sección pero en ningún subitem (ej. lista de productos o editar un producto).
+const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(subs, s.href));
 ---
 
 <!doctype html>
@@ -29,24 +54,82 @@ const activo = (href: string) =>
     <title>{titulo} · Admin Propósito UY</title>
   </head>
   <body class="min-h-screen bg-crema font-sans text-marca-900">
-    <div class="flex min-h-screen">
-      <aside class="sticky top-0 flex h-screen w-56 shrink-0 flex-col overflow-y-auto border-r border-marca-100 bg-white p-4">
-        <a href="/admin" class="flex items-center gap-2 px-2">
-          <span class="text-lg font-bold tracking-tight text-marca-700">Propósito</span>
-          <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-6 w-6" />
-        </a>
+    <div class="flex min-h-screen" data-shell>
+      <aside data-sidebar class="sticky top-0 h-screen w-56 shrink-0 overflow-hidden border-r border-marca-100 bg-white">
+      <div class="flex h-screen w-56 flex-col overflow-y-auto p-4">
+        <div class="flex items-center justify-between gap-2">
+          <a href="/admin" class="flex items-center gap-2 px-2">
+            <span class="text-lg font-bold tracking-tight text-marca-700">Propósito</span>
+            <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-6 w-6" />
+          </a>
+          <button
+            type="button"
+            data-sidebar-collapse
+            aria-label="Colapsar menú"
+            class="shrink-0 rounded-lg p-1.5 text-marca-500 hover:bg-marca-50"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
         <p class="mt-1 px-2 text-xs text-marca-500">Panel de administración</p>
         <nav class="mt-6 flex flex-col gap-1">
           {nav.map((n) => (
-            <a
-              href={n.href}
-              class:list={[
-                "rounded-lg px-3 py-2 text-sm font-medium",
-                activo(n.href) ? "bg-marca-600 text-white" : "text-marca-700 hover:bg-marca-50",
-              ]}
-            >
-              {n.label}
-            </a>
+            n.sub ? (
+              <div data-collapsible data-key={n.label}>
+                <div class="flex items-center gap-1">
+                  <a
+                    href={n.href}
+                    class:list={[
+                      "block flex-1 rounded-lg px-3 py-2 text-sm font-medium",
+                      enSeccion(n.href) && !algunSubActivo(n.sub)
+                        ? "bg-marca-600 text-white"
+                        : enSeccion(n.href)
+                          ? "text-marca-900"
+                          : "text-marca-700 hover:bg-marca-50",
+                    ]}
+                  >
+                    {n.label}
+                  </a>
+                  <button
+                    type="button"
+                    data-collapse-toggle
+                    aria-label={`Mostrar u ocultar ${n.label}`}
+                    class="shrink-0 rounded-lg p-1.5 text-marca-500 hover:bg-marca-50"
+                  >
+                    <svg data-chevron class="h-4 w-4 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                </div>
+                <div data-collapse-panel class="ml-3 mt-0.5 flex flex-col gap-0.5 border-l border-marca-100 pl-2">
+                  {n.sub.map((s) => (
+                    <a
+                      href={s.href}
+                      class:list={[
+                        "rounded-lg px-3 py-1.5 text-sm",
+                        subActivo(n.sub!, s.href)
+                          ? "bg-marca-600 font-medium text-white"
+                          : "text-marca-700 hover:bg-marca-50",
+                      ]}
+                    >
+                      {s.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <a
+                href={n.href}
+                class:list={[
+                  "rounded-lg px-3 py-2 text-sm font-medium",
+                  activo(n.href) ? "bg-marca-600 text-white" : "text-marca-700 hover:bg-marca-50",
+                ]}
+              >
+                {n.label}
+              </a>
+            )
           ))}
         </nav>
 
@@ -68,14 +151,97 @@ const activo = (href: string) =>
             <span aria-hidden="true">↗</span> Ver sitio
           </a>
         </div>
+      </div>
       </aside>
 
-      <main class="flex-1 p-8">
-        <h1 class="text-2xl font-bold text-marca-700">{titulo}</h1>
-        <div class="mt-6">
-          <slot />
+      <button
+        type="button"
+        data-sidebar-expand
+        aria-label="Abrir menú"
+        class="fixed left-3 top-3 z-30 hidden rounded-lg border border-marca-100 bg-white p-2 text-marca-700 shadow-sm hover:bg-marca-50"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+
+      <main data-main class="flex-1 p-8">
+        <slot name="antetitulo" />
+        <div class="mx-auto w-full max-w-6xl">
+          {!ocultarTitulo && <h1 class="text-2xl font-bold text-marca-700">{titulo}</h1>}
+          <div class:list={[!ocultarTitulo && "mt-6"]}>
+            <slot />
+          </div>
         </div>
       </main>
     </div>
+
+    <script>
+      // Colapsar/expandir toda la barra lateral. Recuerda el estado en
+      // localStorage; al colapsar aparece un botón flotante para reabrirla.
+      (() => {
+        const KEY = "admin-sidebar-collapsed";
+        const aside = document.querySelector<HTMLElement>("[data-sidebar]");
+        const expandBtn = document.querySelector<HTMLElement>("[data-sidebar-expand]");
+        const collapseBtn = document.querySelector<HTMLElement>("[data-sidebar-collapse]");
+        if (!aside || !expandBtn || !collapseBtn) return;
+        const main = document.querySelector<HTMLElement>("[data-main]");
+        let colapsado = localStorage.getItem(KEY) === "1";
+        const aplicar = (animado: boolean) => {
+          aside.classList.toggle("w-0", colapsado);
+          aside.classList.toggle("w-56", !colapsado);
+          aside.classList.toggle("border-r-0", colapsado);
+          // Deja lugar arriba para el botón flotante cuando el sidebar está oculto.
+          main?.classList.toggle("pt-16", colapsado);
+          if (colapsado) {
+            // Al colapsar con animación, mostrar el botón recién cuando termina.
+            if (animado) window.setTimeout(() => colapsado && expandBtn.classList.remove("hidden"), 250);
+            else expandBtn.classList.remove("hidden");
+          } else {
+            expandBtn.classList.add("hidden");
+          }
+        };
+        aplicar(false);
+        // Habilita la transición después del estado inicial (no animar al cargar).
+        requestAnimationFrame(() =>
+          aside.classList.add("transition-[width]", "duration-300", "ease-in-out"),
+        );
+        collapseBtn.addEventListener("click", () => {
+          colapsado = true;
+          localStorage.setItem(KEY, "1");
+          aplicar(true);
+        });
+        expandBtn.addEventListener("click", () => {
+          colapsado = false;
+          localStorage.setItem(KEY, "0");
+          aplicar(true);
+        });
+      })();
+
+      // Expandir/colapsar las secciones del sidebar que tienen subitems.
+      // Recuerda el estado por sección en localStorage (sin View Transitions
+      // el panel recarga en cada navegación, así que persistimos la preferencia).
+      document.querySelectorAll<HTMLElement>("[data-collapsible]").forEach((root) => {
+        const key = "admin-nav:" + (root.dataset.key ?? "");
+        const btn = root.querySelector<HTMLElement>("[data-collapse-toggle]");
+        const panel = root.querySelector<HTMLElement>("[data-collapse-panel]");
+        const chevron = root.querySelector<HTMLElement>("[data-chevron]");
+        if (!btn || !panel) return;
+        const guardado = localStorage.getItem(key);
+        let abierto = guardado === null ? true : guardado === "1";
+        const aplicar = () => {
+          panel.classList.toggle("hidden", !abierto);
+          if (chevron) chevron.style.transform = abierto ? "" : "rotate(-90deg)";
+        };
+        aplicar();
+        btn.addEventListener("click", () => {
+          abierto = !abierto;
+          localStorage.setItem(key, abierto ? "1" : "0");
+          aplicar();
+        });
+      });
+    </script>
   </body>
 </html>

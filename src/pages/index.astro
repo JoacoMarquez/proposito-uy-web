@@ -4,56 +4,45 @@ import Layout from "../layouts/Layout.astro";
 import ProductCard from "../components/ProductCard.astro";
 import CategoriaCard from "../components/CategoriaCard.astro";
 import TituloSeccion from "../components/TituloSeccion.astro";
-import { getDestacados, getCategorias } from "../db/queries";
+import { getDestacados, getCategorias, getContenido } from "../db/queries";
 
 const destacados = await getDestacados();
 const categoriasLista = await getCategorias();
+const c = await getContenido("inicio");
 
 const atajos = [
-  { href: "/recetario", titulo: "Recetario" },
-  { href: "/retornables", titulo: "Retornables" },
-  { href: "/preguntas", titulo: "Preguntas" },
+  { href: c.atajo1Href, titulo: c.atajo1Titulo },
+  { href: c.atajo2Href, titulo: c.atajo2Titulo },
+  { href: c.atajo3Href, titulo: c.atajo3Titulo },
 ];
 ---
 
 <Layout>
-  <!-- Banner principal: placa de marca -->
+  <!-- Hero principal: placa de marca + frase principal + CTA -->
   <section class="bg-marca-100 text-center">
     <img
-      src="/inicio/portada.webp"
-      alt="Propósito — cuidamos lo que comés"
+      src={c.heroImagen}
+      alt={c.heroAlt}
       class="h-64 w-full object-cover sm:h-80 lg:h-96"
     />
     <div class="px-4 pb-14">
+      <h1 class="mx-auto max-w-3xl pt-8 text-2xl font-bold leading-tight text-marca-700 sm:text-3xl">
+        {c.presentacionFrase}
+      </h1>
       <a
-        href="/tienda"
-        class="inline-block rounded-full bg-marca-600 px-8 py-3 font-medium text-white hover:bg-marca-700"
+        href={c.heroCtaLink}
+        class="mt-8 inline-block rounded-full bg-marca-600 px-8 py-3 font-medium text-white hover:bg-marca-700"
       >
-        Ver catálogo
+        {c.heroCtaTexto}
       </a>
-    </div>
-  </section>
-
-  <!-- Mensaje de marca -->
-  <section class="mx-auto max-w-3xl px-4 pt-16 text-center">
-    <h1 class="text-2xl font-bold leading-tight text-marca-700 sm:text-3xl">
-      Elaboramos alimentos reales, honestos y nutritivos, pensados para acompañarte en el día a día.
-    </h1>
-  </section>
-
-  <!-- Los más pedidos -->
-  <section class="mx-auto max-w-6xl px-4 py-16">
-    <TituloSeccion titulo="Los más pedidos por ustedes" />
-    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {destacados.map((p) => <ProductCard producto={p} />)}
     </div>
   </section>
 
   <!-- Categorías de productos -->
   <section class="bg-marca-50">
-    <div class="mx-auto max-w-6xl px-4 py-16">
-      <TituloSeccion titulo="Categorías" />
-      <div class="mt-6 grid gap-5 sm:grid-cols-3">
+    <div class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
+      <TituloSeccion titulo={c.tituloCategorias} />
+      <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
         {categoriasLista.map((c) => (
           <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} />
         ))}
@@ -61,22 +50,10 @@ const atajos = [
     </div>
   </section>
 
-  <!-- Cierre emocional -->
-  <section class="mx-auto max-w-3xl px-4 py-20 text-center">
-    <p class="text-2xl font-medium leading-relaxed text-marca-700">
-      Queremos alimentarte en tu rutina, en tus momentos de descanso, en tus desayunos, tus meriendas
-      y también cuando no tenés tiempo de sentarte a comer.
-    </p>
-    <p class="mt-4 text-lg text-marca-900/70">
-      Nuestros productos están pensados para acompañarte en lo cotidiano, con soluciones prácticas,
-      ricas y reales.
-    </p>
-  </section>
-
   <!-- Atajos -->
-  <section class="mx-auto max-w-6xl px-4 pb-20">
-    <TituloSeccion titulo="Atajos" />
-    <div class="mt-6 grid gap-5 sm:grid-cols-3">
+  <section class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
+    <TituloSeccion titulo={c.tituloAtajos} />
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
       {atajos.map((a) => (
         <a href={a.href} class="overflow-hidden rounded-2xl border border-marca-100 bg-white hover:shadow-md">
           <div class="flex aspect-video items-center justify-center bg-marca-100 text-sm text-marca-600">
@@ -87,6 +64,24 @@ const atajos = [
           </div>
         </a>
       ))}
+    </div>
+  </section>
+
+  <!-- Texto de presentación -->
+  <section class="mx-auto max-w-3xl px-4 py-20 text-center">
+    <p class="text-2xl font-medium leading-relaxed text-marca-700">
+      {c.presentacionP1}
+    </p>
+    <p class="mt-4 text-lg text-marca-900/70">
+      {c.presentacionP2}
+    </p>
+  </section>
+
+  <!-- Los más pedidos (cierre comercial) -->
+  <section class="mx-auto max-w-6xl px-4 pb-12 sm:pb-20">
+    <TituloSeccion titulo={c.tituloDestacados} />
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      {destacados.map((p) => <ProductCard producto={p} />)}
     </div>
   </section>
 </Layout>

@@ -1,0 +1,44 @@
+---
+export const prerender = false;
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import { getCategorias } from "../../../../db/queries";
+
+const categorias = await getCategorias();
+---
+
+<AdminLayout titulo="Categorías">
+  <p class="mb-4 text-sm text-marca-500">
+    Editá el contenido de cada categoría (textos, características y notas del creador). Las
+    categorías no se crean ni se eliminan.
+  </p>
+
+  <div class="overflow-hidden rounded-2xl border border-marca-100 bg-white">
+    <table class="w-full text-sm">
+      <thead class="border-b border-marca-100 bg-marca-50 text-left text-marca-700">
+        <tr>
+          <th class="p-3">Categoría</th>
+          <th class="p-3">Descripción</th>
+          <th class="p-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {categorias.map((c) => (
+          <tr class="border-b border-marca-50 last:border-0">
+            <td class="p-3">
+              <div class="flex items-center gap-3">
+                {c.imagen
+                  ? <img src={c.imagen} alt={c.nombre} class="h-10 w-10 shrink-0 rounded-lg border border-marca-100 object-cover" />
+                  : <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-marca-100 bg-marca-50 text-marca-300" aria-hidden="true">🖼️</div>}
+                <span class="font-medium text-marca-900">{c.nombre}</span>
+              </div>
+            </td>
+            <td class="p-3 text-marca-900/70">{c.descripcion}</td>
+            <td class="p-3 text-right">
+              <a href={`/admin/productos/categorias/${c.slug}`} class="font-medium text-marca-700 hover:underline">Editar</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</AdminLayout>

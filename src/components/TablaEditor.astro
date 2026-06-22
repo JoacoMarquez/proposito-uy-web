@@ -1,0 +1,173 @@
+---
+// Editor de grilla para el panel: columnas + filas editables, con alta/baja de
+// filas y columnas. Al enviar el form, serializa la grilla a JSON en un input
+// oculto con name={name}. El editor de Contenido parsea ese JSON.
+interface Tabla {
+  columnas?: string[];
+  filas?: string[][];
+}
+interface Props {
+  name: string;
+  valor?: Tabla | null;
+}
+const { name, valor } = Astro.props;
+const columnas = valor?.columnas ?? [];
+const filas = valor?.filas ?? [];
+
+const inputCls =
+  "w-full min-w-28 rounded-lg border border-marca-300 px-2 py-1.5 text-sm";
+const delCls =
+  "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium text-red-600 hover:bg-red-50";
+---
+
+<div data-tabla-editor data-name={name}>
+  <input type="hidden" name={name} data-tabla-input />
+
+  <div class="overflow-x-auto rounded-xl border border-marca-100 bg-white p-2">
+    <table data-grid class="border-separate border-spacing-1">
+      <thead>
+        <tr data-head-row>
+          {columnas.map((col) => (
+            <th class="text-left">
+              <div class="flex items-center gap-1">
+                <input data-col-input value={col} placeholder="Columna" class={`${inputCls} font-semibold`} />
+                <button type="button" data-del-col class={delCls} title="Quitar columna">✕</button>
+              </div>
+            </th>
+          ))}
+          <th data-acciones-col></th>
+        </tr>
+      </thead>
+      <tbody>
+        {filas.map((fila) => (
+          <tr data-row>
+            {columnas.map((_, j) => (
+              <td><input data-cell value={fila[j] ?? ""} class={inputCls} /></td>
+            ))}
+            <td>
+              <button type="button" data-del-row class={delCls} title="Quitar fila">✕</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-2 flex flex-wrap gap-2">
+    <button type="button" data-add-col class="rounded-full border border-marca-300 px-3 py-1.5 text-sm font-medium text-marca-700 hover:bg-marca-50">
+      + Columna
+    </button>
+    <button type="button" data-add-row class="rounded-full border border-marca-300 px-3 py-1.5 text-sm font-medium text-marca-700 hover:bg-marca-50">
+      + Fila
+    </button>
+  </div>
+</div>
+
+<script>
+  const INPUT_CLS = "w-full min-w-28 rounded-lg border border-marca-300 px-2 py-1.5 text-sm";
+  const DEL_CLS = "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium text-red-600 hover:bg-red-50";
+
+  function thColumna(valor = "") {
+    const th = document.createElement("th");
+    th.className = "text-left";
+    const wrap = document.createElement("div");
+    wrap.className = "flex items-center gap-1";
+    const input = document.createElement("input");
+    input.setAttribute("data-col-input", "");
+    input.placeholder = "Columna";
+    input.className = INPUT_CLS + " font-semibold";
+    input.value = valor;
+    const del = document.createElement("button");
+    del.type = "button";
+    del.setAttribute("data-del-col", "");
+    del.className = DEL_CLS;
+    del.title = "Quitar columna";
+    del.textContent = "✕";
+    wrap.append(input, del);
+    th.append(wrap);
+    return th;
+  }
+
+  function tdCelda(valor = "") {
+    const td = document.createElement("td");
+    const input = document.createElement("input");
+    input.setAttribute("data-cell", "");
+    input.className = INPUT_CLS;
+    input.value = valor;
+    td.append(input);
+    return td;
+  }
+
+  function tdAccionFila() {
+    const td = document.createElement("td");
+    const del = document.createElement("button");
+    del.type = "button";
+    del.setAttribute("data-del-row", "");
+    del.className = DEL_CLS;
+    del.title = "Quitar fila";
+    del.textContent = "✕";
+    td.append(del);
+    return td;
+  }
+
+  function setupTablaEditor(root: HTMLElement) {
+    if (root.dataset.init) return;
+    root.dataset.init = "1";
+    const grid = root.querySelector("[data-grid]") as HTMLTableElement;
+    const headRow = root.querySelector("[data-head-row]") as HTMLTableRowElement;
+    const tbody = grid.querySelector("tbody") as HTMLTableSectionElement;
+    const hidden = root.querySelector("[data-tabla-input]") as HTMLInputElement;
+    const form = root.closest("form");
+
+    const nCols = () => root.querySelectorAll("[data-col-input]").length;
+
+    root.querySelector("[data-add-col]")?.addEventListener("click", () => {
+      headRow.insertBefore(thColumna(), headRow.querySelector("[data-acciones-col]"));
+      tbody.querySelectorAll("[data-row]").forEach((tr) => {
+        tr.insertBefore(tdCelda(), tr.lastElementChild);
+      });
+    });
+
+    root.querySelector("[data-add-row]")?.addEventListener("click", () => {
+      const tr = document.createElement("tr");
+      tr.setAttribute("data-row", "");
+      for (let i = 0; i < nCols(); i++) tr.append(tdCelda());
+      tr.append(tdAccionFila());
+      tbody.append(tr);
+    });
+
+    // Delegación para quitar columna / fila.
+    root.addEventListener("click", (e) => {
+      const t = e.target as HTMLElement;
+      const delCol = t.closest("[data-del-col]");
+      const delRow = t.closest("[data-del-row]");
+      if (delCol) {
+        const th = delCol.closest("th")!;
+        const idx = [...headRow.children].indexOf(th);
+        th.remove();
+        tbody.querySelectorAll("[data-row]").forEach((tr) => tr.children[idx]?.remove());
+      } else if (delRow) {
+        delRow.closest("[data-row]")?.remove();
+      }
+    });
+
+    // Serializar al enviar el form.
+    form?.addEventListener(
+      "submit",
+      () => {
+        const columnas = [...root.querySelectorAll<HTMLInputElement>("[data-col-input]")].map((i) => i.value);
+        const filas = [...tbody.querySelectorAll<HTMLTableRowElement>("[data-row]")].map((tr) =>
+          [...tr.querySelectorAll<HTMLInputElement>("[data-cell]")].map((i) => i.value),
+        );
+        hidden.value = JSON.stringify({ columnas, filas });
+      },
+      true, // capture: corre antes que otros submit handlers
+    );
+  }
+
+  function init() {
+    document.querySelectorAll<HTMLElement>("[data-tabla-editor]").forEach(setupTablaEditor);
+  }
+  init();
+  document.addEventListener("astro:after-swap", init);
+</script>

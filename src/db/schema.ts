@@ -72,6 +72,8 @@ export const recetas = pgTable("recetas", {
   rendimiento: jsonb("rendimiento").$type<Record<string, string>>(),
   ingredientes: jsonb("ingredientes").$type<string[]>().notNull().default([]),
   procedimiento: jsonb("procedimiento").$type<string[]>().notNull().default([]),
+  materiales: jsonb("materiales").$type<string[]>().notNull().default([]), // utensilios necesarios
+  notas: jsonb("notas").$type<string[]>().notNull().default([]),
   imagen: text("imagen"),
   orden: integer("orden").notNull().default(0),
 });
@@ -176,6 +178,26 @@ export const suscriptores = pgTable("suscriptores", {
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
+// Tabla genérica de configuración clave/valor. Reservada para flags de sistema.
+// (Los horarios de retiro/entrega ahora viven en el contenido de la página
+// "tienda", tabla `paginas`.) Se mantiene para no forzar un DROP en la base.
+export const configuracion = pgTable("configuracion", {
+  clave: text("clave").primaryKey(),
+  valor: text("valor").notNull(),
+});
+
+// Contenido editable de las páginas estáticas (textos, links, imágenes, listas).
+// Un row por página; `bloques` guarda el objeto JSON de esa página. La FORMA de
+// cada página y sus defaults (= los literales hoy hardcodeados) viven en el
+// esquema en código src/db/paginas-esquema.ts, no en la DB. Por eso esta tabla
+// NO se seedea: arranca vacía (getContenido cae a los defaults) y la primera
+// fila se crea al primer "Guardar" del panel — re-seedear nunca pisa ediciones.
+export const paginas = pgTable("paginas", {
+  slug: text("slug").primaryKey(), // "inicio" | "contacto" | "nosotros" | "ajustes" ...
+  bloques: jsonb("bloques").$type<Record<string, unknown>>().notNull().default({}),
+  actualizadoEn: timestamp("actualizado_en").notNull().defaultNow(),
+});
+
 // Tipos inferidos para usar en la app
 export type Producto = typeof productos.$inferSelect;
 export type Presentacion = typeof presentaciones.$inferSelect;
@@ -187,3 +209,4 @@ export type PedidoItem = typeof pedidoItems.$inferSelect;
 export type Cliente = typeof clientes.$inferSelect;
 export type Suscriptor = typeof suscriptores.$inferSelect;
 export type Imagen = typeof imagenes.$inferSelect;
+export type Pagina = typeof paginas.$inferSelect;
