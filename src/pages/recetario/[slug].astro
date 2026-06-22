@@ -30,9 +30,13 @@ const fichas = [
     <h1 class="mt-2 text-3xl font-bold text-marca-700">{receta.titulo}</h1>
     <p class="mt-1 text-sm text-marca-500">Por Propósito UY</p>
 
-    <div class="mt-6 flex aspect-video items-center justify-center rounded-2xl bg-marca-50 text-sm text-marca-300">
-      Foto pendiente
-    </div>
+    {receta.imagen ? (
+      <img src={receta.imagen} alt={receta.titulo} class="mt-6 aspect-video w-full rounded-2xl object-cover" />
+    ) : (
+      <div class="mt-6 flex aspect-video items-center justify-center rounded-2xl bg-marca-50 text-sm text-marca-300">
+        Foto pendiente
+      </div>
+    )}
 
     <p class="mt-6 text-marca-900/80">{receta.descripcion}</p>
 

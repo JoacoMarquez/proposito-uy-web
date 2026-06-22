@@ -17,7 +17,11 @@ const c = await getContenido("recetario");
     <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {recetas.map((r) => (
         <a href={`/recetario/${r.slug}`} class="overflow-hidden rounded-2xl border border-marca-100 bg-white hover:shadow-md">
-          <div class="flex aspect-video items-center justify-center bg-marca-50 text-sm text-marca-300">Foto pendiente</div>
+          {r.imagen ? (
+            <img src={r.imagen} alt={r.titulo} class="aspect-video w-full object-cover" loading="lazy" />
+          ) : (
+            <div class="flex aspect-video items-center justify-center bg-marca-50 text-sm text-marca-300">Foto pendiente</div>
+          )}
           <div class="p-4">
             <h2 class="font-semibold text-marca-900">{r.titulo}</h2>
             <p class="text-sm text-marca-500">{c.leyendaAutor}</p>
