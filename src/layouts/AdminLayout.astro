@@ -55,7 +55,8 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
   </head>
   <body class="min-h-screen bg-crema font-sans text-marca-900">
     <div class="flex min-h-screen" data-shell>
-      <aside data-sidebar class="sticky top-0 flex h-screen w-56 shrink-0 flex-col overflow-y-auto border-r border-marca-100 bg-white p-4">
+      <aside data-sidebar class="sticky top-0 h-screen w-56 shrink-0 overflow-hidden border-r border-marca-100 bg-white">
+      <div class="flex h-screen w-56 flex-col overflow-y-auto p-4">
         <div class="flex items-center justify-between gap-2">
           <a href="/admin" class="flex items-center gap-2 px-2">
             <span class="text-lg font-bold tracking-tight text-marca-700">Propósito</span>
@@ -150,6 +151,7 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
             <span aria-hidden="true">↗</span> Ver sitio
           </a>
         </div>
+      </div>
       </aside>
 
       <button
@@ -187,22 +189,34 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
         if (!aside || !expandBtn || !collapseBtn) return;
         const main = document.querySelector<HTMLElement>("[data-main]");
         let colapsado = localStorage.getItem(KEY) === "1";
-        const aplicar = () => {
-          aside.classList.toggle("hidden", colapsado);
-          expandBtn.classList.toggle("hidden", !colapsado);
+        const aplicar = (animado: boolean) => {
+          aside.classList.toggle("w-0", colapsado);
+          aside.classList.toggle("w-56", !colapsado);
+          aside.classList.toggle("border-r-0", colapsado);
           // Deja lugar arriba para el botón flotante cuando el sidebar está oculto.
           main?.classList.toggle("pt-16", colapsado);
+          if (colapsado) {
+            // Al colapsar con animación, mostrar el botón recién cuando termina.
+            if (animado) window.setTimeout(() => colapsado && expandBtn.classList.remove("hidden"), 250);
+            else expandBtn.classList.remove("hidden");
+          } else {
+            expandBtn.classList.add("hidden");
+          }
         };
-        aplicar();
+        aplicar(false);
+        // Habilita la transición después del estado inicial (no animar al cargar).
+        requestAnimationFrame(() =>
+          aside.classList.add("transition-[width]", "duration-300", "ease-in-out"),
+        );
         collapseBtn.addEventListener("click", () => {
           colapsado = true;
           localStorage.setItem(KEY, "1");
-          aplicar();
+          aplicar(true);
         });
         expandBtn.addEventListener("click", () => {
           colapsado = false;
           localStorage.setItem(KEY, "0");
-          aplicar();
+          aplicar(true);
         });
       })();
 
