@@ -3,28 +3,15 @@ import { nav, site } from "../data/site";
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/" ? path === "/" : path.startsWith(href);
+// En Inicio (solo desktop) se oculta la marca del header y el nav va centrado;
+// la marca aparece con animación (View Transitions) al navegar a otra página.
+const isHome = path === "/";
 ---
 
 <header class="sticky top-0 z-50 border-b border-marca-100 bg-crema/90 backdrop-blur">
-  <div class="mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3">
-    <!-- Izquierda: menú (links en desktop, botón Menú en mobile) -->
-    <div class="flex items-center justify-start">
-      <nav transition:name="site-nav" class="site-nav hidden gap-1 md:flex">
-        {nav.map((item) => (
-          <a
-            href={item.href}
-            class:list={[
-              "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-              isActive(item.href)
-                ? "bg-marca-600 text-white"
-                : "text-marca-700 hover:bg-marca-100",
-            ]}
-          >
-            {item.label}
-          </a>
-        ))}
-      </nav>
-
+  <div class="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    <!-- Izquierda: botón Menú (mobile) y, fuera de Inicio, la marca (desktop) -->
+    <div class="flex items-center">
       <!-- Menú mobile simple (detalle nativo, sin JS) -->
       <details class="relative md:hidden">
         <summary class="cursor-pointer list-none rounded-md border border-marca-300 px-3 py-1.5 text-sm font-medium text-marca-700">
@@ -44,16 +31,58 @@ const isActive = (href: string) =>
           ))}
         </nav>
       </details>
+
+      <!-- Desktop fuera de Inicio: marca a la izquierda (aparece con animación al navegar) -->
+      {!isHome && (
+        <a href="/" transition:name="site-logo" class="hidden items-center gap-2 text-lg font-bold tracking-tight text-marca-700 md:flex">
+          <span>{site.nombre}</span>
+          <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-6 w-6" />
+        </a>
+      )}
     </div>
 
-    <!-- Centro: marca -->
-    <a href="/" transition:name="site-logo" class="flex items-center justify-center gap-1.5 whitespace-nowrap text-base font-bold tracking-tight text-marca-700 sm:gap-2 sm:text-lg">
+    <!-- Centro: en mobile la marca SIEMPRE centrada; en desktop Inicio, el nav centrado -->
+    <a href="/" class="absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap text-base font-bold tracking-tight text-marca-700 md:hidden">
       <span>{site.nombre}</span>
-      <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-5 w-5 sm:h-6 sm:w-6" />
+      <img src="/marca/proposito-isotipo.webp" alt="" width="600" height="600" class="h-5 w-5" />
     </a>
+    {isHome && (
+      <nav transition:name="site-nav" class="site-nav absolute left-1/2 hidden -translate-x-1/2 gap-1 md:flex">
+        {nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+              isActive(item.href)
+                ? "bg-marca-600 text-white"
+                : "text-marca-700 hover:bg-marca-100",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    )}
 
-    <!-- Derecha: iconos -->
+    <!-- Derecha: nav (desktop fuera de Inicio) + iconos -->
     <div class="flex items-center justify-end gap-0.5 sm:gap-2">
+    {!isHome && (
+      <nav transition:name="site-nav" class="site-nav mr-1 hidden gap-1 md:flex">
+        {nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+              isActive(item.href)
+                ? "bg-marca-600 text-white"
+                : "text-marca-700 hover:bg-marca-100",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    )}
     <a href="/favoritos" class="relative rounded-full p-1.5 text-marca-700 hover:bg-marca-100 sm:p-2" aria-label="Favoritos">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 sm:h-6 sm:w-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
