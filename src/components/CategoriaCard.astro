@@ -12,7 +12,7 @@ const { slug, nombre, descripcion, imagen } = Astro.props;
 
 <a
   href={`/tienda/${slug}`}
-  class="group relative block aspect-square overflow-hidden rounded-2xl bg-marca-200"
+  class="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-marca-200 sm:aspect-square"
 >
   {imagen && (
     <img
@@ -23,8 +23,8 @@ const { slug, nombre, descripcion, imagen } = Astro.props;
     />
   )}
   <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
-  <div class="absolute inset-x-0 bottom-0 p-5">
-    <h3 class="text-lg font-semibold text-white">{nombre}</h3>
-    <p class="mt-1 text-sm text-white/85">{descripcion}</p>
+  <div class="absolute inset-x-0 bottom-0 p-3 sm:p-5">
+    <h3 class="text-base font-semibold text-white sm:text-lg">{nombre}</h3>
+    <p class="mt-1 text-xs text-white/85 sm:text-sm">{descripcion}</p>
   </div>
 </a>
