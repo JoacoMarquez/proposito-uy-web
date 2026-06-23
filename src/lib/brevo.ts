@@ -2,24 +2,31 @@
 // Es "best-effort": si falta la API key/List ID o Brevo falla, no rompe la
 // suscripción (igual que mail.ts con Resend). Corre en el Worker (fetch).
 
-function env(key: string): string | undefined {
-  return process.env[key] ?? (import.meta.env as Record<string, string | undefined>)?.[key];
+// En Cloudflare las vars/secrets viven en el runtime (locals.runtime.env); en
+// local vienen de process.env / import.meta.env (.env). Probamos en ese orden.
+type EnvLike = Record<string, unknown> | undefined;
+function leer(env: EnvLike, key: string): string | undefined {
+  const v =
+    env?.[key] ??
+    process.env[key] ??
+    (import.meta.env as Record<string, string | undefined>)?.[key];
+  return v == null ? undefined : String(v);
 }
 
 const BREVO_CONTACTS = "https://api.brevo.com/v3/contacts";
 
 export type ResultadoBrevo = "ok" | "sin-config" | "error";
 
-function brevoConfig() {
-  const apiKey = env("BREVO_API_KEY");
-  const listId = parseInt(env("BREVO_LIST_ID") ?? "", 10);
+function brevoConfig(env?: EnvLike) {
+  const apiKey = leer(env, "BREVO_API_KEY");
+  const listId = parseInt(leer(env, "BREVO_LIST_ID") ?? "", 10);
   return { apiKey, listId, ok: Boolean(apiKey) && Number.isInteger(listId) };
 }
 
 // Crea (o actualiza) el contacto en la lista configurada. `updateEnabled: true`
 // evita el error si el contacto ya existía: lo suma a la lista igual.
-export async function agregarContactoBrevo(email: string): Promise<ResultadoBrevo> {
-  const { apiKey, listId, ok } = brevoConfig();
+export async function agregarContactoBrevo(email: string, env?: EnvLike): Promise<ResultadoBrevo> {
+  const { apiKey, listId, ok } = brevoConfig(env);
   if (!ok) return "sin-config";
 
   try {
@@ -43,8 +50,8 @@ export async function agregarContactoBrevo(email: string): Promise<ResultadoBrev
 
 // Saca el contacto de la lista (no borra el contacto de Brevo, solo lo quita
 // de la lista del newsletter). Best-effort.
-export async function quitarContactoBrevo(email: string): Promise<ResultadoBrevo> {
-  const { apiKey, listId, ok } = brevoConfig();
+export async function quitarContactoBrevo(email: string, env?: EnvLike): Promise<ResultadoBrevo> {
+  const { apiKey, listId, ok } = brevoConfig(env);
   if (!ok) return "sin-config";
 
   try {
