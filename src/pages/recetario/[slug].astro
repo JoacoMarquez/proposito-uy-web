@@ -22,6 +22,7 @@ const fichas = [
   { label: "Porciones", valor: meta.porciones },
   { label: "Tiempo", valor: meta.tiempo },
   { label: "Conservación", valor: receta.almacenamientoVidaUtil ?? undefined },
+  { label: "Envase", valor: receta.almacenamientoEnvase ?? undefined },
 ].filter((f) => f.valor);
 ---
 
