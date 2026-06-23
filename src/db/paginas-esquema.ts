@@ -107,6 +107,13 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "atajo3Imagen", label: "Atajo 3 · Imagen", tipo: "imagen" },
         ],
       },
+      {
+        titulo: "Bloques solo mobile (Catálogo y Contacto)",
+        campos: [
+          { key: "catalogoImagen", label: "Catálogo · Imagen (solo mobile)", tipo: "imagen", ayuda: "Solo se muestra en celular, en la grilla de Categorías." },
+          { key: "contactoImagen", label: "Contacto · Imagen (solo mobile)", tipo: "imagen", ayuda: "Solo se muestra en celular, en la grilla de Atajos." },
+        ],
+      },
     ],
     defaults: {
       heroImagen: "/inicio/portada.webp",
@@ -128,6 +135,8 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       atajo3Titulo: "Preguntas",
       atajo3Href: "/preguntas",
       atajo3Imagen: "",
+      catalogoImagen: "",
+      contactoImagen: "",
     },
   },
   {
