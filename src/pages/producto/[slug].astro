@@ -108,7 +108,6 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
                       <input
                         type="text"
                         inputmode="numeric"
-                        readonly
                         value="0"
                         data-sabor={s.key}
                         class="mix-sabor w-full min-w-0 border-0 bg-transparent py-2 text-center text-marca-900 focus:outline-none"
@@ -368,7 +367,21 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
     }
 
     tamanoSel.addEventListener("change", actualizar);
-    saborInputs.forEach((inp) => inp.addEventListener("input", actualizar));
+    saborInputs.forEach((inp) => {
+      // Permite escribir el número a mano (solo dígitos).
+      inp.addEventListener("input", () => {
+        const limpio = inp.value.replace(/\D/g, "");
+        if (limpio !== inp.value) inp.value = limpio;
+        actualizar();
+      });
+      // Al salir del campo, si quedó vacío vuelve a 0.
+      inp.addEventListener("blur", () => {
+        if (inp.value === "") {
+          inp.value = "0";
+          actualizar();
+        }
+      });
+    });
     actualizar();
 
     btn.addEventListener("click", () => {
