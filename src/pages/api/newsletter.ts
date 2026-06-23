@@ -13,7 +13,8 @@ function json(obj: unknown, status = 200) {
   });
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const runtimeEnv = (locals as any)?.runtime?.env as Record<string, unknown> | undefined;
   let body: any;
   try {
     body = await request.json();
@@ -29,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const r = await suscribirNewsletter(email);
     // Sincroniza con Brevo (no bloquea ni rompe si Brevo falla o no está configurado).
-    await agregarContactoBrevo(email).catch(() => {});
+    await agregarContactoBrevo(email, runtimeEnv).catch(() => {});
     return json({
       ok: true,
       mensaje:

@@ -44,14 +44,15 @@ if (Astro.request.method === "POST") {
       msg = "Dirección eliminada.";
     }
   } else if (accion === "newsletter") {
+    const runtimeEnv = (Astro.locals as any)?.runtime?.env as Record<string, unknown> | undefined;
     const quiere = form.get("suscripto") === "on";
     if (quiere) {
       await suscribirNewsletter(cliente.email);
-      await agregarContactoBrevo(cliente.email).catch(() => {});
+      await agregarContactoBrevo(cliente.email, runtimeEnv).catch(() => {});
       msg = "Te suscribiste al newsletter.";
     } else {
       await desuscribirNewsletter(cliente.email);
-      await quitarContactoBrevo(cliente.email).catch(() => {});
+      await quitarContactoBrevo(cliente.email, runtimeEnv).catch(() => {});
       msg = "Te diste de baja del newsletter.";
     }
   }
