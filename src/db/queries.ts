@@ -322,6 +322,19 @@ export async function suscribirNewsletter(email: string): Promise<"ok" | "duplic
   return row ? "ok" : "duplicado";
 }
 
+export async function estaSuscripto(email: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: suscriptores.id })
+    .from(suscriptores)
+    .where(eq(suscriptores.email, email.trim().toLowerCase()))
+    .limit(1);
+  return Boolean(row);
+}
+
+export async function desuscribirNewsletter(email: string): Promise<void> {
+  await db.delete(suscriptores).where(eq(suscriptores.email, email.trim().toLowerCase()));
+}
+
 // ── Imágenes (subidas desde el panel, guardadas en la base) ──
 // Tipos permitidos y tamaño máximo del archivo subido (validación compartida
 // entre el form del panel y, si hiciera falta, otros llamadores).
