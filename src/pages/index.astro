@@ -20,11 +20,15 @@ const atajos = [
 <Layout>
   <!-- Hero principal: placa de marca + frase principal + CTA -->
   <section class="bg-marca-100 text-center">
-    <img
-      src={c.heroImagen}
-      alt={c.heroAlt}
-      class="h-44 w-full object-cover sm:h-80 lg:h-96"
-    />
+    {/* En mobile hacemos zoom a la portada (recorta el margen) para que el logo
+        ocupe más ancho; en desktop se muestra a escala normal. */}
+    <div class="overflow-hidden">
+      <img
+        src={c.heroImagen}
+        alt={c.heroAlt}
+        class="h-64 w-full scale-[1.6] object-cover sm:h-80 sm:scale-100 lg:h-96"
+      />
+    </div>
     <div class="px-4 pb-10 sm:pb-14">
       <h1 class="mx-auto max-w-3xl pt-6 text-xl font-bold leading-tight text-marca-700 sm:pt-8 sm:text-3xl">
         {c.presentacionFrase}
