@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { suscribirNewsletter } from "../../db/queries";
+import { agregarContactoBrevo } from "../../lib/brevo";
 
 export const prerender = false;
 
@@ -27,6 +28,8 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const r = await suscribirNewsletter(email);
+    // Sincroniza con Brevo (no bloquea ni rompe si Brevo falla o no está configurado).
+    await agregarContactoBrevo(email).catch(() => {});
     return json({
       ok: true,
       mensaje:
