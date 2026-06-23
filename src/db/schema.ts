@@ -70,7 +70,8 @@ export const recetas = pgTable("recetas", {
   productosAliados: jsonb("productos_aliados").$type<string[]>().notNull().default([]),
   almacenamientoEnvase: text("almacenamiento_envase"),
   almacenamientoVidaUtil: text("almacenamiento_vida_util"),
-  rendimiento: jsonb("rendimiento").$type<Record<string, string>>(),
+  // Valores de las fichas (cantidad/porcion/...) + `titulos` editables por receta.
+  rendimiento: jsonb("rendimiento").$type<Record<string, any>>(),
   ingredientes: jsonb("ingredientes").$type<string[]>().notNull().default([]),
   procedimiento: jsonb("procedimiento").$type<string[]>().notNull().default([]),
   materiales: jsonb("materiales").$type<string[]>().notNull().default([]), // utensilios necesarios

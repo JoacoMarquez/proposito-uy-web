@@ -37,8 +37,13 @@ if (Astro.request.method === "POST") {
       .filter(Boolean);
 
   const rendKeys = ["cantidad", "porcion", "porciones", "tiempo"] as const;
-  const rendimiento: Record<string, string> = {};
+  const rendimiento: Record<string, any> = {};
   for (const k of rendKeys) if (s(`rend_${k}`)) rendimiento[k] = s(`rend_${k}`);
+  // Títulos editables de las 6 fichas → rendimiento.titulos
+  const slotsFicha = ["cantidad", "porcion", "porciones", "tiempo", "envase", "conservacion"] as const;
+  const titulos: Record<string, string> = {};
+  for (const slot of slotsFicha) if (s(`titulo_${slot}`)) titulos[slot] = s(`titulo_${slot}`);
+  if (Object.keys(titulos).length) rendimiento.titulos = titulos;
 
   // Imagen: archivo nuevo → se guarda y se usa su URL; si no, se conserva la actual.
   const subida = await procesarImagenSubida(form);
@@ -78,8 +83,20 @@ if (!esNuevo && !receta) return Astro.redirect("/admin/recetas");
 
 const todos = await getProductos();
 const r = receta;
-const rend = (r?.rendimiento ?? {}) as Record<string, string>;
+const rend = (r?.rendimiento ?? {}) as Record<string, any>;
 const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
+
+// Las 6 fichas (mismo formato que la web). El título de cada una es editable
+// (se guarda en rendimiento.titulos); el valor mantiene su ubicación actual.
+const titulosGuardados = (rend.titulos ?? {}) as Record<string, string>;
+const FICHAS = [
+  { slot: "cantidad", tituloDef: "Cantidad", valueName: "rend_cantidad", valor: rend.cantidad ?? "" },
+  { slot: "porcion", tituloDef: "Porción", valueName: "rend_porcion", valor: rend.porcion ?? "" },
+  { slot: "porciones", tituloDef: "Porciones", valueName: "rend_porciones", valor: rend.porciones ?? "" },
+  { slot: "tiempo", tituloDef: "Tiempo", valueName: "rend_tiempo", valor: rend.tiempo ?? "" },
+  { slot: "envase", tituloDef: "Envase", valueName: "almacenamientoEnvase", valor: r?.almacenamientoEnvase ?? "" },
+  { slot: "conservacion", tituloDef: "Conservación", valueName: "almacenamientoVidaUtil", valor: r?.almacenamientoVidaUtil ?? "" },
+];
 ---
 
 <AdminLayout titulo={esNuevo ? "Nueva receta" : `Editar: ${r?.titulo}`} ocultarTitulo>
@@ -144,23 +161,26 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
       <p class="text-xs text-marca-500">Ctrl/Cmd + click para elegir varios.</p>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-4">
-      {["cantidad", "porcion", "porciones", "tiempo"].map((k) => (
-        <div>
-          <label class="text-sm font-medium capitalize text-marca-700">{k}</label>
-          <input name={`rend_${k}`} value={rend[k] ?? ""} class={campoBase} />
-        </div>
-      ))}
-    </div>
-
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div>
-        <label class="text-sm font-medium text-marca-700">Envase de almacenamiento</label>
-        <input name="almacenamientoEnvase" value={r?.almacenamientoEnvase ?? ""} class={campoBase} />
-      </div>
-      <div>
-        <label class="text-sm font-medium text-marca-700">Vida útil</label>
-        <input name="almacenamientoVidaUtil" value={r?.almacenamientoVidaUtil ?? ""} class={campoBase} />
+    <div>
+      <label class="text-sm font-medium text-marca-700">Tarjetas de la ficha</label>
+      <p class="text-xs text-marca-500">Se ven igual que en la web. Editá el título y el valor de cada una.</p>
+      <div class="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {FICHAS.map((f) => (
+          <div class="rounded-xl bg-marca-50 p-3">
+            <input
+              name={`titulo_${f.slot}`}
+              value={titulosGuardados[f.slot] ?? f.tituloDef}
+              placeholder="Título"
+              class="w-full border-0 bg-transparent p-0 text-xs font-semibold uppercase tracking-wide text-marca-500 focus:outline-none focus:ring-0"
+            />
+            <input
+              name={f.valueName}
+              value={f.valor}
+              placeholder="Valor"
+              class="mt-1 w-full border-0 bg-transparent p-0 text-sm font-medium text-marca-900 placeholder:font-normal placeholder:text-marca-400 focus:outline-none focus:ring-0"
+            />
+          </div>
+        ))}
       </div>
     </div>
 

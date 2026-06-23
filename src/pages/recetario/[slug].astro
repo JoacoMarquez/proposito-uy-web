@@ -15,14 +15,16 @@ const aliados = (
   await Promise.all(receta.productosAliados.map((s) => getProducto(s)))
 ).filter((p): p is NonNullable<typeof p> => Boolean(p));
 
-const meta = receta.rendimiento ?? {};
+const meta = (receta.rendimiento ?? {}) as Record<string, any>;
+// Título de cada ficha: editable por receta (rendimiento.titulos), con fallback.
+const tit = (slot: string, def: string) => (meta.titulos?.[slot] as string)?.trim() || def;
 const fichas = [
-  { label: "Cantidad", valor: meta.cantidad },
-  { label: "Porción", valor: meta.porcion },
-  { label: "Porciones", valor: meta.porciones },
-  { label: "Tiempo", valor: meta.tiempo },
-  { label: "Conservación", valor: receta.almacenamientoVidaUtil ?? undefined },
-  { label: "Envase", valor: receta.almacenamientoEnvase ?? undefined },
+  { label: tit("cantidad", "Cantidad"), valor: meta.cantidad },
+  { label: tit("porcion", "Porción"), valor: meta.porcion },
+  { label: tit("porciones", "Porciones"), valor: meta.porciones },
+  { label: tit("tiempo", "Tiempo"), valor: meta.tiempo },
+  { label: tit("conservacion", "Conservación"), valor: receta.almacenamientoVidaUtil ?? undefined },
+  { label: tit("envase", "Envase"), valor: receta.almacenamientoEnvase ?? undefined },
 ].filter((f) => f.valor);
 ---
 

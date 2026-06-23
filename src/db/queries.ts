@@ -173,7 +173,7 @@ export interface RecetaInput {
   productosAliados: string[];
   almacenamientoEnvase: string | null;
   almacenamientoVidaUtil: string | null;
-  rendimiento: Record<string, string> | null;
+  rendimiento: Record<string, any> | null;
   ingredientes: string[];
   procedimiento: string[];
   materiales: string[];
