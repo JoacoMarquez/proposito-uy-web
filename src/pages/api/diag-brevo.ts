@@ -2,20 +2,38 @@ import type { APIRoute } from "astro";
 
 export const prerender = false;
 
-// Diagnóstico temporal: indica desde qué fuente se leen las variables de Brevo
-// en producción. NO expone valores secretos (solo presencia y el List ID).
+// Diagnóstico temporal: de dónde se leen las vars de Brevo. No expone valores.
 export const GET: APIRoute = ({ locals }) => {
-  const r = ((locals as any)?.runtime?.env ?? {}) as Record<string, unknown>;
-  const has = (o: Record<string, unknown>, k: string) => Boolean(o?.[k]);
-  const im = import.meta.env as Record<string, unknown>;
-  const body = {
-    runtime: { apiKey: has(r, "BREVO_API_KEY"), listId: has(r, "BREVO_LIST_ID"), listVal: r?.BREVO_LIST_ID ?? null },
-    processEnv: { apiKey: !!process.env.BREVO_API_KEY, listId: !!process.env.BREVO_LIST_ID },
-    importMeta: { apiKey: has(im, "BREVO_API_KEY"), listId: has(im, "BREVO_LIST_ID") },
-    // nombres presentes en el runtime (para detectar typos), sin valores
-    runtimeKeysRelevantes: Object.keys(r).filter((k) => /BREVO|DATABASE|RESEND|MAIL/i.test(k)),
-  };
-  return new Response(JSON.stringify(body, null, 2), {
+  const out: Record<string, unknown> = {};
+  try {
+    const r = ((locals as any)?.runtime?.env ?? {}) as Record<string, unknown>;
+    out.runtime = {
+      apiKey: Boolean(r.BREVO_API_KEY),
+      listId: Boolean(r.BREVO_LIST_ID),
+      listVal: r.BREVO_LIST_ID ?? null,
+    };
+    out.runtimeKeys = Object.keys(r).filter((k) => /BREVO|DATABASE|RESEND|MAIL/i.test(k));
+  } catch (e) {
+    out.runtimeError = String(e);
+  }
+  try {
+    const pe = (globalThis as any)?.process?.env;
+    out.processEnv = {
+      existe: Boolean(pe),
+      apiKey: Boolean(pe?.BREVO_API_KEY),
+      listId: Boolean(pe?.BREVO_LIST_ID),
+      database: Boolean(pe?.DATABASE_URL),
+    };
+  } catch (e) {
+    out.processError = String(e);
+  }
+  try {
+    const im = import.meta.env as Record<string, unknown>;
+    out.importMeta = { apiKey: Boolean(im?.BREVO_API_KEY), listId: Boolean(im?.BREVO_LIST_ID) };
+  } catch (e) {
+    out.importMetaError = String(e);
+  }
+  return new Response(JSON.stringify(out, null, 2), {
     headers: { "Content-Type": "application/json" },
   });
 };
