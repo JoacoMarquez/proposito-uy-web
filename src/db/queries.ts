@@ -180,11 +180,19 @@ export interface RecetaInput {
   notas: string[];
   imagen: string | null;
   imagen2: string | null;
+  orden: number;
 }
 
 export async function getRecetaById(id: number): Promise<Receta | undefined> {
   const [r] = await db.select().from(recetas).where(eq(recetas.id, id)).limit(1);
   return r;
+}
+
+// Guarda el nuevo orden de varias recetas (reordenamiento por arrastre).
+export async function actualizarOrdenRecetas(ordenes: { id: number; orden: number }[]): Promise<void> {
+  await Promise.all(
+    ordenes.map((o) => db.update(recetas).set({ orden: o.orden }).where(eq(recetas.id, o.id))),
+  );
 }
 
 export async function upsertReceta(id: number | null, data: RecetaInput): Promise<number> {

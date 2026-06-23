@@ -1,13 +1,26 @@
 ---
 export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { getRecetas } from "../../../db/queries";
+import { getRecetas, actualizarOrdenRecetas } from "../../../db/queries";
+
+// Guardado del nuevo orden (llega por fetch desde el arrastre).
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  try {
+    const ordenes = JSON.parse(String(form.get("orden") ?? "[]"));
+    if (Array.isArray(ordenes)) await actualizarOrdenRecetas(ordenes);
+  } catch {
+    // ignora payload inválido
+  }
+  return new Response(null, { status: 204 });
+}
 
 const recetas = await getRecetas();
 ---
 
 <AdminLayout titulo="Recetas">
-  <div class="mb-4 flex justify-end">
+  <div class="mb-4 flex items-center justify-between">
+    <p class="text-sm text-marca-500">Arrastrá las filas para reordenar. El orden se guarda solo.</p>
     <a href="/admin/recetas/nuevo" class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
       + Nueva receta
     </a>
@@ -17,14 +30,18 @@ const recetas = await getRecetas();
     <table class="w-full text-sm">
       <thead class="border-b border-marca-100 bg-marca-50 text-left text-marca-700">
         <tr>
+          <th class="w-10 p-3"></th>
+          <th class="w-16 p-3">Orden</th>
           <th class="p-3">Receta</th>
           <th class="p-3">Aliados</th>
           <th class="p-3"></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody data-recetas-body>
         {recetas.map((r) => (
-          <tr class="border-b border-marca-50 last:border-0">
+          <tr class="border-b border-marca-50 last:border-0" draggable="true" data-id={r.id}>
+            <td class="cursor-move select-none p-3 text-center text-marca-300" data-drag-handle title="Arrastrar para reordenar">⠿</td>
+            <td class="p-3 text-marca-900/70" data-orden>{r.orden}</td>
             <td class="p-3">
               <div class="flex items-center gap-3">
                 {r.imagen
@@ -43,3 +60,46 @@ const recetas = await getRecetas();
     </table>
   </div>
 </AdminLayout>
+
+<script>
+  function setupOrden() {
+    const tbody = document.querySelector<HTMLElement>("[data-recetas-body]");
+    if (!tbody || tbody.dataset.init) return;
+    tbody.dataset.init = "1";
+    let dragged: HTMLElement | null = null;
+
+    tbody.querySelectorAll<HTMLElement>("tr").forEach((tr) => {
+      tr.addEventListener("dragstart", () => {
+        dragged = tr;
+        setTimeout(() => tr.classList.add("opacity-40"), 0);
+      });
+      tr.addEventListener("dragend", () => {
+        tr.classList.remove("opacity-40");
+        guardar();
+      });
+      tr.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        if (!dragged || dragged === tr) return;
+        const r = tr.getBoundingClientRect();
+        const despues = e.clientY > r.top + r.height / 2;
+        tbody.insertBefore(dragged, despues ? tr.nextSibling : tr);
+      });
+    });
+
+    async function guardar() {
+      const filas = [...tbody!.querySelectorAll<HTMLElement>("tr")];
+      const ordenes = filas.map((tr, i) => ({ id: Number(tr.dataset.id), orden: i + 1 }));
+      filas.forEach((tr, i) => {
+        const celda = tr.querySelector("[data-orden]");
+        if (celda) celda.textContent = String(i + 1);
+      });
+      await fetch(location.pathname, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "orden=" + encodeURIComponent(JSON.stringify(ordenes)),
+      });
+    }
+  }
+  setupOrden();
+  document.addEventListener("astro:after-swap", setupOrden);
+</script>

@@ -58,6 +58,7 @@ if (Astro.request.method === "POST") {
     notas: lineas("notas"),
     imagen: subida.url ?? sn("imagen"),
     imagen2: subida2.url ?? sn("imagen2"),
+    orden: Number.parseInt(s("orden"), 10) || 0,
   };
 
   if (subida.error || subida2.error) {
@@ -121,6 +122,12 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     <div>
       <label class="text-sm font-medium text-marca-700">Descripción</label>
       <textarea name="descripcion" rows="3" class={campoBase}>{r?.descripcion ?? ""}</textarea>
+    </div>
+
+    <div class="max-w-[10rem]">
+      <label class="text-sm font-medium text-marca-700">Orden</label>
+      <p class="text-xs text-marca-500">Menor primero. También se puede arrastrar en la lista.</p>
+      <input type="number" name="orden" value={r?.orden ?? 0} class={campoBase} />
     </div>
 
     <!-- Imagen -->
