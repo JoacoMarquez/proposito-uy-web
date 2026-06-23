@@ -3,18 +3,19 @@ import type { APIRoute } from "astro";
 export const prerender = false;
 
 // Diagnóstico temporal: de dónde se leen las vars de Brevo. No expone valores.
-export const GET: APIRoute = ({ locals }) => {
+export const GET: APIRoute = async () => {
   const out: Record<string, unknown> = {};
   try {
-    const r = ((locals as any)?.runtime?.env ?? {}) as Record<string, unknown>;
-    out.runtime = {
+    const mod: any = await import(/* @vite-ignore */ "cloudflare:workers");
+    const r = (mod?.env ?? {}) as Record<string, unknown>;
+    out.cfWorkers = {
       apiKey: Boolean(r.BREVO_API_KEY),
       listId: Boolean(r.BREVO_LIST_ID),
       listVal: r.BREVO_LIST_ID ?? null,
     };
-    out.runtimeKeys = Object.keys(r).filter((k) => /BREVO|DATABASE|RESEND|MAIL/i.test(k));
+    out.cfWorkersKeys = Object.keys(r).filter((k) => /BREVO|DATABASE|RESEND|MAIL/i.test(k));
   } catch (e) {
-    out.runtimeError = String(e);
+    out.cfWorkersError = String(e);
   }
   try {
     const pe = (globalThis as any)?.process?.env;
