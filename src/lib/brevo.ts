@@ -1,0 +1,37 @@
+// Sincroniza suscriptores del newsletter con una lista de contactos de Brevo.
+// Es "best-effort": si falta la API key/List ID o Brevo falla, no rompe la
+// suscripción (igual que mail.ts con Resend). Corre en el Worker (fetch).
+
+function env(key: string): string | undefined {
+  return process.env[key] ?? (import.meta.env as Record<string, string | undefined>)?.[key];
+}
+
+const BREVO_CONTACTS = "https://api.brevo.com/v3/contacts";
+
+export type ResultadoBrevo = "ok" | "sin-config" | "error";
+
+// Crea (o actualiza) el contacto en la lista configurada. `updateEnabled: true`
+// evita el error si el contacto ya existía: lo suma a la lista igual.
+export async function agregarContactoBrevo(email: string): Promise<ResultadoBrevo> {
+  const apiKey = env("BREVO_API_KEY");
+  const listId = parseInt(env("BREVO_LIST_ID") ?? "", 10);
+  if (!apiKey || !Number.isInteger(listId)) return "sin-config";
+
+  try {
+    const res = await fetch(BREVO_CONTACTS, {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify({ email, listIds: [listId], updateEnabled: true }),
+    });
+    if (res.ok) return "ok"; // 201 creado / 204 actualizado
+    console.error("[brevo] respuesta", res.status, await res.text());
+    return "error";
+  } catch (e) {
+    console.error("[brevo] error al agregar contacto:", e);
+    return "error";
+  }
+}
