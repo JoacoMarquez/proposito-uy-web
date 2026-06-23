@@ -2,8 +2,8 @@
 // El precio se recalcula SIEMPRE en el servidor al crear el pedido; este módulo
 // es la única fuente de verdad de la regla para que ambos lados coincidan.
 
-export const MIX_SLUG = "barras-proteicas-mix";
-export const RECARGO_CAJU = 16; // $U extra por cada barra de Cajú
+export const MIX_SLUG = "B-BP-MX";
+export const RECARGO_CAJU = 20; // $U extra por barra de Cajú (default; editable en Contenido › Tienda)
 
 // Tamaños de referencia. La capacidad real se deriva de los dígitos del label
 // (ver cantidadTamano), para que cliente y servidor coincidan aunque Pedro
@@ -53,8 +53,9 @@ export function mixValido(mix: MixDetalle): boolean {
 }
 
 // Precio unitario de la caja: base del tamaño + recargo por barras de Cajú.
-export function precioMix(basePrecio: number, mix: MixDetalle): number {
-  return basePrecio + RECARGO_CAJU * (Number(mix?.sabores?.caju) || 0);
+// `recargo` es configurable (Contenido › Tienda); cae al default si no se pasa.
+export function precioMix(basePrecio: number, mix: MixDetalle, recargo: number = RECARGO_CAJU): number {
+  return basePrecio + recargo * (Number(mix?.sabores?.caju) || 0);
 }
 
 // Etiqueta legible para el carrito/pedido, ej. "x12 · 4 Clásica, 4 Coco, 4 Cajú".

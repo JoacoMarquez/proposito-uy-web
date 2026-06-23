@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
-import { getProducto, crearPedido, type ItemPedido } from "../../db/queries";
+import { getProducto, getContenido, crearPedido, type ItemPedido } from "../../db/queries";
 import { enviarMailsPedido } from "../../lib/mail";
 import { validarAgenda } from "../../lib/agenda";
-import { MIX_SLUG, mixValido, precioMix, etiquetaMix, type MixDetalle } from "../../lib/barrasMix";
+import { MIX_SLUG, RECARGO_CAJU, mixValido, precioMix, etiquetaMix, type MixDetalle } from "../../lib/barrasMix";
 
 export const prerender = false;
 
@@ -35,6 +35,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (modalidad === "entrega" && !direccion) return json({ error: "Falta la dirección de entrega." }, 400);
   if (!Array.isArray(items) || items.length === 0) return json({ error: "El carrito está vacío." }, 400);
 
+  // Recargo de Cajú (Mix) editable desde Contenido › Tienda.
+  const tiendaCfg = await getContenido("tienda");
+  const recargoCaju = Math.max(0, parseInt(String(tiendaCfg?.recargoCajuMix ?? ""), 10) || RECARGO_CAJU);
+
   // Revalidar cada ítem contra la base (no confiamos en los precios del cliente).
   const validados: ItemPedido[] = [];
   let subtotal = 0;
@@ -50,7 +54,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       if (!mixValido(mix)) continue;
       const base = prod.presentaciones.find((p) => p.label === mix.tamano);
       if (!base) continue;
-      const precioUnitario = precioMix(base.precio, mix);
+      const precioUnitario = precioMix(base.precio, mix, recargoCaju);
       subtotal += precioUnitario * cantidad;
       validados.push({
         productoSlug: prod.slug,

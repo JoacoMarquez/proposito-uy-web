@@ -197,6 +197,12 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "pedidoNumeroInicial", label: "Número inicial de pedido", tipo: "text", ayuda: "El próximo pedido tomará este número (ej: 170 → P-170) y de ahí sigue correlativo. Si ya hay pedidos más altos, continúa desde el mayor." },
         ],
       },
+      {
+        titulo: "Barras Proteicas Mix",
+        campos: [
+          { key: "recargoCajuMix", label: "Recargo por barra de Cajú ($U)", tipo: "text", ayuda: "Extra que se suma por cada barra de Cajú elegida en la caja Mix. Ej: 20" },
+        ],
+      },
     ],
     defaults: {
       titulo: "Tienda",
@@ -207,6 +213,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       horarioRetiro: "12:00 a 15:00",
       horarioEntrega: "15:00 a 18:00",
       pedidoNumeroInicial: "1",
+      recargoCajuMix: "20",
     },
   },
   {
