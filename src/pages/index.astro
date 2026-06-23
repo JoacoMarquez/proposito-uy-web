@@ -23,15 +23,15 @@ const atajos = [
     <img
       src={c.heroImagen}
       alt={c.heroAlt}
-      class="h-64 w-full object-cover sm:h-80 lg:h-96"
+      class="h-44 w-full object-cover sm:h-80 lg:h-96"
     />
-    <div class="px-4 pb-14">
-      <h1 class="mx-auto max-w-3xl pt-8 text-2xl font-bold leading-tight text-marca-700 sm:text-3xl">
+    <div class="px-4 pb-10 sm:pb-14">
+      <h1 class="mx-auto max-w-3xl pt-6 text-xl font-bold leading-tight text-marca-700 sm:pt-8 sm:text-3xl">
         {c.presentacionFrase}
       </h1>
       <a
         href={c.heroCtaLink}
-        class="mt-8 inline-block rounded-full bg-marca-600 px-8 py-3 font-medium text-white hover:bg-marca-700"
+        class="mt-5 inline-block rounded-full bg-marca-600 px-8 py-3 font-medium text-white hover:bg-marca-700 sm:mt-8"
       >
         {c.heroCtaTexto}
       </a>
@@ -40,7 +40,7 @@ const atajos = [
 
   <!-- Categorías de productos -->
   <section class="bg-marca-50">
-    <div class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
+    <div class="mx-auto max-w-6xl px-4 py-8 sm:py-16">
       <TituloSeccion titulo={c.tituloCategorias} />
       <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
         {categoriasLista.map((c) => (
@@ -51,7 +51,7 @@ const atajos = [
   </section>
 
   <!-- Atajos -->
-  <section class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
+  <section class="mx-auto max-w-6xl px-4 py-8 sm:py-16">
     <TituloSeccion titulo={c.tituloAtajos} />
     <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
       {atajos.map((a) => (
@@ -63,8 +63,8 @@ const atajos = [
               Foto pendiente
             </div>
           )}
-          <div class="p-4">
-            <h3 class="font-semibold text-marca-900">{a.titulo}</h3>
+          <div class="p-3 sm:p-4">
+            <h3 class="text-sm font-semibold text-marca-900 sm:text-base">{a.titulo}</h3>
           </div>
         </a>
       ))}
@@ -72,11 +72,11 @@ const atajos = [
   </section>
 
   <!-- Texto de presentación -->
-  <section class="mx-auto max-w-3xl px-4 py-20 text-center">
-    <p class="text-2xl font-medium leading-relaxed text-marca-700">
+  <section class="mx-auto max-w-3xl px-4 py-12 text-center sm:py-20">
+    <p class="text-xl font-medium leading-relaxed text-marca-700 sm:text-2xl">
       {c.presentacionP1}
     </p>
-    <p class="mt-4 text-lg text-marca-900/70">
+    <p class="mt-4 text-base text-marca-900/70 sm:text-lg">
       {c.presentacionP2}
     </p>
   </section>
