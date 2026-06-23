@@ -3,6 +3,7 @@ export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 import ProductCard from "../../components/ProductCard.astro";
 import TituloSeccion from "../../components/TituloSeccion.astro";
+import Galeria from "../../components/Galeria.astro";
 import {
   getProducto,
   getCategoria,
@@ -51,13 +52,7 @@ const esMix = producto.slug === MIX_SLUG;
 
     <div class="mt-6 grid gap-10 md:grid-cols-2">
       <!-- Galería -->
-      <div class="flex aspect-square items-center justify-center rounded-2xl bg-marca-50 text-marca-300">
-        {producto.imagen ? (
-          <img src={producto.imagen} alt={nombre} class="h-full w-full rounded-2xl object-cover" />
-        ) : (
-          <span class="text-sm">Foto pendiente</span>
-        )}
-      </div>
+      <Galeria imagenes={[producto.imagen, producto.imagen2]} alt={nombre} marco="aspect-square" />
 
       <!-- Info principal -->
       <div>

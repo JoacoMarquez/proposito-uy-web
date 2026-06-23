@@ -21,6 +21,14 @@ const {
   label = "Imagen",
   ayuda,
 } = Astro.props;
+
+// Nombre a mostrar de la imagen actual: el nombre de archivo de la URL si lo
+// tiene; si es una imagen subida (/api/img/<id>, sin extensión) → "Imagen cargada".
+const nombreImagen = (() => {
+  if (!imagen) return "Ningún archivo seleccionado";
+  const base = imagen.split("?")[0].split("/").pop() ?? "";
+  return base.includes(".") ? decodeURIComponent(base) : "Imagen cargada";
+})();
 ---
 
 <div data-img-field>
@@ -28,19 +36,22 @@ const {
     {label}{ayuda && <span class="font-normal text-marca-500"> — {ayuda}</span>}
   </label>
 
-  <input type="hidden" name={name} value={imagen ?? ""} />
+  <input type="hidden" name={name} value={imagen ?? ""} data-img-hidden />
 
-  <div class="mt-2 flex flex-wrap items-center gap-3">
-    {imagen && (
-      <button type="button" data-img-open class="shrink-0 rounded-xl" title="Ver imagen grande / cambiarla">
-        <img
-          src={imagen}
-          alt={alt}
-          data-img-thumb
-          class="h-20 w-20 cursor-zoom-in rounded-xl border border-marca-100 object-cover transition hover:opacity-90"
-        />
-      </button>
-    )}
+  <div class="mt-2 flex flex-wrap items-start gap-3">
+    <button
+      type="button"
+      data-img-open
+      class:list={["shrink-0 rounded-xl", !imagen && "hidden"]}
+      title="Ver imagen grande / cambiarla"
+    >
+      <img
+        src={imagen ?? ""}
+        alt={alt}
+        data-img-thumb
+        class="h-20 w-20 cursor-zoom-in rounded-xl border border-marca-100 object-cover transition hover:opacity-90"
+      />
+    </button>
     <input
       type="file"
       id={fieldId}
@@ -48,23 +59,36 @@ const {
       accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
       class="hidden"
     />
-    <label
-      for={fieldId}
-      class="cursor-pointer rounded-full bg-marca-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-marca-700"
-    >
-      Seleccionar imagen
-    </label>
-    <span data-img-filename class="text-sm text-marca-500">Ningún archivo seleccionado</span>
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-wrap items-center gap-3">
+        <label
+          for={fieldId}
+          class="cursor-pointer rounded-full bg-marca-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-marca-700"
+        >
+          Seleccionar imagen
+        </label>
+        <span data-img-filename class="text-sm text-marca-500">{nombreImagen}</span>
+      </div>
+      <button
+        type="button"
+        data-img-remove
+        class:list={[
+          "self-start cursor-pointer rounded-full bg-red-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-red-700",
+          !imagen && "hidden",
+        ]}
+      >
+        Quitar imagen
+      </button>
+    </div>
   </div>
 
-  {imagen && (
-    <div
-      data-img-modal
-      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
-    >
+  <div
+    data-img-modal
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
+  >
       <div class="relative max-h-[90vh] max-w-[92vw] overflow-auto rounded-2xl bg-marca-50 p-3 shadow-xl">
         <img
-          src={imagen}
+          src={imagen ?? ""}
           alt={alt}
           data-img-big
           class="mx-auto max-h-[74vh] w-auto rounded-xl object-contain"
@@ -78,6 +102,13 @@ const {
           </label>
           <button
             type="button"
+            data-img-remove
+            class="rounded-full border border-red-300 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+          >
+            Quitar imagen
+          </button>
+          <button
+            type="button"
             data-img-close
             class="rounded-full border border-marca-300 px-5 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-100"
           >
@@ -85,8 +116,33 @@ const {
           </button>
         </div>
       </div>
+  </div>
+
+  <!-- Confirmación de quitar imagen -->
+  <div data-img-confirm class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <h2 class="text-lg font-semibold text-marca-900">Quitar imagen</h2>
+      <p class="mt-2 text-sm text-marca-900/70">
+        ¿Seguro que querés quitar esta imagen? Va a quedar sin imagen cuando guardes.
+      </p>
+      <div class="mt-5 flex flex-wrap justify-end gap-3">
+        <button
+          type="button"
+          data-img-confirm-cancel
+          class="rounded-full border border-marca-300 px-5 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-50"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          data-img-confirm-yes
+          class="rounded-full bg-red-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+        >
+          Quitar imagen
+        </button>
+      </div>
     </div>
-  )}
+  </div>
 </div>
 
 <script>
@@ -96,11 +152,13 @@ const {
     if (root.dataset.imgInit) return; // evita doble init (initial + after-swap)
     root.dataset.imgInit = "1";
     const file = root.querySelector<HTMLInputElement>('input[type="file"]');
+    const hidden = root.querySelector<HTMLInputElement>("[data-img-hidden]");
     const nameEl = root.querySelector("[data-img-filename]");
     const modal = root.querySelector("[data-img-modal]");
     const openBtn = root.querySelector("[data-img-open]");
     const thumb = root.querySelector<HTMLImageElement>("[data-img-thumb]");
     const big = root.querySelector<HTMLImageElement>("[data-img-big]");
+    const removeBtns = root.querySelectorAll<HTMLElement>("[data-img-remove]");
 
     const open = () => {
       if (!modal) return;
@@ -121,10 +179,46 @@ const {
           const url = URL.createObjectURL(f);
           if (thumb) thumb.src = url;
           if (big) big.src = url;
+          (openBtn as HTMLElement | null)?.classList.remove("hidden"); // mostrar miniatura
+          removeBtns.forEach((b) => b.classList.remove("hidden"));
         }
         close();
       });
     }
+
+    // Quitar imagen: vacía el hidden (al guardar queda sin imagen), limpia el
+    // archivo elegido y oculta la miniatura. No sube nada.
+    const ejecutarQuitar = () => {
+      if (hidden) {
+        hidden.value = "";
+        hidden.dispatchEvent(new Event("input", { bubbles: true })); // marca el form como sucio
+      }
+      if (file) file.value = "";
+      if (nameEl) nameEl.textContent = "Ningún archivo seleccionado";
+      (openBtn as HTMLElement | null)?.classList.add("hidden");
+      removeBtns.forEach((b) => b.classList.add("hidden"));
+      close();
+    };
+
+    // Confirmación con modal del sistema.
+    const confirmModal = root.querySelector<HTMLElement>("[data-img-confirm]");
+    const abrirConfirm = () => {
+      confirmModal?.classList.remove("hidden");
+      confirmModal?.classList.add("flex");
+    };
+    const cerrarConfirm = () => {
+      confirmModal?.classList.add("hidden");
+      confirmModal?.classList.remove("flex");
+    };
+    removeBtns.forEach((b) => b.addEventListener("click", abrirConfirm));
+    root.querySelector("[data-img-confirm-yes]")?.addEventListener("click", () => {
+      ejecutarQuitar();
+      cerrarConfirm();
+    });
+    root.querySelector("[data-img-confirm-cancel]")?.addEventListener("click", cerrarConfirm);
+    confirmModal?.addEventListener("click", (e) => {
+      if (e.target === confirmModal) cerrarConfirm();
+    });
 
     if (openBtn) openBtn.addEventListener("click", open);
     if (modal) {

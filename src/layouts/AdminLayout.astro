@@ -179,6 +179,43 @@ const algunSubActivo = (subs: { href: string }[]) => subs.some((s) => subActivo(
     </div>
 
     <script>
+      // Conversor de fracciones global del panel: al escribir "1/2", "3/4", etc.
+      // en cualquier campo de texto editable, lo reemplaza por su glifo (½, ¾…).
+      // Se excluyen campos donde no corresponde (slug, links, precio, contacto).
+      (() => {
+        const MAPA: Record<string, string> = {
+          "1/2": "½", "1/3": "⅓", "2/3": "⅔",
+          "1/4": "¼", "3/4": "¾",
+          "1/5": "⅕", "2/5": "⅖", "3/5": "⅗", "4/5": "⅘",
+          "1/6": "⅙", "5/6": "⅚",
+          "1/8": "⅛", "3/8": "⅜", "5/8": "⅝", "7/8": "⅞",
+        };
+        const RE = /(?<![\d.])(\d\/\d)$/;
+        const EXCLUIR = /slug|href|link|url|precio|price|email|celular|tel|whatsapp|instagram/;
+        const convertir = (el: HTMLInputElement | HTMLTextAreaElement) => {
+          const pos = el.selectionStart;
+          if (pos == null) return;
+          const m = el.value.slice(0, pos).match(RE);
+          if (!m) return;
+          const g = MAPA[m[1]];
+          if (!g) return;
+          const start = pos - m[1].length;
+          el.value = el.value.slice(0, start) + g + el.value.slice(pos);
+          el.selectionStart = el.selectionEnd = start + g.length;
+        };
+        document.addEventListener("input", (e) => {
+          const el = e.target as HTMLElement;
+          const esTexto =
+            el instanceof HTMLTextAreaElement ||
+            (el instanceof HTMLInputElement && (el.type === "text" || el.type === ""));
+          if (!esTexto) return;
+          if ((el as HTMLElement).closest("[data-no-fraccion]")) return;
+          const campo = el as HTMLInputElement | HTMLTextAreaElement;
+          if (EXCLUIR.test((campo.name || campo.id || "").toLowerCase())) return;
+          convertir(campo);
+        });
+      })();
+
       // Colapsar/expandir toda la barra lateral. Recuerda el estado en
       // localStorage; al colapsar aparece un botón flotante para reabrirla.
       (() => {

@@ -47,6 +47,7 @@ export const productos = pgTable("productos", {
   destacado: boolean("destacado").notNull().default(false),
   disponible: boolean("disponible").notNull().default(true),
   imagen: text("imagen"),
+  imagen2: text("imagen2"), // segunda foto opcional (packaging / complementaria)
   orden: integer("orden").notNull().default(0),
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
@@ -75,6 +76,7 @@ export const recetas = pgTable("recetas", {
   materiales: jsonb("materiales").$type<string[]>().notNull().default([]), // utensilios necesarios
   notas: jsonb("notas").$type<string[]>().notNull().default([]),
   imagen: text("imagen"),
+  imagen2: text("imagen2"), // segunda foto opcional (complementaria)
   orden: integer("orden").notNull().default(0),
 });
 
