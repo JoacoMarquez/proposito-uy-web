@@ -20,6 +20,11 @@ const valores = [1, 2, 3, 4, 5].map((n, i) => ({
   imagen: c[`valor${n}Imagen`],
   icono: ICONOS[i],
 }));
+// "Contenido real": un párrafo por línea (mismo patrón que los acordeones).
+const contenidoRealParrafos = String(c.contenidoRealTexto ?? "")
+  .split("\n")
+  .map((s) => s.trim())
+  .filter(Boolean);
 ---
 
 <Layout titulo="Nosotros" descripcion="Quiénes están detrás de Propósito UY y cómo trabajamos.">
@@ -61,14 +66,29 @@ const valores = [1, 2, 3, 4, 5].map((n, i) => ({
       {c.subtituloValoresAccion}
     </p>
     <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-      {valores.map((v) => (
+      {valores.map((v, i) => (
         <img
           src={v.imagen}
           alt={`Propósito — ${v.titulo}`}
           loading="lazy"
-          class="aspect-square w-full rounded-2xl object-cover"
+          class:list={[
+            "w-full rounded-2xl object-cover",
+            // En mobile (2 col) la 5ª imagen ocupa el ancho completo y cierra la
+            // grilla sin hueco; en sm+ vuelve a una celda cuadrada normal (PROP-104).
+            i === valores.length - 1
+              ? "col-span-2 aspect-[2/1] sm:col-span-1 sm:aspect-square"
+              : "aspect-square",
+          ]}
         />
       ))}
+    </div>
+  </section>
+
+  <!-- Contenido real -->
+  <section class="mx-auto max-w-3xl px-4 pb-20">
+    <TituloSeccion titulo={c.contenidoRealTitulo} />
+    <div class="mt-4 space-y-4 text-marca-900/80">
+      {contenidoRealParrafos.map((p) => <p class="leading-relaxed">{p}</p>)}
     </div>
   </section>
 </Layout>

@@ -13,7 +13,7 @@ const c = await getContenido("tienda");
     <h1 class="text-3xl font-bold text-marca-700">{c.titulo}</h1>
     <p class="mt-2 max-w-xl text-marca-900/70">{c.intro}</p>
 
-    <div class="mt-8 grid gap-5 sm:grid-cols-2">
+    <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5">
       {lista.map((c) => (
         <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} />
       ))}
@@ -21,16 +21,16 @@ const c = await getContenido("tienda");
           Placeholder con el isotipo; reemplazar por la foto de productos o el isotipo invertido del cliente (PROP-83). */}
       <a
         href="/tienda/catalogo"
-        class="group relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-2xl bg-marca-100 p-6 text-center transition-shadow hover:shadow-md"
+        class="group relative flex aspect-[4/3] flex-col items-center justify-center overflow-hidden rounded-2xl bg-marca-100 p-4 text-center transition-shadow hover:shadow-md sm:aspect-square sm:p-6"
       >
         <img
           src={c.catalogoImagen}
           alt=""
           loading="lazy"
-          class="h-20 w-20 object-contain transition-transform duration-300 group-hover:scale-105"
+          class="h-14 w-14 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20"
         />
-        <h2 class="mt-4 text-lg font-semibold text-marca-900">{c.catalogoTitulo}</h2>
-        <p class="mt-1 text-sm text-marca-900/70">{c.catalogoDescripcion}</p>
+        <h2 class="mt-2 text-base font-semibold text-marca-900 sm:mt-4 sm:text-lg">{c.catalogoTitulo}</h2>
+        <p class="mt-1 text-xs text-marca-900/70 sm:text-sm">{c.catalogoDescripcion}</p>
       </a>
     </div>
   </section>

@@ -2,10 +2,12 @@
 
 export const site = {
   nombre: "Propósito UY",
-  dominio: "propositouy.com.uy",
+  dominio: "www.propositouy.com",
   // Número de WhatsApp Business en formato internacional sin "+" ni espacios.
   whatsapp: "59897174174",
   whatsappMensajeBase: "¡Hola Propósito! Quiero hacer un pedido:",
+  // Mensaje del botón genérico de WhatsApp (footer): consulta/coordinación/comprobante.
+  whatsappMensajeConsulta: "Hola! Quiero hacer una consulta: ",
   // Link de "conversación abierta" de WhatsApp Business (para el bloque de Contacto).
   whatsappConversacion: "https://wa.me/message/YWJV7R5QSYRND1",
   // Horario de atención.
