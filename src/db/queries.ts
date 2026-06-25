@@ -40,6 +40,25 @@ export async function getDestacados(): Promise<ProductoFull[]> {
   return (await getProductos()).filter((p) => p.destacado);
 }
 
+// Reordena SOLO los destacados ("Los más pedidos" del inicio) entre sí.
+// Permuta entre ellos los valores de `orden` que ya ocupan, sin tocar el resto
+// del catálogo: cada producto no destacado conserva su orden, y los destacados
+// quedan en la secuencia recibida (idsEnOrden = ids en el orden deseado).
+export async function actualizarOrdenDestacados(idsEnOrden: number[]): Promise<void> {
+  const dest = await db
+    .select({ id: productos.id, orden: productos.orden })
+    .from(productos)
+    .where(eq(productos.destacado, true));
+  const slots = dest.map((d) => d.orden).sort((a, b) => a - b);
+  await Promise.all(
+    idsEnOrden.map((id, i) =>
+      slots[i] === undefined
+        ? Promise.resolve()
+        : db.update(productos).set({ orden: slots[i] }).where(eq(productos.id, id)),
+    ),
+  );
+}
+
 // ── Categorías ──
 export async function getCategorias(): Promise<Categoria[]> {
   return db.select().from(categorias).orderBy(asc(categorias.orden));

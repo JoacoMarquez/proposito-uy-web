@@ -311,6 +311,13 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         ],
       },
       {
+        titulo: "Contenido real",
+        campos: [
+          { key: "contenidoRealTitulo", label: "Título", tipo: "text" },
+          { key: "contenidoRealTexto", label: "Texto (un párrafo por línea)", tipo: "richtext" },
+        ],
+      },
+      {
         titulo: "Valor 1",
         campos: [
           { key: "valor1Titulo", label: "Título", tipo: "text" },
@@ -359,6 +366,9 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         "Es nuestro compromiso con ustedes, los que nos apoyan y nos hacen dar latido a nuestro proyecto.",
       tituloValoresAccion: "Los valores en acción",
       subtituloValoresAccion: "Los valores no son solo palabras, sino parte del trabajo cotidiano.",
+      contenidoRealTitulo: "Contenido real",
+      contenidoRealTexto:
+        "Todo el contenido visual de esta web nace de elaboraciones hechas por nosotros: no son renders ni fotos generadas con IA.\nLas recetas y productos fueron preparados, fotografiados y seleccionados en sesiones propias de contenido, con nuestros productos y espacio de trabajo.\nLo que ves busca representar lo que realmente hacemos: alimentos simples, cuidados y posibles de preparar o recibir tal como se muestran.\nTambién cuidamos que la comunicación sea directa. Si nos escribís por WhatsApp, del otro lado te responde una persona.",
       valor1Titulo: "Cercanía",
       valor1Detalle: "Cocinar como para alguien querido.",
       valor1Imagen: "/valores/real-cercania.webp",
@@ -488,12 +498,25 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "direccionRetiro", label: "Dirección de retiro", tipo: "text" },
         ],
       },
+      {
+        titulo: "Datos bancarios",
+        campos: [
+          { key: "bancoNombre", label: "Banco", tipo: "text", ayuda: "Se muestran en la confirmación de pedidos con pago por transferencia." },
+          { key: "bancoTipoCuenta", label: "Tipo de cuenta", tipo: "text", ayuda: "Ej: CA $ (caja de ahorro en pesos)." },
+          { key: "bancoNumeroCuenta", label: "N° de cuenta", tipo: "text" },
+          { key: "bancoTitular", label: "Titular", tipo: "text" },
+        ],
+      },
     ],
     defaults: {
       whatsappConversacion: "https://wa.me/message/YWJV7R5QSYRND1",
       horarioAtencion: "Lunes a viernes de 12:00 a 18:00 hs.",
       instagram: "https://instagram.com/proposito_uy",
       direccionRetiro: "Volteadores 1742, Punta Gorda, Montevideo",
+      bancoNombre: "BROU",
+      bancoTipoCuenta: "CA $",
+      bancoNumeroCuenta: "110522297-00001",
+      bancoTitular: "Pedro Dieste",
     },
   },
   {
