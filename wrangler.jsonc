@@ -7,6 +7,11 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2025-05-21",
   "compatibility_flags": ["nodejs_compat"],
+  // Conserva las variables/secrets cargadas desde el dashboard al desplegar.
+  // Sin esto, cada deploy de Workers Builds borra las variables (tipo Text) que
+  // no estén en este archivo — por eso desaparecían BREVO_LIST_ID, RESEND_API_KEY,
+  // etc. Los secrets se mantienen, pero con keep_vars protegemos todo.
+  "keep_vars": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
