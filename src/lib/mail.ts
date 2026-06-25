@@ -3,10 +3,7 @@
 
 import { site } from "../data/site";
 import { formatoPrecio } from "../db/queries";
-
-function env(key: string): string | undefined {
-  return process.env[key] ?? (import.meta.env as Record<string, string | undefined>)?.[key];
-}
+import { obtenerEnv, leerEnv } from "./env";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
@@ -120,14 +117,16 @@ function htmlAviso(p: PedidoMail): string {
   return layout(`Nuevo pedido — ${p.nombre}`, cuerpo);
 }
 
-async function enviar(payload: {
-  from: string;
-  to: string | string[];
-  subject: string;
-  html: string;
-  reply_to?: string;
-}): Promise<boolean> {
-  const apiKey = env("RESEND_API_KEY");
+async function enviar(
+  apiKey: string | undefined,
+  payload: {
+    from: string;
+    to: string | string[];
+    subject: string;
+    html: string;
+    reply_to?: string;
+  },
+): Promise<boolean> {
   if (!apiKey) {
     console.warn("[mail] RESEND_API_KEY no configurada — se omite el envío.");
     return false;
@@ -151,17 +150,20 @@ async function enviar(payload: {
 
 // Envía la confirmación al cliente y el aviso a Propósito. Nunca lanza.
 export async function enviarMailsPedido(p: PedidoMail): Promise<void> {
-  const from = env("MAIL_FROM") ?? `${site.nombre} <onboarding@resend.dev>`;
-  const admin = env("MAIL_ADMIN");
+  // En el Worker los secrets vienen de "cloudflare:workers" (no de process.env).
+  const env = await obtenerEnv();
+  const apiKey = leerEnv(env, "RESEND_API_KEY");
+  const from = leerEnv(env, "MAIL_FROM") ?? `${site.nombre} <onboarding@resend.dev>`;
+  const admin = leerEnv(env, "MAIL_ADMIN");
   try {
-    await enviar({
+    await enviar(apiKey, {
       from,
       to: p.email,
       subject: `Pedido ${p.numero} recibido · ${site.nombre}`,
       html: htmlConfirmacion(p),
     });
     if (admin) {
-      await enviar({
+      await enviar(apiKey, {
         from,
         to: admin,
         subject: `Nuevo pedido ${p.numero} — ${p.nombre}`,

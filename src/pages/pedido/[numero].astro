@@ -33,16 +33,19 @@ const waCoord = whatsappLink(`Hola! Mi pedido ${pedido.numero} es con coordinaci
 // Mensaje de confirmación con el detalle completo del pedido (PROP-96).
 const modalidadTxt = pedido.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta";
 const pagoTxt = pedido.metodoPago === "transferencia" ? "Transferencia" : "Efectivo";
+// Mensaje solo con caracteres ASCII (+ acentos): evitamos viñetas, signo de
+// multiplicación, rayas largas y emojis que algunos WhatsApp/teléfonos
+// muestran como "cajita" con signo de pregunta (PROP-105).
 const lineasPedido = pedido.items
-  .map((i) => `• ${i.cantidad}× ${i.nombre} (${i.presentacion})`)
+  .map((i) => `- ${i.cantidad}x ${i.nombre} (${i.presentacion})`)
   .join("\n");
 const mensajeConfirmar = [
-  `Hola! Confirmo mi pedido ${pedido.numero} ✅`,
+  `Hola! Confirmo mi pedido ${pedido.numero}`,
   "",
   lineasPedido,
   "",
   `Total: ${formatoPrecio(pedido.total)}`,
-  `${modalidadTxt} — ${agendaTexto}`,
+  `${modalidadTxt} - ${agendaTexto}`,
   pedido.direccion ? `Dirección: ${pedido.direccion}` : null,
   `Pago: ${pagoTxt}`,
 ]
