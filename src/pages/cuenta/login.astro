@@ -39,7 +39,10 @@ if (Astro.request.method === "POST") {
           class="mt-1 w-full rounded-xl border border-marca-300 px-3 py-2" /></label>
       <button type="submit" class="w-full rounded-full bg-marca-600 py-2.5 font-medium text-white hover:bg-marca-700">Ingresar</button>
     </form>
-    <p class="mt-4 text-center text-sm text-marca-900/70">¿No tenés cuenta?
+    <p class="mt-4 text-center text-sm">
+      <a href="/cuenta/recuperar" class="font-medium text-marca-700 hover:underline">¿Olvidaste tu contraseña?</a>
+    </p>
+    <p class="mt-2 text-center text-sm text-marca-900/70">¿No tenés cuenta?
       <a href="/cuenta/registro" class="font-medium text-marca-700 hover:underline">Registrate</a>
     </p>
   </section>

@@ -182,6 +182,18 @@ export const suscriptores = pgTable("suscriptores", {
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
+// Tokens de "Olvidé mi contraseña" (admin y cliente). Guardamos el hash del
+// token (no el token en claro). De un solo uso y con vencimiento.
+export const passwordResets = pgTable("password_resets", {
+  id: serial("id").primaryKey(),
+  tipo: text("tipo").notNull(), // "admin" | "cliente"
+  email: text("email").notNull(),
+  tokenHash: text("token_hash").notNull(),
+  expiraEn: timestamp("expira_en").notNull(),
+  usadoEn: timestamp("usado_en"),
+  creadoEn: timestamp("creado_en").notNull().defaultNow(),
+});
+
 // Tabla genérica de configuración clave/valor. Reservada para flags de sistema.
 // (Los horarios de retiro/entrega ahora viven en el contenido de la página
 // "tienda", tabla `paginas`.) Se mantiene para no forzar un DROP en la base.
