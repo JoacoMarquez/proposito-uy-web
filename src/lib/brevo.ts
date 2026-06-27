@@ -29,6 +29,42 @@ const BREVO_CONTACTS = "https://api.brevo.com/v3/contacts";
 
 export type ResultadoBrevo = "ok" | "sin-config" | "error";
 
+// Envía un mail transaccional por Brevo (ej. reseteo de contraseña). El remitente
+// (BREVO_SENDER_EMAIL) debe estar verificado en Brevo. Best-effort: devuelve false
+// si no está configurado o si falla, sin lanzar.
+export async function enviarMailBrevo(opts: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<boolean> {
+  const env = await obtenerEnv();
+  const apiKey = leer(env, "BREVO_API_KEY");
+  const senderEmail = leer(env, "BREVO_SENDER_EMAIL") ?? leer(env, "MAIL_FROM_EMAIL");
+  const senderName = leer(env, "BREVO_SENDER_NAME") ?? "Propósito UY";
+  if (!apiKey || !senderEmail) {
+    console.warn("[brevo] falta BREVO_API_KEY o BREVO_SENDER_EMAIL — se omite el envío.");
+    return false;
+  }
+  try {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": apiKey, "Content-Type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        sender: { email: senderEmail, name: senderName },
+        to: [{ email: opts.to }],
+        subject: opts.subject,
+        htmlContent: opts.html,
+      }),
+    });
+    if (res.ok) return true;
+    console.error("[brevo] mail respuesta", res.status, await res.text());
+    return false;
+  } catch (e) {
+    console.error("[brevo] error al enviar mail:", e);
+    return false;
+  }
+}
+
 async function brevoConfig() {
   const env = await obtenerEnv();
   const apiKey = leer(env, "BREVO_API_KEY");
