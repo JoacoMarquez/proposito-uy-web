@@ -18,10 +18,12 @@ interface Props {
 
 const { titulo, descripcion, imagen, noindex = false } = Astro.props;
 const tituloFinal = titulo ? `${titulo} · ${site.nombre}` : site.nombre;
-const desc = descripcion ?? "Alimentos con propósito. Frutos secos, barras proteicas, hummus y cremas artesanales.";
+const desc = descripcion ?? "Cuidamos lo que comés.";
 // URLs absolutas estables (independientes del host) para canonical y Open Graph.
 const baseUrl = `https://${site.dominio}`;
 const canonical = new URL(Astro.url.pathname, baseUrl).href;
+// Sin imagen propia, usamos la tarjeta institucional de marca (1200×630).
+const usaOgMarca = !imagen;
 const imagenOg = new URL(imagen ?? site.ogImagen, baseUrl).href;
 ---
 
@@ -47,12 +49,21 @@ const imagenOg = new URL(imagen ?? site.ogImagen, baseUrl).href;
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={imagenOg} />
+    <meta property="og:image:alt" content={site.nombre} />
+    {usaOgMarca && (
+      <>
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+      </>
+    )}
     <meta property="og:locale" content="es_UY" />
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={tituloFinal} />
     <meta name="twitter:description" content={desc} />
     <meta name="twitter:image" content={imagenOg} />
+    <meta name="twitter:image:alt" content={site.nombre} />
     <ClientRouter />
   </head>
   <body class="flex min-h-screen flex-col font-sans">

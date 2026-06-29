@@ -19,8 +19,9 @@ export const site = {
     instagram: "https://instagram.com/proposito_uy",
   },
   // Imagen por defecto para previews al compartir (Open Graph / Twitter).
-  // Ideal: reemplazar por una imagen de marca dedicada de 1200x630 (PROP-66).
-  ogImagen: "/productos/granola-del-dia-clasica.webp",
+  // Tarjeta institucional 1200x630 (logo sobre fondo crema). Se regenera con
+  // `npm run og:gen` (scripts/generar-og.mjs). (PROP-112)
+  ogImagen: "/marca/og-proposito.png",
   // URL de la política de cookies (página legal). El banner muestra el link
   // "Más información" apuntando aquí (PROP-67/PROP-68).
   cookiesPolicyUrl: "/legales/cookies",
