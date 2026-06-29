@@ -3,11 +3,9 @@ import { getProducto, getContenido, crearPedido, type ItemPedido } from "../../d
 import { enviarMailsPedido } from "../../lib/mail";
 import { validarAgenda } from "../../lib/agenda";
 import { MIX_SLUG, RECARGO_CAJU, mixValido, precioMix, etiquetaMix, type MixDetalle } from "../../lib/barrasMix";
+import { costoEnvio as calcularEnvio } from "../../lib/envio";
 
 export const prerender = false;
-
-const ENVIO = 250;
-const ENVIO_GRATIS_DESDE = 3000;
 
 function json(obj: unknown, status = 200) {
   return new Response(JSON.stringify(obj), {
@@ -80,7 +78,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   if (validados.length === 0) return json({ error: "No hay productos válidos en el carrito." }, 400);
 
-  const costoEnvio = modalidad === "retiro" ? 0 : subtotal >= ENVIO_GRATIS_DESDE ? 0 : ENVIO;
+  const costoEnvio = calcularEnvio(subtotal, modalidad);
   const total = subtotal + costoEnvio;
 
   const numero = await crearPedido(

@@ -102,6 +102,7 @@ const direcciones = cliente?.direcciones ?? [];
           <div class="flex justify-between"><span>Envío</span><span id="r-envio"></span></div>
           <div class="mt-1 flex justify-between text-lg font-bold text-marca-900"><span>Total</span><span id="r-total"></span></div>
         </div>
+        <p id="r-envio-nota" class="mt-3 hidden rounded-lg bg-marca-50 p-2 text-xs text-marca-700"></p>
         <p id="error" class="mt-3 hidden rounded-lg bg-red-50 p-2 text-sm text-red-700"></p>
         <button id="confirmar" type="submit" class="mt-5 w-full rounded-full bg-marca-600 px-5 py-3 font-medium text-white hover:bg-marca-700">
           Confirmar pedido
@@ -114,9 +115,7 @@ const direcciones = cliente?.direcciones ?? [];
 
 <script>
   import { getCarrito, subtotal as calcSubtotal, limpiar, formatoPrecio } from "../scripts/cart";
-
-  const ENVIO = 250;
-  const ENVIO_GRATIS_DESDE = 3000;
+  import { costoEnvio, notaEnvio, type Modalidad } from "../lib/envio";
 
   function setup() {
   const form = document.getElementById("checkout") as HTMLFormElement | null;
@@ -127,11 +126,8 @@ const direcciones = cliente?.direcciones ?? [];
 
   if (getCarrito().length === 0) location.href = "/carrito";
 
-  function modalidad() {
-    return (form.querySelector('input[name="modalidad"]:checked') as HTMLInputElement).value;
-  }
-  function costoEnvio(sub: number) {
-    return modalidad() === "retiro" ? 0 : sub >= ENVIO_GRATIS_DESDE ? 0 : ENVIO;
+  function modalidad(): Modalidad {
+    return (form.querySelector('input[name="modalidad"]:checked') as HTMLInputElement).value as Modalidad;
   }
 
   function render() {
@@ -140,10 +136,15 @@ const direcciones = cliente?.direcciones ?? [];
       .map((i) => `<div class="flex justify-between"><span>${i.cantidad}× ${i.nombre} <span class="text-marca-500">(${i.presentacion})</span></span><span>${formatoPrecio(i.precio * i.cantidad)}</span></div>`)
       .join("");
     const sub = calcSubtotal();
-    const envio = costoEnvio(sub);
+    const envio = costoEnvio(sub, modalidad());
     document.getElementById("r-subtotal")!.textContent = formatoPrecio(sub);
     document.getElementById("r-envio")!.textContent = envio === 0 ? "Gratis" : formatoPrecio(envio);
     document.getElementById("r-total")!.textContent = formatoPrecio(sub + envio);
+    // Nota de envío gratis: que el cliente entienda la política antes de confirmar (PROP-109).
+    const nota = document.getElementById("r-envio-nota")!;
+    const texto = notaEnvio(sub, modalidad(), formatoPrecio);
+    nota.textContent = texto ?? "";
+    nota.classList.toggle("hidden", texto === null);
   }
 
   // Mostrar/ocultar dirección según modalidad
