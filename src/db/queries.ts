@@ -310,6 +310,12 @@ export async function actualizarEstadoPago(id: number, estadoPago: string) {
   await db.update(pedidos).set({ estadoPago }).where(eq(pedidos.id, id));
 }
 
+// Elimina un pedido (para borrar pruebas, duplicados o cargas por error).
+// Los pedido_items se borran en cascada (FK onDelete: "cascade"). (PROP-110)
+export async function eliminarPedido(id: number): Promise<void> {
+  await db.delete(pedidos).where(eq(pedidos.id, id));
+}
+
 // ── Contenido editable de páginas (CMS liviano) ──
 // Mezcla los defaults del esquema (los literales actuales) con lo guardado en la
 // tabla `paginas`. Toda clave no guardada cae a su default → nada se rompe aunque
