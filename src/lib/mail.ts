@@ -1,11 +1,11 @@
-// Mails transaccionales del pedido vía Resend (API REST con fetch — corre en Workers).
-// Es "best-effort": si falta RESEND_API_KEY, no rompe el pedido, solo omite el envío.
+// Mails transaccionales del pedido vía Brevo (mismo proveedor que el newsletter y
+// el reseteo de contraseña; reusa enviarMailBrevo). Es "best-effort": si Brevo no
+// está configurado o falla, no rompe el pedido, solo omite el envío.
 
 import { site } from "../data/site";
 import { formatoPrecio } from "../db/queries";
 import { obtenerEnv, leerEnv } from "./env";
-
-const RESEND_ENDPOINT = "https://api.resend.com/emails";
+import { enviarMailBrevo } from "./brevo";
 
 export interface PedidoMail {
   numero: string;
@@ -117,58 +117,26 @@ function htmlAviso(p: PedidoMail): string {
   return layout(`Nuevo pedido — ${p.nombre}`, cuerpo);
 }
 
-async function enviar(
-  apiKey: string | undefined,
-  payload: {
-    from: string;
-    to: string | string[];
-    subject: string;
-    html: string;
-    reply_to?: string;
-  },
-): Promise<boolean> {
-  if (!apiKey) {
-    console.warn("[mail] RESEND_API_KEY no configurada — se omite el envío.");
-    return false;
-  }
-  try {
-    const res = await fetch(RESEND_ENDPOINT, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      console.error("[mail] Resend respondió", res.status, await res.text());
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error("[mail] Error enviando con Resend:", e);
-    return false;
-  }
-}
-
-// Envía la confirmación al cliente y el aviso a Propósito. Nunca lanza.
+// Envía la confirmación al cliente y, si hay MAIL_ADMIN, un aviso/respaldo a
+// Propósito con los datos del pedido (PROP-108). Nunca lanza.
 export async function enviarMailsPedido(p: PedidoMail): Promise<void> {
   // En el Worker los secrets vienen de "cloudflare:workers" (no de process.env).
   const env = await obtenerEnv();
-  const apiKey = leerEnv(env, "RESEND_API_KEY");
-  const from = leerEnv(env, "MAIL_FROM") ?? `${site.nombre} <onboarding@resend.dev>`;
   const admin = leerEnv(env, "MAIL_ADMIN");
   try {
-    await enviar(apiKey, {
-      from,
+    // Confirmación al cliente.
+    await enviarMailBrevo({
       to: p.email,
       subject: `Pedido ${p.numero} recibido · ${site.nombre}`,
       html: htmlConfirmacion(p),
     });
+    // Aviso/respaldo al administrador. replyTo = cliente, para responderle directo.
     if (admin) {
-      await enviar(apiKey, {
-        from,
+      await enviarMailBrevo({
         to: admin,
         subject: `Nuevo pedido ${p.numero} — ${p.nombre}`,
         html: htmlAviso(p),
-        reply_to: p.email,
+        replyTo: p.email,
       });
     }
   } catch (e) {

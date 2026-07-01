@@ -36,6 +36,7 @@ export async function enviarMailBrevo(opts: {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
 }): Promise<boolean> {
   const env = await obtenerEnv();
   const apiKey = leer(env, "BREVO_API_KEY");
@@ -54,6 +55,7 @@ export async function enviarMailBrevo(opts: {
         to: [{ email: opts.to }],
         subject: opts.subject,
         htmlContent: opts.html,
+        ...(opts.replyTo ? { replyTo: { email: opts.replyTo } } : {}),
       }),
     });
     if (res.ok) return true;
