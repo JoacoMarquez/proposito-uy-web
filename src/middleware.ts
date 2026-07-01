@@ -12,6 +12,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     ? { id: cliente.id, email: cliente.email, nombre: cliente.nombre }
     : null;
 
+  // Sesión de admin: se valida siempre que exista la cookie (una sola consulta,
+  // y solo para quien la tiene). Así el sitio público puede ofrecer un acceso
+  // directo al panel a los administradores logueados, sin costo para el resto.
+  const adminToken = cookies.get(SESSION_COOKIE)?.value;
+  const adminUser = adminToken ? await validateToken(adminToken) : null;
+  context.locals.adminUser = adminUser ? { id: adminUser.id, email: adminUser.email } : null;
+
   // Protección del panel /admin.
   if (url.pathname.startsWith("/admin")) {
     // Páginas públicas del panel: login y recuperación de contraseña.
@@ -19,12 +26,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
       url.pathname === "/admin/login" ||
       url.pathname === "/admin/recuperar" ||
       url.pathname === "/admin/restablecer";
-    const token = cookies.get(SESSION_COOKIE)?.value;
-    const user = await validateToken(token);
-    context.locals.adminUser = user ? { id: user.id, email: user.email } : null;
 
-    if (!user && !esPublica) return context.redirect("/admin/login");
-    if (user && url.pathname === "/admin/login") return context.redirect("/admin");
+    if (!adminUser && !esPublica) return context.redirect("/admin/login");
+    if (adminUser && url.pathname === "/admin/login") return context.redirect("/admin");
   }
 
   return next();
