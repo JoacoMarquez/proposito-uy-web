@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validarAgenda, proximosDiasHabilitados, agendaTexto } from "./agenda";
+import { validarAgenda, proximosDiasHabilitados, agendaTexto, parseLicencia, enLicencia, licenciaTexto } from "./agenda";
 
 // Próxima fecha (ISO, UTC) cuyo día de la semana sea `dow` (0=Dom … 6=Sáb),
 // estrictamente a futuro respecto de hoy. Misma base UTC que usa el módulo.
@@ -50,6 +50,52 @@ describe("proximosDiasHabilitados", () => {
     }
     const isos = dias.map((d) => d.iso);
     expect([...isos].sort()).toEqual(isos); // estrictamente crecientes
+  });
+});
+
+describe("licencia (PROP-111)", () => {
+  it("parseLicencia normaliza y solo queda activa con rango válido", () => {
+    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-01", licenciaHasta: "2026-07-15" }))
+      .toEqual({ activa: true, desde: "2026-07-01", hasta: "2026-07-15" });
+    // inactiva si falta el flag
+    expect(parseLicencia({ licenciaDesde: "2026-07-01", licenciaHasta: "2026-07-15" }).activa).toBe(false);
+    // inactiva si desde > hasta
+    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-20", licenciaHasta: "2026-07-15" }).activa).toBe(false);
+    // inactiva si falta una fecha
+    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-01", licenciaHasta: "" }).activa).toBe(false);
+  });
+
+  it("enLicencia es inclusivo en los bordes", () => {
+    const lic = { activa: true, desde: "2026-07-01", hasta: "2026-07-15" };
+    expect(enLicencia("2026-07-01", lic)).toBe(true);
+    expect(enLicencia("2026-07-15", lic)).toBe(true);
+    expect(enLicencia("2026-06-30", lic)).toBe(false);
+    expect(enLicencia("2026-07-16", lic)).toBe(false);
+    // licencia inactiva nunca bloquea
+    expect(enLicencia("2026-07-10", { activa: false, desde: "2026-07-01", hasta: "2026-07-15" })).toBe(false);
+  });
+
+  it("proximosDiasHabilitados saltea los días dentro de la licencia", () => {
+    const sinLic = proximosDiasHabilitados(6);
+    const d0 = sinLic[0].iso;
+    const lic = { activa: true, desde: d0, hasta: d0 };
+    const conLic = proximosDiasHabilitados(6, lic);
+    expect(conLic).toHaveLength(6);
+    expect(conLic.map((d) => d.iso)).not.toContain(d0);
+    for (const d of conLic) expect(enLicencia(d.iso, lic)).toBe(false);
+  });
+
+  it("validarAgenda rechaza una fecha dentro de la licencia", () => {
+    const iso = proximoDow(3); // próximo miércoles
+    expect(validarAgenda("dia", iso, { activa: true, desde: iso, hasta: iso })).toBeNull();
+    // sin licencia, la misma fecha es válida
+    expect(validarAgenda("dia", iso)).toEqual({ agenda: "miercoles", fechaAgenda: iso });
+  });
+
+  it("licenciaTexto arma el aviso con la fecha de regreso (DD/MM)", () => {
+    expect(licenciaTexto({ activa: true, desde: "2026-07-01", hasta: "2026-07-15" }))
+      .toBe("Estamos de licencia hasta el 15/07. Podés dejar tu pedido agendado para las próximas fechas disponibles.");
+    expect(licenciaTexto({ activa: false, desde: null, hasta: null })).toBeNull();
   });
 });
 
