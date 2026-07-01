@@ -16,12 +16,17 @@ export interface Licencia {
   hasta: string | null; // YYYY-MM-DD (inclusive, fecha de regreso)
 }
 
-// Normaliza el contenido editable ("tienda") a una Licencia. Solo queda activa
-// si tiene ambas fechas y forman un rango válido (desde <= hasta).
-export function parseLicencia(c: Record<string, any> | null | undefined): Licencia {
+// Normaliza el contenido editable ("tienda") a una Licencia. Queda activa solo
+// si tiene ambas fechas, forman un rango válido (desde <= hasta) y la fecha de
+// regreso todavía no pasó (hoyIso <= hasta): así se vence sola el día de regreso
+// sin necesidad de apagarla desde el panel (PROP-111).
+export function parseLicencia(
+  c: Record<string, any> | null | undefined,
+  hoyIso: string = new Date().toISOString().slice(0, 10),
+): Licencia {
   const desde = typeof c?.licenciaDesde === "string" && /^\d{4}-\d{2}-\d{2}$/.test(c.licenciaDesde) ? c.licenciaDesde : null;
   const hasta = typeof c?.licenciaHasta === "string" && /^\d{4}-\d{2}-\d{2}$/.test(c.licenciaHasta) ? c.licenciaHasta : null;
-  const activa = c?.licenciaActiva === "si" && !!desde && !!hasta && desde <= hasta;
+  const activa = c?.licenciaActiva === "si" && !!desde && !!hasta && desde <= hasta && hoyIso <= hasta;
   return { activa, desde, hasta };
 }
 
