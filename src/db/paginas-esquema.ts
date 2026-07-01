@@ -8,7 +8,7 @@
 // Para hacer editable un texto nuevo: agregá el campo acá (con su default) y
 // reemplazá el literal del .astro por {c.<key>}. No hace falta tocar el editor.
 
-export type CampoTipo = "text" | "richtext" | "link" | "ruta" | "imagen" | "tabla" | "lista";
+export type CampoTipo = "text" | "richtext" | "link" | "ruta" | "imagen" | "tabla" | "fecha" | "checkbox" | "lista";
 
 export interface CampoSimple {
   key: string;
@@ -16,7 +16,8 @@ export interface CampoSimple {
   ayuda?: string;
   // "link" = URL libre (externa). "ruta" = página interna del sitio (desplegable).
   // "tabla" = grilla editable { columnas, filas } (valores/filas/columnas).
-  tipo: "text" | "richtext" | "link" | "ruta" | "imagen" | "tabla";
+  // "fecha" = input date (YYYY-MM-DD). "checkbox" = booleano ("si" / "").
+  tipo: "text" | "richtext" | "link" | "ruta" | "imagen" | "tabla" | "fecha" | "checkbox";
 }
 
 // Forma de los valores de un campo tipo "tabla".
@@ -203,6 +204,14 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "recargoCajuMix", label: "Recargo por barra de Cajú ($U)", tipo: "text", ayuda: "Extra que se suma por cada barra de Cajú elegida en la caja Mix. Ej: 20" },
         ],
       },
+      {
+        titulo: "Licencia / pausa de pedidos",
+        campos: [
+          { key: "licenciaActiva", label: "Estamos de licencia", tipo: "checkbox", ayuda: "Al activarlo, el checkout no ofrece fechas de entrega/retiro dentro del período y avisa a los clientes. Los pedidos se agendan para después del regreso." },
+          { key: "licenciaDesde", label: "Desde", tipo: "fecha", ayuda: "Primer día de la licencia (inclusive)." },
+          { key: "licenciaHasta", label: "Hasta (regreso)", tipo: "fecha", ayuda: "Último día de la licencia (inclusive). Las entregas se retoman después de esta fecha." },
+        ],
+      },
     ],
     defaults: {
       titulo: "Tienda",
@@ -214,6 +223,9 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       horarioEntrega: "15:00 a 18:00",
       pedidoNumeroInicial: "1",
       recargoCajuMix: "20",
+      licenciaActiva: "",
+      licenciaDesde: "",
+      licenciaHasta: "",
     },
   },
   {
