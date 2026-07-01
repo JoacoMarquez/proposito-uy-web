@@ -2,11 +2,14 @@
 export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 import { getPedidosDeCliente, cambiarAgendaPedido } from "../../lib/cliente-auth";
-import { formatoPrecio } from "../../db/queries";
-import { proximosDiasHabilitados, validarAgenda, agendaTexto } from "../../lib/agenda";
+import { formatoPrecio, getContenido } from "../../db/queries";
+import { proximosDiasHabilitados, validarAgenda, agendaTexto, parseLicencia, licenciaTexto } from "../../lib/agenda";
 
 const sesion = Astro.locals.cliente;
 if (!sesion) return Astro.redirect("/cuenta/login");
+
+const licencia = parseLicencia(await getContenido("tienda"));
+const avisoLicencia = licenciaTexto(licencia);
 
 let msg = "";
 if (Astro.request.method === "POST") {
@@ -14,7 +17,7 @@ if (Astro.request.method === "POST") {
   const pedidoId = Number(form.get("pedidoId"));
   const valor = String(form.get("valor") ?? "");
   const ag =
-    valor === "coordinacion" ? validarAgenda("coordinacion", null) : validarAgenda("dia", valor);
+    valor === "coordinacion" ? validarAgenda("coordinacion", null) : validarAgenda("dia", valor, licencia);
   if (!ag || !Number.isInteger(pedidoId)) {
     msg = "Opción de agenda inválida.";
   } else {
@@ -24,7 +27,7 @@ if (Astro.request.method === "POST") {
 }
 
 const pedidos = await getPedidosDeCliente(sesion.id);
-const dias = proximosDiasHabilitados(6);
+const dias = proximosDiasHabilitados(6, licencia);
 ---
 
 <Layout titulo="Mis pedidos" descripcion="Historial de pedidos de tu cuenta." noindex>
@@ -34,6 +37,9 @@ const dias = proximosDiasHabilitados(6);
       <a href="/cuenta" class="text-sm text-marca-700 hover:underline">← Mi cuenta</a>
     </div>
     {msg && <p class="mt-4 rounded-lg bg-marca-50 p-3 text-sm text-marca-700">{msg}</p>}
+    {avisoLicencia && (
+      <p class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{avisoLicencia}</p>
+    )}
 
     {pedidos.length === 0 ? (
       <p class="mt-8 text-marca-900/60">Todavía no hiciste pedidos. <a href="/tienda" class="text-marca-700 hover:underline">Ir a la tienda →</a></p>

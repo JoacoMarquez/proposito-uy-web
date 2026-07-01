@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { getProducto, getContenido, crearPedido, type ItemPedido } from "../../db/queries";
 import { enviarMailsPedido } from "../../lib/mail";
-import { validarAgenda } from "../../lib/agenda";
+import { validarAgenda, parseLicencia } from "../../lib/agenda";
 import { MIX_SLUG, RECARGO_CAJU, mixValido, precioMix, etiquetaMix, type MixDetalle } from "../../lib/barrasMix";
 import { costoEnvio as calcularEnvio } from "../../lib/envio";
 
@@ -28,14 +28,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return json({ error: "Faltan datos del pedido." }, 400);
   }
   if (!["entrega", "retiro"].includes(modalidad)) return json({ error: "Modalidad inválida." }, 400);
-  const agendaOk = validarAgenda(agenda, fechaAgenda);
+
+  // Contenido editable (Contenido › Tienda): recargo Mix + período de licencia.
+  const tiendaCfg = await getContenido("tienda");
+  const recargoCaju = Math.max(0, parseInt(String(tiendaCfg?.recargoCajuMix ?? ""), 10) || RECARGO_CAJU);
+
+  // Rechaza fechas dentro de la licencia (además de ocultarlas en el checkout). (PROP-111)
+  const agendaOk = validarAgenda(agenda, fechaAgenda, parseLicencia(tiendaCfg));
   if (!agendaOk) return json({ error: "Elegí un día de agenda válido." }, 400);
   if (modalidad === "entrega" && !direccion) return json({ error: "Falta la dirección de entrega." }, 400);
   if (!Array.isArray(items) || items.length === 0) return json({ error: "El carrito está vacío." }, 400);
-
-  // Recargo de Cajú (Mix) editable desde Contenido › Tienda.
-  const tiendaCfg = await getContenido("tienda");
-  const recargoCaju = Math.max(0, parseInt(String(tiendaCfg?.recargoCajuMix ?? ""), 10) || RECARGO_CAJU);
 
   // Revalidar cada ítem contra la base (no confiamos en los precios del cliente).
   const validados: ItemPedido[] = [];
