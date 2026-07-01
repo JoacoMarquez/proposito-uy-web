@@ -55,14 +55,26 @@ describe("proximosDiasHabilitados", () => {
 
 describe("licencia (PROP-111)", () => {
   it("parseLicencia normaliza y solo queda activa con rango válido", () => {
-    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-01", licenciaHasta: "2026-07-15" }))
+    // hoyIso fijo dentro del rango → determinista
+    const hoy = "2026-07-05";
+    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-01", licenciaHasta: "2026-07-15" }, hoy))
       .toEqual({ activa: true, desde: "2026-07-01", hasta: "2026-07-15" });
     // inactiva si falta el flag
-    expect(parseLicencia({ licenciaDesde: "2026-07-01", licenciaHasta: "2026-07-15" }).activa).toBe(false);
+    expect(parseLicencia({ licenciaDesde: "2026-07-01", licenciaHasta: "2026-07-15" }, hoy).activa).toBe(false);
     // inactiva si desde > hasta
-    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-20", licenciaHasta: "2026-07-15" }).activa).toBe(false);
+    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-20", licenciaHasta: "2026-07-15" }, hoy).activa).toBe(false);
     // inactiva si falta una fecha
-    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-01", licenciaHasta: "" }).activa).toBe(false);
+    expect(parseLicencia({ licenciaActiva: "si", licenciaDesde: "2026-07-01", licenciaHasta: "" }, hoy).activa).toBe(false);
+  });
+
+  it("parseLicencia se vence sola pasada la fecha de regreso (hasta)", () => {
+    const c = { licenciaActiva: "si", licenciaDesde: "2026-07-01", licenciaHasta: "2026-07-15" };
+    // antes o durante la licencia → activa (incluye el mismo día de regreso, inclusive)
+    expect(parseLicencia(c, "2026-06-20").activa).toBe(true); // futura: aún activa (oculta sus fechas)
+    expect(parseLicencia(c, "2026-07-15").activa).toBe(true); // último día, inclusive
+    // pasado el regreso → se apaga sola, sin tocar el panel
+    expect(parseLicencia(c, "2026-07-16").activa).toBe(false);
+    expect(parseLicencia(c, "2026-08-01").activa).toBe(false);
   });
 
   it("enLicencia es inclusivo en los bordes", () => {
