@@ -7,6 +7,7 @@ import {
   getContenido,
   actualizarEstadoPedido,
   actualizarEstadoPago,
+  eliminarPedido,
   ESTADOS_PEDIDO,
   ESTADOS_PAGO,
   formatoPrecio,
@@ -17,6 +18,12 @@ if (!id || Number.isNaN(id)) return Astro.redirect("/admin/pedidos");
 
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
+  // Eliminar pedido (pruebas, duplicados o cargas por error). (PROP-110)
+  if (String(form.get("accion") ?? "") === "eliminar") {
+    await eliminarPedido(id);
+    const numero = String(form.get("numero") ?? "");
+    return Astro.redirect(`/admin/pedidos?eliminado=${encodeURIComponent(numero)}`);
+  }
   const estado = String(form.get("estado") ?? "");
   if ((ESTADOS_PEDIDO as readonly string[]).includes(estado)) {
     await actualizarEstadoPedido(id, estado);
@@ -139,6 +146,25 @@ const waMensaje = `${waCliente}?text=${encodeURIComponent(mensajeWa)}`;
         Escribir por WhatsApp
       </a>
       <p class="mt-1.5 text-center text-xs text-marca-500">Abre WhatsApp con un mensaje ya armado.</p>
+
+      <form
+        method="POST"
+        class="mt-6 border-t border-marca-100 pt-4"
+        onsubmit={`return confirm('¿Eliminar el pedido ${pedido.numero}? Esta acción no se puede deshacer.')`}
+      >
+        <input type="hidden" name="accion" value="eliminar" />
+        <input type="hidden" name="numero" value={pedido.numero} />
+        <button
+          type="submit"
+          class="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H6a1 1 0 01-1-1V6m3 5v6m4-6v6" />
+          </svg>
+          Eliminar pedido
+        </button>
+        <p class="mt-1.5 text-center text-xs text-marca-500">Borra el pedido del panel. No se puede deshacer.</p>
+      </form>
     </aside>
   </div>
 </AdminLayout>
