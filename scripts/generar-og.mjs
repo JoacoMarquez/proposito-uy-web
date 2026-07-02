@@ -20,7 +20,7 @@ const FONDO = "#fbf8ef"; // crema (--color-crema), fondo de página de la marca
 const ISOTIPO = "public/marca/proposito-isotipo.webp"; // trilobulado verde sobre transparente
 // Caja donde entra el isotipo (ya recortado su padding transparente). Presente
 // pero sobrio, con márgenes amplios en el lienzo de 1200×630.
-const CAJA_ISOTIPO = { width: 420, height: 300 };
+const CAJA_ISOTIPO = { width: 470, height: 350 };
 const SALIDA = "public/marca/og-proposito.png";
 
 async function main() {

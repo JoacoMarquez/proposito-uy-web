@@ -19,9 +19,11 @@ export const site = {
     instagram: "https://instagram.com/proposito_uy",
   },
   // Imagen por defecto para previews al compartir (Open Graph / Twitter).
-  // Tarjeta institucional 1200x630 (logo sobre fondo crema). Se regenera con
-  // `npm run og:gen` (scripts/generar-og.mjs). (PROP-112)
-  ogImagen: "/marca/og-proposito.png",
+  // Tarjeta institucional 1200x630 (isotipo sobre fondo crema). Se regenera con
+  // `npm run og:gen` (scripts/generar-og.mjs). (PROP-112 / PROP-114)
+  // El ?v= versiona la URL: al cambiar la imagen, subir el número fuerza a
+  // WhatsApp/redes a re-descargar el preview (que cachean por URL).
+  ogImagen: "/marca/og-proposito.png?v=2",
   // URL de la política de cookies (página legal). El banner muestra el link
   // "Más información" apuntando aquí (PROP-67/PROP-68).
   cookiesPolicyUrl: "/legales/cookies",
