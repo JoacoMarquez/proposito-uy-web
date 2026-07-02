@@ -36,7 +36,6 @@ const detalles = [
   { label: "Vencimiento", valor: producto.vencimiento },
 ].filter((d) => d.valor);
 
-const mensajeBase = `${site.whatsappMensajeBase} ${nombre}`;
 // Link de consulta por WhatsApp para productos agotados (reusado en la rama mix y la normal).
 const consultaWaHref = whatsappLink(`Hola! Quiero consultar por ${nombre}`);
 const primera = producto.presentaciones[0];
@@ -122,6 +121,14 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
                   </div>
                 ))}
               </div>
+              <button
+                id="mix-equitativo"
+                type="button"
+                class="mt-3 w-full rounded-xl border border-marca-300 px-4 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-100"
+              >
+                Distribución equitativa
+              </button>
+              <p class="mt-1 text-center text-xs text-marca-500">Misma cantidad de barras por sabor.</p>
               <p id="mix-estado" class="mt-2 text-sm text-marca-600">Elegí 12 barras en total.</p>
             </div>
 
@@ -198,14 +205,6 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
           </Fragment>
         )}
 
-        <a
-          id="pedir"
-          href={whatsappLink(`${mensajeBase} (${primera.label})`)}
-          class="mt-3 block text-center text-sm text-marca-700 hover:underline"
-        >
-          o pedir directo por WhatsApp
-        </a>
-
         <div class="mt-4">
           <FavoritoBoton
             slug={producto.slug}
@@ -258,10 +257,7 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
   const agregarBtn = document.getElementById("agregar") as HTMLButtonElement | null;
   if (!select && !agregarBtn) return;
   const precioEl = document.getElementById("precio");
-  const pedir = document.getElementById("pedir") as HTMLAnchorElement | null;
   const cantidadEl = document.getElementById("cantidad") as HTMLInputElement | null;
-  const numero = "59897174174";
-  const base = "¡Hola Propósito! Quiero hacer un pedido:";
 
   function presentacionActual() {
     const opt = select!.selectedOptions[0];
@@ -270,12 +266,8 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
 
   function actualizar() {
     if (!select) return;
-    const { label, precio } = presentacionActual();
-    const nombre = select.dataset.nombre ?? "";
+    const { precio } = presentacionActual();
     if (precioEl) precioEl.textContent = formatoPrecio(precio);
-    if (pedir) {
-      pedir.href = `https://wa.me/${numero}?text=${encodeURIComponent(`${base} ${nombre} (${label})`)}`;
-    }
   }
 
   select?.addEventListener("change", actualizar);
@@ -321,6 +313,7 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
     const precioEl = document.getElementById("precio")!;
     const cantidadEl = document.getElementById("cantidad-mix") as HTMLInputElement;
     const btn = document.getElementById("agregar-mix") as HTMLButtonElement;
+    const equitativoBtn = document.getElementById("mix-equitativo") as HTMLButtonElement;
 
     const leerSabores = (): SaboresMix => {
       const s = {} as SaboresMix;
@@ -381,6 +374,18 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
           actualizar();
         }
       });
+    });
+
+    // Distribución equitativa: reparte parejo las barras entre los sabores (PROP-117).
+    // El resto (si la caja no es divisible entre los sabores) va a los primeros.
+    equitativoBtn.addEventListener("click", () => {
+      const cap = Number(tamanoSel.selectedOptions[0].dataset.cantidad);
+      const base = Math.floor(cap / saborInputs.length);
+      const resto = cap % saborInputs.length;
+      saborInputs.forEach((inp, i) => {
+        inp.value = String(base + (i < resto ? 1 : 0));
+      });
+      actualizar();
     });
     actualizar();
 

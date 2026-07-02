@@ -66,6 +66,12 @@ const mensajeWa =
     ? `Hola, ${pedido.nombre}. Te escribimos por tu pedido ${pedido.numero} para coordinar ${modalidadTxt} por este medio.`
     : `Hola, ${pedido.nombre}. Te escribimos por tu pedido ${pedido.numero}. Te confirmamos ${modalidadTxt} para ${agendaTexto} en la franja ${horario}.`;
 const waMensaje = `${waCliente}?text=${encodeURIComponent(mensajeWa)}`;
+
+// Link a Google Maps con la dirección de entrega, para la distribución (PROP-116).
+// Solo se muestra si el pedido tiene dirección cargada (entrega a domicilio).
+const mapsHref = pedido.direccion
+  ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pedido.direccion)}`
+  : null;
 ---
 
 <AdminLayout titulo={`Pedido ${pedido.numero}`} ocultarTitulo>
@@ -146,6 +152,23 @@ const waMensaje = `${waCliente}?text=${encodeURIComponent(mensajeWa)}`;
         Escribir por WhatsApp
       </a>
       <p class="mt-1.5 text-center text-xs text-marca-500">Abre WhatsApp con un mensaje ya armado.</p>
+
+      {mapsHref && (
+        <>
+          <a
+            href={mapsHref}
+            target="_blank"
+            rel="noopener"
+            class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z"/>
+            </svg>
+            Abrir en Maps
+          </a>
+          <p class="mt-1.5 text-center text-xs text-marca-500">Abre la dirección de entrega en Google Maps.</p>
+        </>
+      )}
 
       <form
         method="POST"

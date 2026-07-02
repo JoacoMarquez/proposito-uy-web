@@ -3,7 +3,7 @@
 // está configurado o falla, no rompe el pedido, solo omite el envío.
 
 import { site } from "../data/site";
-import { formatoPrecio } from "../db/queries";
+import { formatoPrecio, getContenido } from "../db/queries";
 import { obtenerEnv, leerEnv } from "./env";
 import { enviarMailBrevo } from "./brevo";
 
@@ -27,6 +27,39 @@ export interface PedidoMail {
 const VERDE = "#2D392C";
 const CREMA = "#FBF8EF";
 const GRIS = "#6b6b63";
+
+// Capitaliza la primera letra (para valores del pedido guardados en minúscula).
+const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+interface DatosBanco {
+  nombre: string;
+  tipoCuenta: string;
+  numeroCuenta: string;
+  titular: string;
+}
+
+function datosBancoDesde(ajustes: Record<string, any>): DatosBanco {
+  return {
+    nombre: String(ajustes.bancoNombre ?? ""),
+    tipoCuenta: String(ajustes.bancoTipoCuenta ?? ""),
+    numeroCuenta: String(ajustes.bancoNumeroCuenta ?? ""),
+    titular: String(ajustes.bancoTitular ?? ""),
+  };
+}
+
+// Bloque con los datos bancarios, solo para pedidos con pago por transferencia.
+function bloqueTransferencia(banco: DatosBanco): string {
+  const cuentaLabel = banco.tipoCuenta ? `Cuenta (${banco.tipoCuenta})` : "Cuenta";
+  return `
+    <div style="background:${CREMA};border-radius:12px;padding:14px;margin-top:12px">
+      <p style="margin:0 0 6px;font-weight:bold;color:${VERDE}">Datos para transferencia</p>
+      <table style="width:100%;font-size:14px">
+        <tr><td style="color:${GRIS}">Banco</td><td style="text-align:right;color:${VERDE}">${banco.nombre}</td></tr>
+        <tr><td style="color:${GRIS}">Titular</td><td style="text-align:right;color:${VERDE}">${banco.titular}</td></tr>
+        <tr><td style="color:${GRIS}">${cuentaLabel}</td><td style="text-align:right;color:${VERDE}">${banco.numeroCuenta}</td></tr>
+      </table>
+    </div>`;
+}
 
 function agendaTexto(p: PedidoMail): string {
   if (p.fechaAgenda) {
@@ -77,12 +110,12 @@ function layout(titulo: string, cuerpo: string): string {
       <h1 style="color:${VERDE};font-size:20px;margin:0 0 4px">${site.nombre}</h1>
       <h2 style="color:${VERDE};font-size:16px;margin:0 0 16px">${titulo}</h2>
       ${cuerpo}
-      <p style="color:${GRIS};font-size:12px;margin-top:24px">Alimentos reales, honestos y nutritivos elaborados en Montevideo, Uruguay.</p>
+      <p style="color:${GRIS};font-size:12px;margin-top:24px">Alimentos artesanales elaborados en Montevideo, Uruguay.</p>
     </div>
   </div>`;
 }
 
-function htmlConfirmacion(p: PedidoMail): string {
+function htmlConfirmacion(p: PedidoMail, banco: DatosBanco | null): string {
   const cuerpo = `
     <p style="color:${VERDE}">¡Gracias, ${p.nombre}! Recibimos tu pedido <b>${p.numero}</b>.</p>
     ${bloqueTotales(p)}
@@ -96,6 +129,7 @@ function htmlConfirmacion(p: PedidoMail): string {
       <p style="margin:0 0 4px;font-weight:bold;color:${VERDE}">${p.metodoPago === "transferencia" ? "Pago por transferencia" : "Pago en efectivo"}</p>
       ${instruccionesPago(p)}
     </div>
+    ${banco ? bloqueTransferencia(banco) : ""}
     ${p.agenda === "coordinacion" ? `<p style="color:${GRIS};font-size:14px;margin-top:12px">Seleccionaste coordinación personalizada: coordinamos por WhatsApp el día y horario.</p>` : ""}`;
   return layout(`Pedido ${p.numero} recibido`, cuerpo);
 }
@@ -110,7 +144,7 @@ function htmlAviso(p: PedidoMail): string {
       <tr><td style="color:${GRIS}">Modalidad</td><td style="text-align:right;color:${VERDE}">${p.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta"}</td></tr>
       <tr><td style="color:${GRIS}">Agenda</td><td style="text-align:right;color:${VERDE}">${agendaTexto(p)}</td></tr>
       ${p.direccion ? `<tr><td style="color:${GRIS}">Dirección</td><td style="text-align:right;color:${VERDE}">${p.direccion}</td></tr>` : ""}
-      <tr><td style="color:${GRIS}">Pago</td><td style="text-align:right;color:${VERDE}">${p.metodoPago}</td></tr>
+      <tr><td style="color:${GRIS}">Pago</td><td style="text-align:right;color:${VERDE}">${cap(p.metodoPago)}</td></tr>
       ${p.notas ? `<tr><td style="color:${GRIS}">Notas</td><td style="text-align:right;color:${VERDE}">${p.notas}</td></tr>` : ""}
     </table>
     ${bloqueTotales(p)}`;
@@ -124,11 +158,13 @@ export async function enviarMailsPedido(p: PedidoMail): Promise<void> {
   const env = await obtenerEnv();
   const admin = leerEnv(env, "MAIL_ADMIN");
   try {
+    // Datos bancarios para el bloque de transferencia (editables en Ajustes › Datos bancarios).
+    const banco = p.metodoPago === "transferencia" ? datosBancoDesde(await getContenido("ajustes")) : null;
     // Confirmación al cliente.
     await enviarMailBrevo({
       to: p.email,
       subject: `Pedido ${p.numero} recibido · ${site.nombre}`,
-      html: htmlConfirmacion(p),
+      html: htmlConfirmacion(p, banco),
     });
     // Aviso/respaldo al administrador. replyTo = cliente, para responderle directo.
     if (admin) {
