@@ -121,6 +121,14 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
                   </div>
                 ))}
               </div>
+              <button
+                id="mix-equitativo"
+                type="button"
+                class="mt-3 w-full rounded-xl border border-marca-300 px-4 py-2 text-sm font-medium text-marca-700 transition hover:bg-marca-100"
+              >
+                Distribución equitativa
+              </button>
+              <p class="mt-1 text-center text-xs text-marca-500">Misma cantidad de barras por sabor.</p>
               <p id="mix-estado" class="mt-2 text-sm text-marca-600">Elegí 12 barras en total.</p>
             </div>
 
@@ -305,6 +313,7 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
     const precioEl = document.getElementById("precio")!;
     const cantidadEl = document.getElementById("cantidad-mix") as HTMLInputElement;
     const btn = document.getElementById("agregar-mix") as HTMLButtonElement;
+    const equitativoBtn = document.getElementById("mix-equitativo") as HTMLButtonElement;
 
     const leerSabores = (): SaboresMix => {
       const s = {} as SaboresMix;
@@ -365,6 +374,18 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
           actualizar();
         }
       });
+    });
+
+    // Distribución equitativa: reparte parejo las barras entre los sabores (PROP-117).
+    // El resto (si la caja no es divisible entre los sabores) va a los primeros.
+    equitativoBtn.addEventListener("click", () => {
+      const cap = Number(tamanoSel.selectedOptions[0].dataset.cantidad);
+      const base = Math.floor(cap / saborInputs.length);
+      const resto = cap % saborInputs.length;
+      saborInputs.forEach((inp, i) => {
+        inp.value = String(base + (i < resto ? 1 : 0));
+      });
+      actualizar();
     });
     actualizar();
 
