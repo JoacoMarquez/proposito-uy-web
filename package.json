@@ -16,6 +16,7 @@
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
     "admin:create": "tsx src/db/create-admin.ts",
+    "admin:grant": "tsx src/db/grant-admin.ts",
     "img:optim": "node scripts/optimizar-imagenes.mjs",
     "og:gen": "node scripts/generar-og.mjs"
   },

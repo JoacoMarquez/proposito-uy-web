@@ -154,6 +154,9 @@ export const clientes = pgTable("clientes", {
   nombre: text("nombre").notNull(),
   celular: text("celular"),
   direcciones: jsonb("direcciones").$type<string[]>().notNull().default([]),
+  // Permiso de administrador: si es true, la cuenta accede al panel /admin
+  // (login unificado — la sesión de cliente determina el acceso).
+  esAdmin: boolean("es_admin").notNull().default(false),
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
