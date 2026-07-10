@@ -15,5 +15,8 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
-  }
+  },
+  "r2_buckets": [
+    { "binding": "FOTOS", "bucket_name": "proposito-fotos" }
+  ]
 }

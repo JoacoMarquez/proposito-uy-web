@@ -210,6 +210,18 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
       </div>
     </div>
 
+    <div class="max-w-md">
+      <label class="text-sm font-medium text-marca-700">Foto del producto</label>
+      <div class="mt-2 flex items-center gap-4">
+        <img id="img-preview" src={p?.imagen ?? ""} alt="" class:list={["h-20 w-20 rounded-lg border border-marca-100 object-cover", !p?.imagen && "hidden"]} />
+        <div>
+          <input type="file" id="img-file" accept="image/*" class="text-sm" />
+          <p id="img-estado" class="mt-1 text-xs text-marca-900/60">Se optimiza y sube sola. Después guardá el producto.</p>
+        </div>
+      </div>
+      <input type="hidden" name="imagen" id="img-input" value={p?.imagen ?? ""} />
+    </div>
+
     <div class="flex gap-6">
       <label class="flex items-center gap-2 text-sm text-marca-700">
         <input type="checkbox" name="destacado" checked={p?.destacado ?? false} /> Destacado (más pedidos)
@@ -221,3 +233,50 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
 
   </form>
 </AdminLayout>
+
+<script>
+  const fileInput = document.getElementById("img-file") as HTMLInputElement | null;
+  if (fileInput) {
+    const estado = document.getElementById("img-estado")!;
+    const hidden = document.getElementById("img-input") as HTMLInputElement;
+    const preview = document.getElementById("img-preview") as HTMLImageElement;
+
+    async function aWebp(file: File, max = 1200, q = 0.8): Promise<Blob> {
+      const bmp = await createImageBitmap(file);
+      let { width, height } = bmp;
+      if (width > max || height > max) {
+        const r = Math.min(max / width, max / height);
+        width = Math.round(width * r);
+        height = Math.round(height * r);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(bmp, 0, 0, width, height);
+      return await new Promise((res) => canvas.toBlob((b) => res(b!), "image/webp", q));
+    }
+
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      try {
+        estado.textContent = "Optimizando…";
+        const blob = await aWebp(file);
+        estado.textContent = "Subiendo…";
+        const slug = (document.querySelector('[name="slug"]') as HTMLInputElement)?.value || "img";
+        const fd = new FormData();
+        fd.append("file", blob, slug + ".webp");
+        fd.append("slug", slug);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error al subir.");
+        hidden.value = data.url;
+        preview.src = data.url;
+        preview.classList.remove("hidden");
+        estado.textContent = "✓ Foto lista. Guardá el producto para confirmar.";
+      } catch (e: any) {
+        estado.textContent = "✗ " + (e.message || "Error al subir.");
+      }
+    });
+  }
+</script>
