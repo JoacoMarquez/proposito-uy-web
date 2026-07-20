@@ -34,8 +34,16 @@ if (Astro.request.method === "POST") {
 
   const labels = form.getAll("pres_label").map((x) => String(x).trim());
   const precios = form.getAll("pres_precio").map((x) => String(x).trim());
+  const frascos = form.getAll("pres_frascos").map((x) => String(x).trim());
   const pres = labels
-    .map((label, i) => ({ label, precio: Number(precios[i]) }))
+    .map((label, i) => {
+      const n = parseInt(frascos[i], 10);
+      return {
+        label,
+        precio: Number(precios[i]),
+        frascosGratis: Number.isFinite(n) && n > 0 ? n : null,
+      };
+    })
     .filter((p) => p.label !== "" && Number.isFinite(p.precio) && p.precio > 0);
 
   // Imagen: si se subió un archivo nuevo, se guarda y se usa su URL; si no,
@@ -151,12 +159,17 @@ const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text
     <!-- Presentaciones -->
     <div>
       <label class="text-sm font-medium text-marca-700">Presentaciones y precios</label>
-      <p class="text-xs text-marca-500">Label (ej: ½ kg, x12) y precio en pesos. Dejá vacío para omitir.</p>
+      <p class="text-xs text-marca-500">
+        Label (ej: ½ kg, x12) y precio en pesos. Dejá vacío para omitir.
+        <br />
+        “Frascos p/ 1 gratis”: cantidad de envases a devolver para recibir 1 unidad gratis (retornables). Dejalo vacío si la presentación no participa.
+      </p>
       <div class="mt-2 space-y-2">
         {filasPres.map((pr) => (
           <div class="flex gap-2">
             <input name="pres_label" value={pr.label} placeholder="Label" class="flex-1 rounded-xl border border-marca-300 px-3 py-2 text-sm" />
             <input name="pres_precio" value={pr.precio || ""} type="number" placeholder="Precio" class="w-32 rounded-xl border border-marca-300 px-3 py-2 text-sm" />
+            <input name="pres_frascos" value={("frascosGratis" in pr && pr.frascosGratis) || ""} type="number" min="1" placeholder="Frascos p/ gratis" class="w-32 rounded-xl border border-marca-300 px-3 py-2 text-sm" title="Frascos a devolver para 1 gratis (retornables)" />
           </div>
         ))}
       </div>

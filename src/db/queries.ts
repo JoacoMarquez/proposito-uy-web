@@ -33,7 +33,22 @@ export async function getProducto(slug: string): Promise<ProductoFull | undefine
 }
 
 export async function getProductosPorCategoria(cat: string): Promise<ProductoFull[]> {
-  return (await getProductos()).filter((p) => p.categoriaSlug === cat);
+  // En la tienda pública se ordenan por `ordenCategoria` (reordenable desde el
+  // panel), independiente del orden global usado en "Los más pedidos".
+  return (await getProductos())
+    .filter((p) => p.categoriaSlug === cat)
+    .sort((a, b) => a.ordenCategoria - b.ordenCategoria);
+}
+
+// Guarda el orden de los productos dentro de una categoría (arrastre en el
+// panel). `idsEnOrden` = ids en el orden deseado; se les asigna 0..n en
+// `ordenCategoria`, sin tocar el orden global ni otras categorías.
+export async function actualizarOrdenCategoria(idsEnOrden: number[]): Promise<void> {
+  await Promise.all(
+    idsEnOrden.map((id, i) =>
+      db.update(productos).set({ ordenCategoria: i }).where(eq(productos.id, id)),
+    ),
+  );
 }
 
 export async function getDestacados(): Promise<ProductoFull[]> {
@@ -163,7 +178,7 @@ export async function getProductoById(id: number): Promise<ProductoFull | undefi
 export async function upsertProducto(
   id: number | null,
   data: ProductoInput,
-  pres: { label: string; precio: number }[],
+  pres: { label: string; precio: number; frascosGratis: number | null }[],
 ): Promise<number> {
   let prodId = id;
   if (id) {
@@ -175,7 +190,13 @@ export async function upsertProducto(
   await db.delete(presentaciones).where(eq(presentaciones.productoId, prodId!));
   if (pres.length) {
     await db.insert(presentaciones).values(
-      pres.map((p, i) => ({ productoId: prodId!, label: p.label, precio: p.precio, orden: i })),
+      pres.map((p, i) => ({
+        productoId: prodId!,
+        label: p.label,
+        precio: p.precio,
+        frascosGratis: p.frascosGratis,
+        orden: i,
+      })),
     );
   }
   return prodId!;
@@ -391,4 +412,39 @@ export function precioDesde(p: ProductoFull): number {
 
 export function formatoPrecio(precio: number): string {
   return `$U${precio.toLocaleString("es-UY")}`;
+}
+
+// ── Retornables ──
+// Precio equivalente por unidad aprovechando la devolución: devolviendo
+// `frascos` envases recibís 1 unidad gratis, así que por cada `frascos + 1`
+// unidades pagás solo `frascos`. Efectivo = precio · frascos / (frascos + 1).
+export function precioRetornable(precio: number, frascos: number): number {
+  if (frascos <= 0) return precio;
+  return Math.round((precio * frascos) / (frascos + 1));
+}
+
+// ¿El producto tiene al menos una presentación retornable?
+export function esRetornable(p: ProductoFull): boolean {
+  return p.presentaciones.some((pr) => pr.frascosGratis != null && pr.frascosGratis > 0);
+}
+
+export interface FilaRetornable {
+  producto: string; // "Crema | Cajú - 330 g"
+  frascos: number;
+}
+
+// Arma la grilla de retornabilidad automáticamente desde los productos: una
+// fila por cada presentación que tenga `frascosGratis` cargado. Reemplaza la
+// tabla que antes se mantenía a mano en el panel.
+export async function getGrillaRetornables(): Promise<FilaRetornable[]> {
+  const prods = await getProductos();
+  const filas: FilaRetornable[] = [];
+  for (const p of prods) {
+    for (const pr of p.presentaciones) {
+      if (pr.frascosGratis != null && pr.frascosGratis > 0) {
+        filas.push({ producto: `${nombreCompleto(p)} - ${pr.label}`, frascos: pr.frascosGratis });
+      }
+    }
+  }
+  return filas;
 }

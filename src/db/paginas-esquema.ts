@@ -53,6 +53,7 @@ export type Campo = CampoSimple | CampoLista;
 export interface Seccion {
   titulo: string;
   campos: Campo[];
+  ayudaSeccion?: string; // nota explicativa bajo el título de la sección (opcional)
 }
 
 export interface EsquemaPagina {
@@ -417,8 +418,9 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         campos: [
           { key: "grillaTitulo", label: "Título del bloque", tipo: "text" },
           { key: "grillaDescripcion", label: "Descripción del bloque", tipo: "text" },
-          { key: "grillaTabla", label: "Tabla", tipo: "tabla", ayuda: "Se muestra dentro de la página de Retornables." },
         ],
+        ayudaSeccion:
+          "La tabla se arma automáticamente con los productos que tengan cargado “Frascos p/ 1 gratis” en sus presentaciones (Productos → editar). No se edita desde acá.",
       },
       { titulo: "Acordeón 1", campos: [
         { key: "acordeon1Titulo", label: "Pregunta", tipo: "text" },
