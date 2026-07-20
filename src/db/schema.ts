@@ -48,7 +48,8 @@ export const productos = pgTable("productos", {
   disponible: boolean("disponible").notNull().default(true),
   imagen: text("imagen"),
   imagen2: text("imagen2"), // segunda foto opcional (packaging / complementaria)
-  orden: integer("orden").notNull().default(0),
+  orden: integer("orden").notNull().default(0), // orden global (lista admin + "Los más pedidos")
+  ordenCategoria: integer("orden_categoria").notNull().default(0), // orden dentro de su categoría en la tienda
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
@@ -59,6 +60,9 @@ export const presentaciones = pgTable("presentaciones", {
     .references(() => productos.id, { onDelete: "cascade" }),
   label: text("label").notNull(),
   precio: integer("precio").notNull(), // pesos uruguayos
+  // Retornabilidad: cantidad de frascos a devolver para recibir 1 unidad gratis.
+  // null = esta presentación no participa del sistema de retornables.
+  frascosGratis: integer("frascos_gratis"),
   orden: integer("orden").notNull().default(0),
 });
 

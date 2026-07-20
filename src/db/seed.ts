@@ -36,9 +36,21 @@ async function seed() {
   }
   console.log(`  ✓ ${ordenCat.length} categorías`);
 
+  // Retornabilidad: frascos a devolver para 1 gratis, por slug + label de la
+  // presentación. Solo participan los frascos de vidrio de la categoría Húmedos.
+  const RETORNABLES: Record<string, Record<string, number>> = {
+    "hummus-garbanzo": { "280 g": 5 },
+    "hummus-lentejon": { "280 g": 5 },
+    "crema-caju": { "180 g": 6, "330 g": 9 },
+    "crema-mani": { "390 g": 6, "1 kg": 6 },
+  };
+
   // Productos + presentaciones
+  const ordenPorCategoria: Record<string, number> = {};
   for (let i = 0; i < dataProductos.length; i++) {
     const p = dataProductos[i];
+    const ordenCategoria = ordenPorCategoria[p.categoria] ?? 0;
+    ordenPorCategoria[p.categoria] = ordenCategoria + 1;
     const [row] = await db
       .insert(productos)
       .values({
@@ -60,6 +72,7 @@ async function seed() {
         destacado: p.destacado ?? false,
         imagen: p.imagen ?? null,
         orden: i,
+        ordenCategoria,
       })
       .returning({ id: productos.id });
 
@@ -68,6 +81,7 @@ async function seed() {
         productoId: row.id,
         label: pr.label,
         precio: pr.precio,
+        frascosGratis: RETORNABLES[p.slug]?.[pr.label] ?? null,
         orden: j,
       })),
     );

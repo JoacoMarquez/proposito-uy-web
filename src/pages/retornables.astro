@@ -2,9 +2,16 @@
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import TablaContenido from "../components/TablaContenido.astro";
-import { getContenido } from "../db/queries";
+import { getContenido, getGrillaRetornables } from "../db/queries";
 
 const c = await getContenido("retornables");
+// Grilla automática: se arma desde las presentaciones con "frascos p/ 1 gratis"
+// cargados en cada producto (panel → Productos). Un solo lugar para mantener.
+const filasRetornables = await getGrillaRetornables();
+const grillaTabla = {
+  columnas: ["Productos", "Frascos para 1 gratis"],
+  filas: filasRetornables.map((f) => [f.producto, String(f.frascos)]),
+};
 const acordeones = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
   titulo: c[`acordeon${n}Titulo`],
   cuerpo: String(c[`acordeon${n}Cuerpo`] ?? "")
@@ -32,7 +39,7 @@ const acordeones = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
     <div class="mt-8">
       <h2 class="text-lg font-semibold text-marca-700">{c.grillaTitulo}</h2>
       <p class="mt-1 mb-3 text-sm text-marca-900/70">{c.grillaDescripcion}</p>
-      <TablaContenido tabla={c.grillaTabla} chipCol={1} />
+      <TablaContenido tabla={grillaTabla} chipCol={1} />
     </div>
 
     <!-- Acordeones -->

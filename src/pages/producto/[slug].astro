@@ -12,6 +12,8 @@ import {
   nombreCompleto,
   precioDesde,
   formatoPrecio,
+  esRetornable,
+  precioRetornable,
 } from "../../db/queries";
 import FavoritoBoton from "../../components/FavoritoBoton.astro";
 import { MIX_SLUG, SABORES_MIX, RECARGO_CAJU } from "../../lib/barrasMix";
@@ -40,6 +42,9 @@ const detalles = [
 const consultaWaHref = whatsappLink(`Hola! Quiero consultar por ${nombre}`);
 const primera = producto.presentaciones[0];
 const esMix = producto.slug === MIX_SLUG;
+// Retornabilidad: se muestra el distintivo y el bloque informativo cuando el
+// producto tiene al menos una presentación con `frascosGratis` cargado.
+const retornable = esRetornable(producto);
 // Recargo por barra de Cajú (editable en Contenido › Tienda).
 const tienda = esMix ? await getContenido("tienda") : null;
 const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 10) || RECARGO_CAJU);
@@ -61,6 +66,17 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
       <div>
         <h1 class="text-3xl font-bold text-marca-900">{producto.nombre}</h1>
         <p class="text-lg text-marca-600">{producto.variante}</p>
+
+        {retornable && (
+          <a
+            href="/retornables"
+            class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-marca-100 px-3 py-1 text-sm font-medium text-marca-700 transition hover:bg-marca-200"
+            title="Este producto participa del sistema de envases retornables"
+          >
+            ♻ Retornable
+          </a>
+        )}
+
         <p class="mt-4 text-marca-900/80">{producto.descripcion}</p>
 
         {producto.textoInformativo && (
@@ -163,7 +179,7 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
                 data-nombre={nombre}
               >
                 {producto.presentaciones.map((pr) => (
-                  <option value={pr.label} data-precio={pr.precio}>
+                  <option value={pr.label} data-precio={pr.precio} data-frascos={pr.frascosGratis ?? ""}>
                     {pr.label} — {formatoPrecio(pr.precio)}
                   </option>
                 ))}
@@ -173,6 +189,28 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
             <p id="precio" class="mt-4 text-2xl font-bold text-marca-900">
               {formatoPrecio(primera.precio)}
             </p>
+
+            {retornable && (
+              <div
+                id="retornable-info"
+                class="mt-3 rounded-xl border border-marca-200 bg-marca-50 p-3 text-sm"
+                data-frascos={primera.frascosGratis ?? ""}
+                data-precio={primera.precio}
+                hidden={primera.frascosGratis == null}
+              >
+                <p class="font-medium text-marca-700">
+                  ♻ Devolvé <span data-ret-frascos>{primera.frascosGratis ?? ""}</span> frascos y llevate 1 gratis
+                </p>
+                <p class="mt-0.5 text-marca-900/70">
+                  Aprovechando la devolución te queda a ~<span data-ret-precio>{
+                    primera.frascosGratis
+                      ? formatoPrecio(precioRetornable(primera.precio, primera.frascosGratis))
+                      : ""
+                  }</span> por unidad.
+                  <a href="/retornables" class="font-medium text-marca-700 underline">Ver condiciones</a>
+                </p>
+              </div>
+            )}
 
             {producto.nota && <p class="mt-2 text-sm text-marca-600">{producto.nota}</p>}
 
@@ -258,16 +296,36 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
   if (!select && !agregarBtn) return;
   const precioEl = document.getElementById("precio");
   const cantidadEl = document.getElementById("cantidad") as HTMLInputElement | null;
+  const retInfo = document.getElementById("retornable-info");
 
   function presentacionActual() {
     const opt = select!.selectedOptions[0];
-    return { label: opt.value, precio: Number(opt.dataset.precio) };
+    return {
+      label: opt.value,
+      precio: Number(opt.dataset.precio),
+      frascos: Number(opt.dataset.frascos) || 0,
+    };
   }
 
   function actualizar() {
     if (!select) return;
-    const { precio } = presentacionActual();
+    const { precio, frascos } = presentacionActual();
     if (precioEl) precioEl.textContent = formatoPrecio(precio);
+
+    // Bloque de retornabilidad: se muestra solo si la presentación elegida
+    // participa; el precio equivalente se recalcula por presentación.
+    if (retInfo) {
+      if (frascos > 0) {
+        retInfo.hidden = false;
+        const efectivo = Math.round((precio * frascos) / (frascos + 1));
+        const fEl = retInfo.querySelector("[data-ret-frascos]");
+        const pEl = retInfo.querySelector("[data-ret-precio]");
+        if (fEl) fEl.textContent = String(frascos);
+        if (pEl) pEl.textContent = formatoPrecio(efectivo);
+      } else {
+        retInfo.hidden = true;
+      }
+    }
   }
 
   select?.addEventListener("change", actualizar);
