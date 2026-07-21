@@ -20,7 +20,10 @@ const [productos, cats] = await Promise.all([getProductos(), getCategorias()]);
       <div class="mt-10">
         <TituloSeccion titulo={cat.nombre} />
         <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {productos.filter((p) => p.categoriaSlug === cat.slug).map((p) => <ProductCard producto={p} />)}
+          {productos
+            .filter((p) => p.categoriaSlug === cat.slug)
+            .sort((a, b) => a.ordenCategoria - b.ordenCategoria)
+            .map((p) => <ProductCard producto={p} />)}
         </div>
       </div>
     ))}
