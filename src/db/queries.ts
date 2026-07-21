@@ -435,7 +435,8 @@ export interface FilaRetornable {
 
 // Arma la grilla de retornabilidad automáticamente desde los productos: una
 // fila por cada presentación que tenga `frascosGratis` cargado. Reemplaza la
-// tabla que antes se mantenía a mano en el panel.
+// tabla que antes se mantenía a mano en el panel. Se ordena de menor a mayor
+// cantidad de frascos (y por nombre a igual cantidad, para que sea estable).
 export async function getGrillaRetornables(): Promise<FilaRetornable[]> {
   const prods = await getProductos();
   const filas: FilaRetornable[] = [];
@@ -446,5 +447,7 @@ export async function getGrillaRetornables(): Promise<FilaRetornable[]> {
       }
     }
   }
-  return filas;
+  return filas.sort(
+    (a, b) => a.frascos - b.frascos || a.producto.localeCompare(b.producto, "es"),
+  );
 }
