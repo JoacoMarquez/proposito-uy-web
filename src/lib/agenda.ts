@@ -38,10 +38,16 @@ export function enLicencia(iso: string, lic: Licencia | null | undefined): boole
 }
 
 // Aviso para el cliente durante la licencia. Devuelve null si no está activa.
-export function licenciaTexto(lic: Licencia | null | undefined): string | null {
-  if (!lic?.activa || !lic.hasta) return null;
-  const [, mes, dia] = lic.hasta.split("-");
-  return `Estamos de licencia hasta el ${dia}/${mes}. Podés dejar tu pedido agendado para las próximas fechas disponibles.`;
+export function licenciaTexto(
+  lic: Licencia | null | undefined,
+  hoyIso: string = new Date().toISOString().slice(0, 10),
+): string | null {
+  if (!lic?.activa || !lic.desde || !lic.hasta) return null;
+  const [, mesD, diaD] = lic.desde.split("-");
+  const [, mesH, diaH] = lic.hasta.split("-");
+  const periodo = `del ${diaD}/${mesD} al ${diaH}/${mesH}`;
+  const verbo = hoyIso < lic.desde ? "Estaremos" : "Estamos";
+  return `${verbo} de licencia ${periodo}. Podés dejar tu pedido agendado para las próximas fechas disponibles.`;
 }
 
 // Próximos N días habilitados (mié/vie) a partir de mañana, salteando la licencia.

@@ -149,6 +149,7 @@ export interface ProductoInput {
   categoriaSlug: string;
   descripcion: string;
   textoInformativo: string | null;
+  proteina: string | null;
   ingredientes: string;
   packaging: string;
   conservacion: string;
