@@ -35,6 +35,9 @@ export const productos = pgTable("productos", {
     .references(() => categorias.slug),
   descripcion: text("descripcion").notNull(),
   textoInformativo: text("texto_informativo"),
+  // Distintivo de proteína en la ficha (ej.: "10 g de proteína").
+  // null/vacío = no se muestra.
+  proteina: text("proteina"),
   ingredientes: text("ingredientes").notNull(),
   packaging: text("packaging").notNull(),
   conservacion: text("conservacion").notNull(),

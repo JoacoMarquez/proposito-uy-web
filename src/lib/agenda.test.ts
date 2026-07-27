@@ -104,9 +104,13 @@ describe("licencia (PROP-111)", () => {
     expect(validarAgenda("dia", iso)).toEqual({ agenda: "miercoles", fechaAgenda: iso });
   });
 
-  it("licenciaTexto arma el aviso con la fecha de regreso (DD/MM)", () => {
-    expect(licenciaTexto({ activa: true, desde: "2026-07-01", hasta: "2026-07-15" }))
-      .toBe("Estamos de licencia hasta el 15/07. Podés dejar tu pedido agendado para las próximas fechas disponibles.");
+  it("licenciaTexto arma el aviso con el período completo (DD/MM al DD/MM)", () => {
+    // ya empezada: "Estamos"
+    expect(licenciaTexto({ activa: true, desde: "2026-07-01", hasta: "2026-07-15" }, "2026-07-05"))
+      .toBe("Estamos de licencia del 01/07 al 15/07. Podés dejar tu pedido agendado para las próximas fechas disponibles.");
+    // todavía no empezó: "Estaremos"
+    expect(licenciaTexto({ activa: true, desde: "2026-07-01", hasta: "2026-07-15" }, "2026-06-20"))
+      .toBe("Estaremos de licencia del 01/07 al 15/07. Podés dejar tu pedido agendado para las próximas fechas disponibles.");
     expect(licenciaTexto({ activa: false, desde: null, hasta: null })).toBeNull();
   });
 });
