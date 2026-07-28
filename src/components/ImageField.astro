@@ -146,6 +146,39 @@ const nombreImagen = (() => {
 </div>
 
 <script>
+  // Comprime la imagen en el navegador antes de subirla: máx 1200px de ancho,
+  // WebP calidad 0.8. El Worker no puede procesar imágenes (sin sharp), así que
+  // esta es la única barrera para que no entren fotos de ~2 MB a la base, cuya
+  // transferencia es lo que agota el cupo gratuito de Neon. Los GIF se dejan
+  // igual (pueden tener animación) y ante cualquier error se sube la original
+  // (el server valida tipo y tamaño máximo igual que siempre).
+  const COMPRIMIR_UMBRAL = 150 * 1024; // no toca archivos ya livianos
+  const MAX_ANCHO = 1200;
+  const CALIDAD = 0.8;
+
+  async function comprimirImagen(f: File): Promise<File> {
+    if (f.type === "image/gif" || f.size < COMPRIMIR_UMBRAL) return f;
+    try {
+      // imageOrientation respeta la rotación EXIF de fotos de celular; si el
+      // navegador no soporta la opción, se intenta sin ella.
+      const bitmap = await createImageBitmap(f, { imageOrientation: "from-image" }).catch(() =>
+        createImageBitmap(f),
+      );
+      const escala = Math.min(1, MAX_ANCHO / bitmap.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * escala);
+      canvas.height = Math.round(bitmap.height * escala);
+      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/webp", CALIDAD));
+      if (!blob || blob.size >= f.size) return f; // no mejora → original
+      const nombre = f.name.replace(/\.[^.]+$/, "") + ".webp";
+      return new File([blob], nombre, { type: "image/webp" });
+    } catch {
+      return f;
+    }
+  }
+
   // Inicializa CADA campo de imagen del form de forma independiente (scoped al
   // root), así soporta varias imágenes en una misma página (panel de Contenido).
   function initOne(root: HTMLElement) {
@@ -172,8 +205,19 @@ const nombreImagen = (() => {
     };
 
     if (file) {
-      file.addEventListener("change", () => {
-        const f = file.files && file.files[0];
+      file.addEventListener("change", async () => {
+        let f = file.files && file.files[0];
+        if (f) {
+          const comprimida = await comprimirImagen(f);
+          if (comprimida !== f) {
+            // Reemplaza el archivo del input por la versión comprimida, así el
+            // form la envía sin cambiar nada del flujo de guardado.
+            const dt = new DataTransfer();
+            dt.items.add(comprimida);
+            file.files = dt.files;
+            f = comprimida;
+          }
+        }
         if (nameEl) nameEl.textContent = f ? f.name : "Ningún archivo seleccionado";
         if (f) {
           const url = URL.createObjectURL(f);
