@@ -17,6 +17,7 @@
     "db:seed": "tsx src/db/seed.ts",
     "admin:create": "tsx src/db/create-admin.ts",
     "img:optim": "node scripts/optimizar-imagenes.mjs",
+    "img:optim:db": "node scripts/optimizar-imagenes-db.mjs",
     "og:gen": "node scripts/generar-og.mjs"
   },
   "dependencies": {
