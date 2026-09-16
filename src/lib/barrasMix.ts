@@ -2,7 +2,13 @@
 // El precio se recalcula SIEMPRE en el servidor al crear el pedido; este módulo
 // es la única fuente de verdad de la regla para que ambos lados coincidan.
 
-export const MIX_SLUG = "B-BP-MX";
+// Slugs con los que se reconoce la caja mix. Pedro puede editar el slug desde el
+// panel (en sep-2026 las barras pasaron de "B-" a "P-"), así que se aceptan ambos.
+export const MIX_SLUGS = ["B-BP-MX", "P-BP-MX"] as const;
+
+export function esSlugMix(slug: string | null | undefined): boolean {
+  return (MIX_SLUGS as readonly string[]).includes(String(slug ?? ""));
+}
 export const RECARGO_CAJU = 20; // $U extra por barra de Cajú (default; editable en Contenido › Tienda)
 
 // Tamaños de referencia. La capacidad real se deriva de los dígitos del label

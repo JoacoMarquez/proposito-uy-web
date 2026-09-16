@@ -16,7 +16,7 @@ import {
   precioRetornable,
 } from "../../db/queries";
 import FavoritoBoton from "../../components/FavoritoBoton.astro";
-import { MIX_SLUG, SABORES_MIX, RECARGO_CAJU } from "../../lib/barrasMix";
+import { esSlugMix, SABORES_MIX, RECARGO_CAJU } from "../../lib/barrasMix";
 import { site, whatsappLink } from "../../data/site";
 
 const { slug } = Astro.params;
@@ -41,7 +41,7 @@ const detalles = [
 // Link de consulta por WhatsApp para productos agotados (reusado en la rama mix y la normal).
 const consultaWaHref = whatsappLink(`Hola! Quiero consultar por ${nombre}`);
 const primera = producto.presentaciones[0];
-const esMix = producto.slug === MIX_SLUG;
+const esMix = esSlugMix(producto.slug);
 // Retornabilidad: se muestra el distintivo y el bloque informativo cuando el
 // producto tiene al menos una presentación con `frascosGratis` cargado.
 const retornable = esRetornable(producto);

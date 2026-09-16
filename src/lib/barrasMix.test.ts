@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   RECARGO_CAJU,
   cantidadTamano,
+  esSlugMix,
   totalBarras,
   mixValido,
   precioMix,
@@ -73,5 +74,17 @@ describe("etiquetaMix", () => {
   });
   it("omite los sabores en 0", () => {
     expect(etiquetaMix(mix("x12", { clasica: 12 }))).toBe("x12 · 12 Clásica");
+  });
+});
+
+describe("esSlugMix", () => {
+  it("reconoce la caja mix con el slug viejo y el nuevo", () => {
+    expect(esSlugMix("B-BP-MX")).toBe(true);
+    expect(esSlugMix("P-BP-MX")).toBe(true);
+  });
+  it("no confunde otras barras ni valores vacíos", () => {
+    expect(esSlugMix("P-BP-CL")).toBe(false);
+    expect(esSlugMix("")).toBe(false);
+    expect(esSlugMix(undefined)).toBe(false);
   });
 });
