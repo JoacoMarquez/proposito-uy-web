@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getProducto, getContenido, crearPedido, type ItemPedido } from "../../db/queries";
 import { enviarMailsPedido } from "../../lib/mail";
 import { validarAgenda, parseLicencia } from "../../lib/agenda";
-import { MIX_SLUG, RECARGO_CAJU, mixValido, precioMix, etiquetaMix, type MixDetalle } from "../../lib/barrasMix";
+import { esSlugMix, RECARGO_CAJU, mixValido, precioMix, etiquetaMix, type MixDetalle } from "../../lib/barrasMix";
 import { costoEnvio as calcularEnvio } from "../../lib/envio";
 
 export const prerender = false;
@@ -49,7 +49,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Caja personalizada de Barras Mix: el precio se recalcula desde la regla,
     // tomando la base del tamaño desde la DB + recargo por barras de Cajú.
-    if (prod.slug === MIX_SLUG && it?.mix) {
+    if (esSlugMix(prod.slug) && it?.mix) {
       const mix = it.mix as MixDetalle;
       if (!mixValido(mix)) continue;
       const base = prod.presentaciones.find((p) => p.label === mix.tamano);
