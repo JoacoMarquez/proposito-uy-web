@@ -3,7 +3,7 @@
 import { db } from "./index";
 import { productos, presentaciones, categorias, recetas, preguntas, pedidos, pedidoItems, suscriptores, imagenes, paginas } from "./schema";
 import { esquemaDePagina } from "./paginas-esquema";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, max } from "drizzle-orm";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
 
 export type { Categoria, Receta, Pregunta } from "./schema";
@@ -12,7 +12,8 @@ export type ProductoFull = Producto & { presentaciones: Presentacion[] };
 // ── Productos ──
 export async function getProductos(): Promise<ProductoFull[]> {
   const [prods, pres] = await Promise.all([
-    db.select().from(productos).orderBy(asc(productos.orden)),
+    // `id` desempata productos con el mismo `orden`, para que el listado sea estable.
+    db.select().from(productos).orderBy(asc(productos.orden), asc(productos.id)),
     db.select().from(presentaciones).orderBy(asc(presentaciones.orden)),
   ]);
   return prods.map((p) => ({
@@ -64,7 +65,7 @@ export async function actualizarOrdenDestacados(idsEnOrden: number[]): Promise<v
     .select({ id: productos.id, orden: productos.orden })
     .from(productos)
     .where(eq(productos.destacado, true));
-  const slots = dest.map((d) => d.orden).sort((a, b) => a - b);
+  const slots = slotsDistintos(dest.map((d) => d.orden));
   await Promise.all(
     idsEnOrden.map((id, i) =>
       slots[i] === undefined
@@ -72,6 +73,17 @@ export async function actualizarOrdenDestacados(idsEnOrden: number[]): Promise<v
         : db.update(productos).set({ orden: slots[i] }).where(eq(productos.id, id)),
     ),
   );
+}
+
+// Ordena los valores de `orden` y los vuelve estrictamente crecientes. Si dos
+// destacados compartían valor (ej. productos creados con orden 0), permutarlos
+// dejaba un empate y la base los devolvía en cualquier orden.
+export function slotsDistintos(ordenes: number[]): number[] {
+  const slots = [...ordenes].sort((a, b) => a - b);
+  for (let i = 1; i < slots.length; i++) {
+    if (slots[i] <= slots[i - 1]) slots[i] = slots[i - 1] + 1;
+  }
+  return slots;
 }
 
 // ── Categorías ──
@@ -185,7 +197,15 @@ export async function upsertProducto(
   if (id) {
     await db.update(productos).set(data).where(eq(productos.id, id));
   } else {
-    const [r] = await db.insert(productos).values(data).returning({ id: productos.id });
+    // Los productos nuevos van al final (orden global y de su categoría) en vez
+    // de quedar en 0 empatados con el primero.
+    const [m] = await db
+      .select({ orden: max(productos.orden), ordenCategoria: max(productos.ordenCategoria) })
+      .from(productos);
+    const [r] = await db
+      .insert(productos)
+      .values({ ...data, orden: (m?.orden ?? -1) + 1, ordenCategoria: (m?.ordenCategoria ?? -1) + 1 })
+      .returning({ id: productos.id });
     prodId = r.id;
   }
   await db.delete(presentaciones).where(eq(presentaciones.productoId, prodId!));
