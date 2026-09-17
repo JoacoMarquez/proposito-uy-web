@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatoPrecio, precioDesde, nombreCompleto, type ProductoFull } from "./queries";
+import { formatoPrecio, precioDesde, nombreCompleto, slotsDistintos, type ProductoFull } from "./queries";
 
 describe("formatoPrecio", () => {
   it("prefija $U y no usa separador en montos chicos", () => {
@@ -24,5 +24,15 @@ describe("precioDesde", () => {
 describe("nombreCompleto", () => {
   it("combina nombre y variante con separador", () => {
     expect(nombreCompleto({ nombre: "Hummus", variante: "Garbanzo" })).toBe("Hummus | Garbanzo");
+  });
+});
+
+describe("slotsDistintos", () => {
+  it("ordena y conserva valores ya distintos", () => {
+    expect(slotsDistintos([5, 1, 3])).toEqual([1, 3, 5]);
+  });
+  it("desempata valores repetidos para que el orden sea estable", () => {
+    expect(slotsDistintos([0, 0, 2, 0])).toEqual([0, 1, 2, 3]);
+    expect(slotsDistintos([4, 4, 5])).toEqual([4, 5, 6]);
   });
 });
