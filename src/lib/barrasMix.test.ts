@@ -21,6 +21,10 @@ describe("cantidadTamano", () => {
     expect(cantidadTamano("Caja x24")).toBe(24);
     expect(cantidadTamano("x48")).toBe(48);
   });
+  it("ignora el talle y el peso si hay un x<número>", () => {
+    expect(cantidadTamano("L x12")).toBe(12);
+    expect(cantidadTamano("S 40g x24")).toBe(24);
+  });
   it("devuelve null si no hay dígitos válidos", () => {
     expect(cantidadTamano("")).toBeNull();
     expect(cantidadTamano("Caja chica")).toBeNull();

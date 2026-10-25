@@ -36,10 +36,13 @@ export interface MixDetalle {
 }
 
 // Capacidad de la caja a partir del label, derivada de sus dígitos (ej. "x12" → 12,
-// "Caja x24" → 24). Misma regla que usa el cliente, evitando que un cambio de label
-// haga que el servidor descarte el mix en silencio.
+// "Caja x24" → 24). Si hay un "x<número>" se usa ese, para que el talle o el peso
+// no se mezclen ("L 80g x12" → 12). Misma regla que usa el cliente, evitando que
+// un cambio de label haga que el servidor descarte el mix en silencio.
 export function cantidadTamano(label: string): number | null {
-  const n = parseInt(String(label ?? "").replace(/\D/g, ""), 10);
+  const s = String(label ?? "");
+  const conX = s.match(/x\s*(\d+)/i);
+  const n = parseInt(conX ? conX[1] : s.replace(/\D/g, ""), 10);
   return Number.isInteger(n) && n > 0 ? n : null;
 }
 

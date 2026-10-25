@@ -1,0 +1,56 @@
+---
+// Selector de talle de barra (S 40 g / L 80 g). Filtra las opciones del <select>
+// indicado en `target` según el prefijo de talle de cada presentación (ver lib/talles).
+import { TALLES, type TalleKey } from "../lib/talles";
+
+interface Props {
+  talles: TalleKey[];
+  target: string; // id del <select> de presentaciones
+}
+const { talles, target } = Astro.props;
+const opciones = TALLES.filter((t) => talles.includes(t.key));
+---
+
+<div data-talle-selector data-target={target}>
+  <p class="text-sm font-medium text-marca-700">Tamaño de la barra</p>
+  <div class="mt-1 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Tamaño de la barra">
+    {opciones.map((t, i) => (
+      <button
+        type="button"
+        role="radio"
+        aria-checked={i === 0 ? "true" : "false"}
+        data-talle={t.key}
+        class="rounded-xl border border-marca-300 px-3 py-2 text-marca-900 transition hover:bg-marca-100 aria-checked:border-marca-600 aria-checked:bg-marca-600 aria-checked:text-white"
+      >
+        <span class="font-semibold">{t.nombre}</span>
+        <span class="text-sm opacity-80"> · {t.peso}</span>
+      </button>
+    ))}
+  </div>
+</div>
+
+<script>
+  function setup() {
+    document.querySelectorAll<HTMLElement>("[data-talle-selector]").forEach((cont) => {
+      const select = document.getElementById(cont.dataset.target!) as HTMLSelectElement | null;
+      if (!select) return;
+      // Se guardan todas las opciones y se reconstruye el <select> en cada cambio
+      // (Safari iOS ignora `hidden` en <option>).
+      const todas = Array.from(select.options);
+      const botones = Array.from(cont.querySelectorAll<HTMLButtonElement>("[data-talle]"));
+
+      function elegir(talle: string) {
+        botones.forEach((b) => b.setAttribute("aria-checked", String(b.dataset.talle === talle)));
+        const visibles = todas.filter((o) => !o.dataset.talle || o.dataset.talle === talle);
+        select!.replaceChildren(...visibles);
+        select!.selectedIndex = 0;
+        select!.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      botones.forEach((b) => b.addEventListener("click", () => elegir(b.dataset.talle!)));
+      if (botones[0]) elegir(botones[0].dataset.talle!);
+    });
+  }
+
+  document.addEventListener("astro:page-load", setup);
+</script>
