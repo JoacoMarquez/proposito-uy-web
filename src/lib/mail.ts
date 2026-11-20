@@ -14,8 +14,8 @@ export interface PedidoMail {
   celular: string;
   direccion: string | null;
   notas: string | null;
-  modalidad: string; // "entrega" | "retiro"
-  agenda: string; // "miercoles" | "viernes" | "coordinacion"
+  modalidad: string; // "entrega" | "retiro" | "digital"
+  agenda: string; // "miercoles" | "viernes" | "coordinacion" | "digital"
   fechaAgenda: string | null;
   metodoPago: string; // "transferencia" | "efectivo"
   subtotal: number;
@@ -59,6 +59,18 @@ function bloqueTransferencia(banco: DatosBanco): string {
         <tr><td style="color:${GRIS}">${cuentaLabel}</td><td style="text-align:right;color:${VERDE}">${banco.numeroCuenta}</td></tr>
       </table>
     </div>`;
+}
+
+function modalidadTexto(modalidad: string): string {
+  if (modalidad === "entrega") return "Entrega a domicilio";
+  if (modalidad === "digital") return "Producto digital (PDF por correo)";
+  return "Retiro en planta";
+}
+
+// Fila de agenda: no aplica a pedidos digitales (no hay entrega ni retiro).
+function filaAgenda(p: PedidoMail): string {
+  if (p.modalidad === "digital") return "";
+  return `<tr><td style="color:${GRIS}">Agenda</td><td style="text-align:right;color:${VERDE}">${agendaTexto(p)}</td></tr>`;
 }
 
 function agendaTexto(p: PedidoMail): string {
@@ -120,8 +132,8 @@ function htmlConfirmacion(p: PedidoMail, banco: DatosBanco | null): string {
     <p style="color:${VERDE}">¡Gracias, ${p.nombre}! Recibimos tu pedido <b>${p.numero}</b>.</p>
     ${bloqueTotales(p)}
     <table style="width:100%;margin-top:16px;font-size:14px">
-      <tr><td style="color:${GRIS}">Modalidad</td><td style="text-align:right;color:${VERDE}">${p.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta"}</td></tr>
-      <tr><td style="color:${GRIS}">Agenda</td><td style="text-align:right;color:${VERDE}">${agendaTexto(p)}</td></tr>
+      <tr><td style="color:${GRIS}">Modalidad</td><td style="text-align:right;color:${VERDE}">${modalidadTexto(p.modalidad)}</td></tr>
+      ${filaAgenda(p)}
       ${p.direccion ? `<tr><td style="color:${GRIS}">Dirección</td><td style="text-align:right;color:${VERDE}">${p.direccion}</td></tr>` : ""}
       ${p.modalidad === "retiro" ? `<tr><td style="color:${GRIS}">Retiro en</td><td style="text-align:right;color:${VERDE}">${site.direccionRetiro}</td></tr>` : ""}
     </table>
@@ -130,7 +142,8 @@ function htmlConfirmacion(p: PedidoMail, banco: DatosBanco | null): string {
       ${instruccionesPago(p)}
     </div>
     ${banco ? bloqueTransferencia(banco) : ""}
-    ${p.agenda === "coordinacion" ? `<p style="color:${GRIS};font-size:14px;margin-top:12px">Seleccionaste coordinación personalizada: coordinamos por WhatsApp el día y horario.</p>` : ""}`;
+    ${p.agenda === "coordinacion" ? `<p style="color:${GRIS};font-size:14px;margin-top:12px">Seleccionaste coordinación personalizada: coordinamos por WhatsApp el día y horario.</p>` : ""}
+    ${p.modalidad === "digital" ? `<p style="color:${GRIS};font-size:14px;margin-top:12px">Cuando confirmemos tu pago te enviamos el PDF a este correo.</p>` : ""}`;
   return layout(`Pedido ${p.numero} recibido`, cuerpo);
 }
 
@@ -141,8 +154,8 @@ function htmlAviso(p: PedidoMail): string {
       <tr><td style="color:${GRIS}">Cliente</td><td style="text-align:right;color:${VERDE}">${p.nombre}</td></tr>
       <tr><td style="color:${GRIS}">Celular</td><td style="text-align:right;color:${VERDE}">${p.celular}</td></tr>
       <tr><td style="color:${GRIS}">Email</td><td style="text-align:right;color:${VERDE}">${p.email}</td></tr>
-      <tr><td style="color:${GRIS}">Modalidad</td><td style="text-align:right;color:${VERDE}">${p.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta"}</td></tr>
-      <tr><td style="color:${GRIS}">Agenda</td><td style="text-align:right;color:${VERDE}">${agendaTexto(p)}</td></tr>
+      <tr><td style="color:${GRIS}">Modalidad</td><td style="text-align:right;color:${VERDE}">${modalidadTexto(p.modalidad)}</td></tr>
+      ${filaAgenda(p)}
       ${p.direccion ? `<tr><td style="color:${GRIS}">Dirección</td><td style="text-align:right;color:${VERDE}">${p.direccion}</td></tr>` : ""}
       <tr><td style="color:${GRIS}">Pago</td><td style="text-align:right;color:${VERDE}">${cap(p.metodoPago)}</td></tr>
       ${p.notas ? `<tr><td style="color:${GRIS}">Notas</td><td style="text-align:right;color:${VERDE}">${p.notas}</td></tr>` : ""}

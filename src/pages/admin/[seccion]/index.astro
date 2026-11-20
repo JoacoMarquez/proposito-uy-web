@@ -1,21 +1,26 @@
 ---
 export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { getProductos, getCategorias, precioDesde, formatoPrecio } from "../../../db/queries";
+import { getProductosSeccion, getCategorias, precioDesde, formatoPrecio } from "../../../db/queries";
+import { seccionAdmin } from "../../../lib/admin-seccion";
 
-const [productos, cats] = await Promise.all([getProductos(), getCategorias()]);
+const sec = seccionAdmin(Astro.params.seccion);
+if (!sec) return Astro.redirect("/admin");
+const [productos, cats] = await Promise.all([getProductosSeccion(sec.seccion), getCategorias(sec.seccion)]);
 const nombreCat = (slug: string) => cats.find((c) => c.slug === slug)?.nombre ?? slug;
 ---
 
-<AdminLayout titulo="Productos">
+<AdminLayout titulo={sec.titulo}>
   <div class="mb-4 flex flex-wrap justify-end gap-2">
-    <a href="/admin/productos/ordenar" class="rounded-full border border-marca-300 px-4 py-2 text-sm font-medium text-marca-700 hover:bg-marca-50">
+    <a href={`${sec.base}/ordenar`} class="rounded-full border border-marca-300 px-4 py-2 text-sm font-medium text-marca-700 hover:bg-marca-50">
       Ordenar catálogo
     </a>
-    <a href="/admin/productos/destacados" class="rounded-full border border-marca-300 px-4 py-2 text-sm font-medium text-marca-700 hover:bg-marca-50">
-      Ordenar “Los más pedidos”
-    </a>
-    <a href="/admin/productos/nuevo" class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
+    {sec.seccion === "tienda" && (
+      <a href="/admin/productos/destacados" class="rounded-full border border-marca-300 px-4 py-2 text-sm font-medium text-marca-700 hover:bg-marca-50">
+        Ordenar “Los más pedidos”
+      </a>
+    )}
+    <a href={`${sec.base}/nuevo`} class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
       + Nuevo producto
     </a>
   </div>
@@ -32,6 +37,9 @@ const nombreCat = (slug: string) => cats.find((c) => c.slug === slug)?.nombre ??
         </tr>
       </thead>
       <tbody>
+        {productos.length === 0 && (
+          <tr><td colspan="5" class="p-6 text-center text-marca-500">Todavía no hay productos. Creá el primero con “+ Nuevo producto”.</td></tr>
+        )}
         {productos.map((p) => (
           <tr class="border-b border-marca-50 last:border-0">
             <td class="p-3">
@@ -54,7 +62,7 @@ const nombreCat = (slug: string) => cats.find((c) => c.slug === slug)?.nombre ??
                 : <span class="text-red-600">Agotado</span>}
             </td>
             <td class="p-3 text-right">
-              <a href={`/admin/productos/${p.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
+              <a href={`${sec.base}/${p.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
             </td>
           </tr>
         ))}

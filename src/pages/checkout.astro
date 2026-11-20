@@ -43,7 +43,12 @@ const direcciones = cliente?.direcciones ?? [];
           </div>
         </fieldset>
 
-        <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
+        <!-- Pedido solo con productos digitales (guías PDF): sin entrega ni agenda -->
+        <p id="aviso-digital" class="hidden rounded-2xl border border-marca-100 bg-marca-50 p-5 text-sm text-marca-900/80">
+          📚 Tu pedido es digital: no lleva envío. Cuando confirmemos tu pago te enviamos el PDF al correo que indicaste.
+        </p>
+
+        <fieldset data-fisico class="rounded-2xl border border-marca-100 bg-white p-5">
           <legend class="px-2 font-semibold text-marca-700">Entrega o retiro</legend>
           <div class="flex gap-4">
             <label class="flex items-center gap-2 text-sm"><input type="radio" name="modalidad" value="entrega" checked /> Entrega a domicilio</label>
@@ -62,7 +67,7 @@ const direcciones = cliente?.direcciones ?? [];
           </p>
         </fieldset>
 
-        <fieldset class="rounded-2xl border border-marca-100 bg-white p-5">
+        <fieldset data-fisico class="rounded-2xl border border-marca-100 bg-white p-5">
           <legend class="px-2 font-semibold text-marca-700">Agenda</legend>
           {avisoLicencia && (
             <p class="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{avisoLicencia}</p>
@@ -94,7 +99,7 @@ const direcciones = cliente?.direcciones ?? [];
           <legend class="px-2 font-semibold text-marca-700">Método de pago</legend>
           <div class="flex gap-4">
             <label class="flex items-center gap-2 text-sm"><input type="radio" name="metodoPago" value="transferencia" checked /> Transferencia</label>
-            <label class="flex items-center gap-2 text-sm"><input type="radio" name="metodoPago" value="efectivo" /> Efectivo</label>
+            <label data-fisico class="flex items-center gap-2 text-sm"><input type="radio" name="metodoPago" value="efectivo" /> Efectivo</label>
           </div>
         </fieldset>
 
@@ -126,7 +131,7 @@ const direcciones = cliente?.direcciones ?? [];
 </Layout>
 
 <script>
-  import { getCarrito, subtotal as calcSubtotal, limpiar, formatoPrecio } from "../scripts/cart";
+  import { getCarrito, subtotal as calcSubtotal, subtotalFisico, soloDigital, limpiar, formatoPrecio } from "../scripts/cart";
   import { costoEnvio, notaEnvio, type Modalidad } from "../lib/envio";
   import { enLicencia } from "../lib/agenda";
 
@@ -139,7 +144,15 @@ const direcciones = cliente?.direcciones ?? [];
 
   if (getCarrito().length === 0) location.href = "/carrito";
 
+  // Carrito solo con productos digitales: se ocultan entrega/retiro, agenda y
+  // efectivo (el server lo vuelve a validar igual).
+  const digital = soloDigital();
+  form.querySelectorAll<HTMLElement>("[data-fisico]").forEach((el) => el.classList.toggle("hidden", digital));
+  document.getElementById("aviso-digital")!.classList.toggle("hidden", !digital);
+  if (digital) (form.querySelector('input[name="metodoPago"][value="transferencia"]') as HTMLInputElement).checked = true;
+
   function modalidad(): Modalidad {
+    if (digital) return "digital";
     return (form.querySelector('input[name="modalidad"]:checked') as HTMLInputElement).value as Modalidad;
   }
 
@@ -149,13 +162,15 @@ const direcciones = cliente?.direcciones ?? [];
       .map((i) => `<div class="flex justify-between"><span>${i.cantidad}× ${i.nombre} <span class="text-marca-500">(${i.presentacion})</span></span><span>${formatoPrecio(i.precio * i.cantidad)}</span></div>`)
       .join("");
     const sub = calcSubtotal();
-    const envio = costoEnvio(sub, modalidad());
+    // El envío (y el mínimo para envío gratis) se calcula solo sobre lo físico.
+    const subFisico = subtotalFisico();
+    const envio = costoEnvio(subFisico, modalidad());
     document.getElementById("r-subtotal")!.textContent = formatoPrecio(sub);
     document.getElementById("r-envio")!.textContent = envio === 0 ? "Gratis" : formatoPrecio(envio);
     document.getElementById("r-total")!.textContent = formatoPrecio(sub + envio);
     // Nota de envío gratis: que el cliente entienda la política antes de confirmar (PROP-109).
     const nota = document.getElementById("r-envio-nota")!;
-    const texto = notaEnvio(sub, modalidad(), formatoPrecio);
+    const texto = notaEnvio(subFisico, modalidad(), formatoPrecio);
     nota.textContent = texto ?? "";
     nota.classList.toggle("hidden", texto === null);
   }
@@ -165,7 +180,7 @@ const direcciones = cliente?.direcciones ?? [];
     const esEntrega = modalidad() === "entrega";
     document.getElementById("campo-direccion")!.classList.toggle("hidden", !esEntrega);
     document.getElementById("info-retiro")!.classList.toggle("hidden", esEntrega);
-    (form.direccion as HTMLInputElement).required = esEntrega;
+    (form.direccion as HTMLInputElement).required = esEntrega && !digital;
     render();
   }
   form.querySelectorAll('input[name="modalidad"]').forEach((r) => r.addEventListener("change", toggleModalidad));
@@ -257,7 +272,7 @@ const direcciones = cliente?.direcciones ?? [];
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!agendaInput.value) {
+    if (!digital && !agendaInput.value) {
       agendaError.classList.remove("hidden");
       document.getElementById("agenda-dias")!.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
@@ -273,7 +288,7 @@ const direcciones = cliente?.direcciones ?? [];
       email: fd.get("email"),
       direccion: fd.get("direccion"),
       notas: fd.get("notas"),
-      modalidad: fd.get("modalidad"),
+      modalidad: digital ? "digital" : fd.get("modalidad"),
       agenda: fd.get("agenda"),
       fechaAgenda: fd.get("fechaAgenda") || null,
       metodoPago: fd.get("metodoPago"),
