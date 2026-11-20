@@ -12,6 +12,9 @@ export interface ItemCarrito {
   // Detalle de sabores para una caja personalizada de Barras Mix (PROP-31).
   // Si está presente, el server recalcula el precio a partir de él.
   mix?: MixDetalle;
+  // Producto digital (guía PDF de Cultivo): sin envío y cantidad fija en 1.
+  // Es solo para la UI del checkout; el server lo vuelve a determinar.
+  digital?: boolean;
 }
 
 const KEY = "carrito";
@@ -33,7 +36,7 @@ function guardar(items: ItemCarrito[]) {
 export function agregar(item: ItemCarrito) {
   const items = getCarrito();
   const ex = items.find((i) => i.slug === item.slug && i.presentacion === item.presentacion);
-  if (ex) ex.cantidad += item.cantidad;
+  if (ex) ex.cantidad = item.digital ? 1 : ex.cantidad + item.cantidad;
   else items.push(item);
   guardar(items);
 }
@@ -59,6 +62,16 @@ export function contar(): number {
 
 export function subtotal(): number {
   return getCarrito().reduce((n, i) => n + i.precio * i.cantidad, 0);
+}
+
+// Subtotal de los productos físicos: es el que cuenta para el envío gratis.
+export function subtotalFisico(): number {
+  return getCarrito().reduce((n, i) => n + (i.digital ? 0 : i.precio * i.cantidad), 0);
+}
+
+export function soloDigital(): boolean {
+  const items = getCarrito();
+  return items.length > 0 && items.every((i) => i.digital);
 }
 
 export function formatoPrecio(n: number): string {

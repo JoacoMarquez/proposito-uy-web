@@ -62,11 +62,13 @@ import Layout from "../layouts/Layout.astro";
           <p class="font-medium text-marca-900">${i.nombre}</p>
           <p class="text-sm text-marca-600">${i.presentacion} · ${formatoPrecio(i.precio)}</p>
         </div>
-        <input type="number" min="0" value="${i.cantidad}" class="qty w-16 rounded-lg border border-marca-300 px-2 py-1 text-center" />
+        ${i.digital
+          ? `<span class="w-16 text-center text-xs text-marca-600" title="Producto digital">PDF</span>`
+          : `<input type="number" min="0" value="${i.cantidad}" class="qty w-16 rounded-lg border border-marca-300 px-2 py-1 text-center" />`}
         <p class="w-24 text-right font-medium text-marca-900">${formatoPrecio(i.precio * i.cantidad)}</p>
         <button class="quitar text-sm text-red-600 hover:underline">Quitar</button>
       `;
-      row.querySelector(".qty")!.addEventListener("change", (e) => {
+      row.querySelector(".qty")?.addEventListener("change", (e) => {
         setCantidad(i.slug, i.presentacion, Math.max(0, Number((e.target as HTMLInputElement).value)));
         render();
       });

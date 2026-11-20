@@ -2,8 +2,11 @@
 export const prerender = false;
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import { getCategorias } from "../../../../db/queries";
+import { seccionAdmin } from "../../../../lib/admin-seccion";
 
-const categorias = await getCategorias();
+const sec = seccionAdmin(Astro.params.seccion);
+if (!sec) return Astro.redirect("/admin");
+const categorias = await getCategorias(sec.seccion);
 ---
 
 <AdminLayout titulo="Categorías">
@@ -34,7 +37,7 @@ const categorias = await getCategorias();
             </td>
             <td class="p-3 text-marca-900/70">{c.descripcion}</td>
             <td class="p-3 text-right">
-              <a href={`/admin/productos/categorias/${c.slug}`} class="font-medium text-marca-700 hover:underline">Editar</a>
+              <a href={`${sec.base}/categorias/${c.slug}`} class="font-medium text-marca-700 hover:underline">Editar</a>
             </td>
           </tr>
         ))}

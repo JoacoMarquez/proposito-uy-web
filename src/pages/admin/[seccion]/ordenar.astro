@@ -8,6 +8,10 @@ import {
   precioDesde,
   formatoPrecio,
 } from "../../../db/queries";
+import { seccionAdmin } from "../../../lib/admin-seccion";
+
+const sec = seccionAdmin(Astro.params.seccion);
+if (!sec) return Astro.redirect("/admin");
 
 // Guardado del nuevo orden de una categoría (llega por fetch desde el arrastre).
 if (Astro.request.method === "POST") {
@@ -21,7 +25,7 @@ if (Astro.request.method === "POST") {
   return new Response(null, { status: 204 });
 }
 
-const [productos, cats] = await Promise.all([getProductos(), getCategorias()]);
+const [productos, cats] = await Promise.all([getProductos(), getCategorias(sec.seccion)]);
 // Productos agrupados por categoría, ya ordenados por `ordenCategoria`.
 const grupos = cats.map((c) => ({
   cat: c,
@@ -34,7 +38,7 @@ const grupos = cats.map((c) => ({
 <AdminLayout titulo="Ordenar catálogo">
   <div class="mb-4 flex items-center justify-between">
     <p class="text-sm text-marca-500">Arrastrá las filas para reordenar cómo se ven los productos dentro de cada categoría en la tienda. El orden se guarda solo.</p>
-    <a href="/admin/productos" class="text-sm font-medium text-marca-700 hover:underline">← Productos</a>
+    <a href={sec.base} class="text-sm font-medium text-marca-700 hover:underline">← {sec.titulo}</a>
   </div>
 
   <div class="space-y-8">
@@ -76,7 +80,7 @@ const grupos = cats.map((c) => ({
                     </td>
                     <td class="p-3">{p.presentaciones.length ? formatoPrecio(precioDesde(p)) : "—"}</td>
                     <td class="p-3 text-right">
-                      <a href={`/admin/productos/${p.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
+                      <a href={`${sec.base}/${p.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
                     </td>
                   </tr>
                 ))}

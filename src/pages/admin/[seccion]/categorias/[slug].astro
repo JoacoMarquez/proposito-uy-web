@@ -13,10 +13,15 @@ import {
   type CategoriaContenidoInput,
 } from "../../../../db/queries";
 import { procesarImagenSubida } from "../../../../lib/upload";
+import { seccionAdmin, baseAdmin } from "../../../../lib/admin-seccion";
 
 const { slug } = Astro.params;
+const sec = seccionAdmin(Astro.params.seccion);
+if (!sec) return Astro.redirect("/admin");
 const categoria = slug ? await getCategoria(slug) : undefined;
-if (!categoria) return Astro.redirect("/admin/productos/categorias");
+if (!categoria) return Astro.redirect(`${sec.base}/categorias`);
+// Si la URL no corresponde a la sección de la categoría, ir a la correcta.
+if (categoria.seccion !== sec.seccion) return Astro.redirect(`${baseAdmin(categoria.seccion)}/categorias/${categoria.slug}`);
 
 let error = "";
 
@@ -47,7 +52,7 @@ if (Astro.request.method === "POST") {
     error = "El nombre no puede quedar vacío.";
   } else {
     await actualizarCategoria(categoria.slug, data);
-    return Astro.redirect(`/admin/productos/categorias/${categoria.slug}?ok=1#contenido`);
+    return Astro.redirect(`${sec.base}/categorias/${categoria.slug}?ok=1#contenido`);
   }
 }
 
@@ -65,8 +70,8 @@ const tabBtn =
   <AdminEditorHeader
     slot="antetitulo"
     titulo={c.nombre}
-    volverHref="/admin/productos"
-    volverLabel="Volver a productos"
+    volverHref={sec.base}
+    volverLabel={`Volver a ${sec.titulo.toLowerCase()}`}
     formId="editor-categoria"
     guardado={guardado}
   />
@@ -84,7 +89,7 @@ const tabBtn =
     <div data-panel="lista" class="mt-5">
       <div class="mb-4 flex items-center justify-between">
         <p class="text-sm text-marca-500">{productos.length} producto{productos.length === 1 ? "" : "s"} en esta categoría.</p>
-        <a href="/admin/productos/nuevo" class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
+        <a href={`${sec.base}/nuevo?categoria=${c.slug}`} class="rounded-full bg-marca-600 px-4 py-2 text-sm font-medium text-white hover:bg-marca-700">
           + Nuevo producto
         </a>
       </div>
@@ -126,7 +131,7 @@ const tabBtn =
                       : <span class="text-red-600">Agotado</span>}
                   </td>
                   <td class="p-3 text-right">
-                    <a href={`/admin/productos/${p.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
+                    <a href={`${sec.base}/${p.id}`} class="font-medium text-marca-700 hover:underline">Editar</a>
                   </td>
                 </tr>
               ))}

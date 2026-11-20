@@ -6,13 +6,18 @@ interface Props {
   nombre: string;
   descripcion: string;
   imagen?: string | null;
+  base?: string; // ruta de la sección: "/tienda" (default) o "/cultivo"
+  apaisada?: boolean; // formato horizontal (portada de Cultivo)
 }
-const { slug, nombre, descripcion, imagen } = Astro.props;
+const { slug, nombre, descripcion, imagen, base = "/tienda", apaisada = false } = Astro.props;
 ---
 
 <a
-  href={`/tienda/${slug}`}
-  class="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-marca-200 sm:aspect-square"
+  href={`${base}/${slug}`}
+  class:list={[
+    "group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-marca-200",
+    apaisada ? "sm:aspect-[16/9]" : "sm:aspect-square",
+  ]}
 >
   {imagen && (
     <img

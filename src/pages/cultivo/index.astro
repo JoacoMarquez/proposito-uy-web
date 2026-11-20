@@ -1,0 +1,39 @@
+---
+export const prerender = false;
+// Portada de Cultivo: mismo esquema que la de Tienda (3 categorías + Catálogo),
+// con el logo de Cultivo y su texto de presentación (Contenido › Cultivo).
+import Layout from "../../layouts/Layout.astro";
+import CategoriaCard from "../../components/CategoriaCard.astro";
+import { getCategorias, getContenido } from "../../db/queries";
+
+const [lista, c] = await Promise.all([getCategorias("cultivo"), getContenido("cultivo")]);
+---
+
+<Layout titulo="Cultivo" descripcion="Plantines, insumos y conocimiento práctico para cultivar y llenar de vida tu espacio.">
+  <section class="mx-auto max-w-6xl px-4 py-12 sm:py-16">
+    <div class="text-center">
+      <h1 class="sr-only">Cultivo</h1>
+      <img src={c.logo} alt="Cultivo · llena de vida tu espacio" width="900" height="559" class="mx-auto h-auto w-56 sm:w-80" />
+      <p class="mx-auto mt-6 max-w-2xl text-marca-900/70">{c.intro}</p>
+    </div>
+
+    <div class="mt-10 grid grid-cols-2 gap-3 sm:gap-5">
+      {lista.map((cat) => (
+        <CategoriaCard slug={cat.slug} nombre={cat.nombre} descripcion={cat.descripcion} imagen={cat.imagen} base="/cultivo" apaisada />
+      ))}
+      <a
+        href="/cultivo/catalogo"
+        class="group relative flex aspect-[4/3] flex-col items-center justify-center overflow-hidden rounded-2xl bg-marca-100 p-4 text-center transition-shadow hover:shadow-md sm:aspect-[16/9] sm:p-6"
+      >
+        <img
+          src={c.catalogoImagen}
+          alt=""
+          loading="lazy"
+          class="h-14 w-14 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20"
+        />
+        <h2 class="mt-2 text-base font-semibold text-marca-900 sm:mt-4 sm:text-lg">{c.catalogoTitulo}</h2>
+        <p class="mt-1 text-xs text-marca-900/70 sm:text-sm">{c.catalogoDescripcion}</p>
+      </a>
+    </div>
+  </section>
+</Layout>
