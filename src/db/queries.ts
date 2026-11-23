@@ -192,10 +192,6 @@ export interface ProductoInput {
   imagen2: string | null;
   // Cultivo: valores de las tarjetas informativas (ver src/lib/cultivo.ts).
   especificaciones?: Record<string, string>;
-  // Cultivo: PDF en R2 (solo se mandan cuando cambian).
-  archivoKey?: string | null;
-  archivoNombre?: string | null;
-  archivoBytes?: number | null;
 }
 
 export async function getProductoById(id: number): Promise<ProductoFull | undefined> {

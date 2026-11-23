@@ -12,7 +12,6 @@ import {
   ESTADOS_PAGO,
   formatoPrecio,
 } from "../../../db/queries";
-import { enviarPdfsPedido, pdfsDelPedido } from "../../../lib/entrega-pdf";
 
 const id = Number(Astro.params.id);
 if (!id || Number.isNaN(id)) return Astro.redirect("/admin/pedidos");
@@ -25,12 +24,6 @@ if (Astro.request.method === "POST") {
     const numero = String(form.get("numero") ?? "");
     return Astro.redirect(`/admin/pedidos?eliminado=${encodeURIComponent(numero)}`);
   }
-  // Cultivo: reenviar el mail con los PDFs (links nuevos).
-  if (String(form.get("accion") ?? "") === "reenviar-pdf") {
-    const r = await enviarPdfsPedido(id, Astro.url.origin);
-    return Astro.redirect(`/admin/pedidos/${id}?pdf=${r}`);
-  }
-  const antes = await getPedidoById(id);
   const estado = String(form.get("estado") ?? "");
   if ((ESTADOS_PEDIDO as readonly string[]).includes(estado)) {
     await actualizarEstadoPedido(id, estado);
@@ -38,11 +31,6 @@ if (Astro.request.method === "POST") {
   const estadoPago = String(form.get("estadoPago") ?? "");
   if ((ESTADOS_PAGO as readonly string[]).includes(estadoPago)) {
     await actualizarEstadoPago(id, estadoPago);
-  }
-  // Al confirmar el pago por primera vez se mandan los PDFs de Cultivo (si hay).
-  if (antes && estadoPago === "pagado" && antes.estadoPago !== "pagado" && !antes.pdfEnviadoEn) {
-    const r = await enviarPdfsPedido(id, Astro.url.origin);
-    if (r !== "sin-pdfs") return Astro.redirect(`/admin/pedidos/${id}?ok=1&pdf=${r}`);
   }
   return Astro.redirect(`/admin/pedidos/${id}?ok=1`);
 }
@@ -52,15 +40,10 @@ const guardado = Astro.url.searchParams.get("ok") === "1";
 const pedido = await getPedidoById(id);
 if (!pedido) return Astro.redirect("/admin/pedidos");
 
-// PDFs de Cultivo de este pedido (fichas de plantines / guías).
-const pdfs = await pdfsDelPedido(pedido.items.map((i) => i.productoSlug));
-const avisoPdf = Astro.url.searchParams.get("pdf");
-
 const agendaLabel: Record<string, string> = {
   miercoles: "Miércoles",
   viernes: "Viernes",
   coordinacion: "Coordinación personalizada",
-  digital: "No aplica (digital)",
 };
 const fmtFecha = (d: Date) => new Date(d).toLocaleString("es-UY");
 const agendaRaw = pedido.fechaAgenda
@@ -79,9 +62,7 @@ const horario =
       ? String(tienda.horarioRetiro)
       : String(tienda.horarioEntrega);
 const mensajeWa =
-  pedido.modalidad === "digital"
-    ? `Hola, ${pedido.nombre}. Te escribimos por tu pedido ${pedido.numero}.`
-    : pedido.agenda === "coordinacion"
+  pedido.agenda === "coordinacion"
     ? `Hola, ${pedido.nombre}. Te escribimos por tu pedido ${pedido.numero} para coordinar ${modalidadTxt} por este medio.`
     : `Hola, ${pedido.nombre}. Te escribimos por tu pedido ${pedido.numero}. Te confirmamos ${modalidadTxt} para ${agendaTexto} en la franja ${horario}.`;
 const waMensaje = `${waCliente}?text=${encodeURIComponent(mensajeWa)}`;
@@ -127,7 +108,7 @@ const mapsHref = pedido.direccion
           <div><dt class="text-marca-500">Nombre</dt><dd class="font-medium">{pedido.nombre}</dd></div>
           <div><dt class="text-marca-500">Celular</dt><dd class="font-medium"><a href={waCliente} target="_blank" rel="noopener" class="text-marca-700 hover:underline">{pedido.celular}</a></dd></div>
           <div class="col-span-2"><dt class="text-marca-500">Email</dt><dd class="font-medium">{pedido.email}</dd></div>
-          <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{pedido.modalidad === "entrega" ? "Entrega" : pedido.modalidad === "digital" ? "Digital (PDF por correo)" : "Retiro"}</dd></div>
+          <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{pedido.modalidad === "entrega" ? "Entrega" : "Retiro"}</dd></div>
           <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto}</dd></div>
           {pedido.direccion && <div class="col-span-2"><dt class="text-marca-500">Dirección</dt><dd class="font-medium">{pedido.direccion}</dd></div>}
           <div><dt class="text-marca-500">Pago</dt><dd class="font-medium capitalize">{pedido.metodoPago}</dd></div>
@@ -158,30 +139,6 @@ const mapsHref = pedido.direccion
           </select>
         </div>
       </form>
-
-      {pdfs.length > 0 && (
-        <div class="mt-4 rounded-xl border border-marca-100 bg-marca-50 p-3 text-sm">
-          <p class="font-medium text-marca-700">📚 PDFs de Cultivo</p>
-          <ul class="mt-1 list-disc pl-5 text-marca-900/80">
-            {pdfs.map((x) => <li>{x.nombre}</li>)}
-          </ul>
-          {avisoPdf === "enviado" && <p class="mt-2 text-green-700">✓ Mail con los PDFs enviado a {pedido.email}.</p>}
-          {avisoPdf === "error" && <p class="mt-2 text-red-700">No se pudo enviar el mail. Revisá la configuración de Brevo y probá “Reenviar”.</p>}
-          <p class="mt-2 text-marca-900/70">
-            {pedido.pdfEnviadoEn
-              ? `Enviados el ${fmtFecha(pedido.pdfEnviadoEn)}.`
-              : "Se envían automáticamente al marcar el pago como “pagado”."}
-          </p>
-          {pedido.estadoPago === "pagado" && (
-            <form method="POST" class="mt-2">
-              <input type="hidden" name="accion" value="reenviar-pdf" />
-              <button type="submit" class="w-full rounded-xl border border-marca-300 bg-white px-3 py-2 text-sm font-medium text-marca-700 hover:bg-marca-100">
-                {pedido.pdfEnviadoEn ? "Reenviar PDFs" : "Enviar PDFs"}
-              </button>
-            </form>
-          )}
-        </div>
-      )}
 
       <a
         href={waMensaje}

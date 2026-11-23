@@ -9,11 +9,11 @@ import { getCategorias, getContenido } from "../../db/queries";
 const [lista, c] = await Promise.all([getCategorias("cultivo"), getContenido("cultivo")]);
 ---
 
-<Layout titulo="Cultivo" descripcion="Plantines, insumos y conocimiento práctico para cultivar y llenar de vida tu espacio.">
+<Layout titulo="Cultivo" descripcion="Plantines, insumos y cosechas de nuestra huerta para cultivar, cuidar la tierra y compartir sus frutos.">
   <section class="mx-auto max-w-6xl px-4 py-12 sm:py-16">
     <div class="text-center">
       <h1 class="sr-only">Cultivo</h1>
-      <img src={c.logo} alt="Cultivo · llena de vida tu espacio" width="900" height="559" class="mx-auto h-auto w-56 sm:w-80" />
+      <img src={c.logo} alt="Cultivo · Todo empieza en la tierra" width="900" height="559" class="mx-auto h-auto w-56 sm:w-80" />
       <p class="mx-auto mt-6 max-w-2xl text-marca-900/70">{c.intro}</p>
     </div>
 

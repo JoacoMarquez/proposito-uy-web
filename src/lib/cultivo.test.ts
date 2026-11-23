@@ -3,11 +3,8 @@ import {
   ESPECIFICACIONES,
   tarjetasEspecificacion,
   limpiarEspecificaciones,
-  esDigital,
-  llevaPdf,
   recomendados,
   rutaSeccion,
-  distintivoCultivo,
 } from "./cultivo";
 
 describe("especificaciones por tipo", () => {
@@ -31,27 +28,22 @@ describe("especificaciones por tipo", () => {
   });
 });
 
-describe("digital y PDF", () => {
-  it("solo Conocimiento es digital", () => {
-    expect(esDigital("conocimiento")).toBe(true);
-    expect(esDigital("plantines")).toBe(false);
-    expect(esDigital(null)).toBe(false);
+describe("títulos editables en Insumos", () => {
+  it("usa el título propio del producto y si no el por defecto", () => {
+    const t = tarjetasEspecificacion("insumos", { materiales: "Turba", titulo_materiales: "Composición", aplicacion: "Macetas" });
+    expect(t).toEqual([
+      { label: "Composición", valor: "Turba" },
+      { label: "Aplicación", valor: "Macetas" },
+    ]);
   });
-  it("plantines y conocimiento llevan PDF; insumos no", () => {
-    expect(llevaPdf("plantines")).toBe(true);
-    expect(llevaPdf("conocimiento")).toBe(true);
-    expect(llevaPdf("insumos")).toBe(false);
+  it("guarda solo títulos distintos al por defecto", () => {
+    expect(
+      limpiarEspecificaciones("insumos", { materiales: "Turba", titulo_materiales: "Composición", titulo_aplicacion: "Aplicación" }),
+    ).toEqual({ materiales: "Turba", titulo_materiales: "Composición" });
   });
-});
-
-describe("distintivoCultivo", () => {
-  it("plantines solo muestra 'incluye ficha' si hay PDF cargado", () => {
-    expect(distintivoCultivo("plantines", false, false)).toBeNull();
-    expect(distintivoCultivo("plantines", true, true)).toMatch(/PDF/);
-  });
-  it("conocimiento siempre es entrega digital; insumos no lleva", () => {
-    expect(distintivoCultivo("conocimiento")).toMatch(/digital/);
-    expect(distintivoCultivo("insumos")).toBeNull();
+  it("en Plantines y Cosechas los títulos son fijos", () => {
+    expect(limpiarEspecificaciones("cosechas", { variedad: "Crespa", titulo_variedad: "Otra" })).toEqual({ variedad: "Crespa" });
+    expect(tarjetasEspecificacion("plantines", { especie: "Romero", titulo_especie: "X" })[0].label).toBe("Especie");
   });
 });
 
@@ -65,11 +57,11 @@ describe("rutaSeccion", () => {
 
 describe("recomendados", () => {
   const p = (slug: string, categoriaSlug: string, disponible = true) => ({ slug, categoriaSlug, disponible });
-  const todos = [p("romero", "plantines"), p("lavanda", "plantines"), p("tierra", "insumos"), p("guia", "conocimiento"), p("agotado", "insumos", false)];
+  const todos = [p("romero", "plantines"), p("lavanda", "plantines"), p("tierra", "insumos"), p("lechuga", "cosechas"), p("agotado", "insumos", false)];
 
   it("excluye el actual y los agotados, y mezcla categorías", () => {
     const r = recomendados(p("romero", "plantines"), todos).map((x) => x.slug);
-    expect(r).toEqual(["tierra", "lavanda", "guia"]);
+    expect(r).toEqual(["tierra", "lavanda", "lechuga"]);
   });
   it("respeta la cantidad pedida", () => {
     expect(recomendados(p("romero", "plantines"), todos, 2)).toHaveLength(2);

@@ -32,7 +32,7 @@ const grupos = cats
       <div class="mt-10">
         <TituloSeccion titulo={g.cat.nombre} />
         <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {g.items.map((p) => <ProductCard producto={p} tipo={g.cat.tipo} />)}
+          {g.items.map((p) => <ProductCard producto={p} />)}
         </div>
       </div>
     ))}

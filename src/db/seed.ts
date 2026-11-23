@@ -38,7 +38,7 @@ async function seed() {
   const CULTIVO = [
     { slug: "plantines", nombre: "Plantines", descripcion: "Plantas ornamentales, aromáticas y frutales." },
     { slug: "insumos", nombre: "Insumos", descripcion: "Productos prácticos para cultivar y cuidar tus plantas." },
-    { slug: "conocimiento", nombre: "Conocimiento", descripcion: "Guías prácticas para aprender y cultivar." },
+    { slug: "cosechas", nombre: "Cosechas", descripcion: "Verduras y hierbas frescas de nuestra huerta, según temporada y disponibilidad." },
   ];
   for (let i = 0; i < CULTIVO.length; i++) {
     await db.insert(categorias).values({ ...CULTIVO[i], seccion: "cultivo", tipo: CULTIVO[i].slug, orden: i });

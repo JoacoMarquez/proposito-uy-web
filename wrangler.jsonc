@@ -15,14 +15,5 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
-  },
-  // PDFs de Cultivo (fichas de plantines y guías). Bucket PRIVADO: solo el
-  // Worker lo usa (src/lib/archivos.ts), con topes para no salir del plan gratis.
-  // ⚠️ El bucket tiene que existir en la cuenta antes de deployar esto.
-  "r2_buckets": [
-    {
-      "binding": "ARCHIVOS",
-      "bucket_name": "proposito-archivos"
-    }
-  ]
+  }
 }

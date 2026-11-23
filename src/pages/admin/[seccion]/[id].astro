@@ -2,7 +2,7 @@
 export const prerender = false;
 // Editor de producto, compartido por Tienda (/admin/productos/[id]) y Cultivo
 // (/admin/cultivo/[id]). En Cultivo los campos informativos cambian según el
-// tipo de la categoría elegida (Plantines / Insumos / Conocimiento).
+// tipo de la categoría elegida (Plantines / Insumos / Cosechas).
 import AdminLayout from "../../../layouts/AdminLayout.astro";
 import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
 import ImageField from "../../../components/ImageField.astro";
@@ -17,9 +17,15 @@ import {
 } from "../../../db/queries";
 import { procesarImagenSubida } from "../../../lib/upload";
 import { seccionAdmin, baseAdmin } from "../../../lib/admin-seccion";
-import { ESPECIFICACIONES, TIPOS_CULTIVO, limpiarEspecificaciones, llevaPdf } from "../../../lib/cultivo";
-import { procesarPdfSubido, borrarPdf } from "../../../lib/archivos";
-import { PDF_MAX_BYTES, formatoBytes } from "../../../lib/archivos-limites";
+import {
+  ESPECIFICACIONES,
+  TIPOS_CULTIVO,
+  PRESENTACIONES_INICIALES,
+  limpiarEspecificaciones,
+  titulosEditables,
+  claveTitulo,
+  esTipoCultivo,
+} from "../../../lib/cultivo";
 
 const sec = seccionAdmin(Astro.params.seccion);
 if (!sec) return Astro.redirect("/admin");
@@ -32,17 +38,12 @@ const id = esNuevo ? null : Number(idParam);
 if (!esNuevo && (!id || Number.isNaN(id))) return Astro.redirect(sec.base);
 
 let error = "";
-// PDF de Cultivo: el subido en este guardado y el que hay que borrar si se guarda bien.
-let pdfNuevo: string | null = null;
-let pdfViejo: string | null = null;
 
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
 
   if (form.get("_action") === "delete" && id) {
-    const previo = await getProductoById(id);
     await deleteProducto(id);
-    await borrarPdf(previo?.archivoKey);
     return Astro.redirect(sec.base);
   }
 
@@ -74,11 +75,15 @@ if (Astro.request.method === "POST") {
   const catValida = cat && cat.seccion === sec.seccion;
 
   // Cultivo: las tarjetas vienen con prefijo por tipo (esp_<tipo>_<clave>) para
-  // que no choquen entre tipos; se toman solo las del tipo de la categoría.
+  // que no choquen entre tipos; se toman solo las del tipo de la categoría. En
+  // Insumos también llega el título de cada tarjeta (esp_insumos_titulo_<clave>).
   const especificaciones: Record<string, string> = {};
-  if (esCultivo && cat?.tipo) {
-    for (const c of ESPECIFICACIONES[cat.tipo as keyof typeof ESPECIFICACIONES] ?? []) {
+  if (esCultivo && esTipoCultivo(cat?.tipo)) {
+    for (const c of ESPECIFICACIONES[cat.tipo]) {
       especificaciones[c.key] = s(`esp_${cat.tipo}_${c.key}`);
+      if (titulosEditables(cat.tipo)) {
+        especificaciones[claveTitulo(c.key)] = s(`esp_${cat.tipo}_${claveTitulo(c.key)}`);
+      }
     }
   }
 
@@ -115,40 +120,13 @@ if (Astro.request.method === "POST") {
     error = "Elegí una categoría válida.";
   } else if (pres.length === 0) {
     error = "Agregá al menos una presentación con precio.";
-  } else {
-    // PDF (Cultivo): se sube recién acá, con el resto validado, para no dejar
-    // archivos huérfanos en R2 si el form tenía errores.
-    const previo = id ? await getProductoById(id) : undefined;
-    const quitar = () => {
-      pdfViejo = previo?.archivoKey ?? null;
-      data.archivoKey = data.archivoNombre = null;
-      data.archivoBytes = null;
-    };
-    if (esCultivo && llevaPdf(cat?.tipo)) {
-      const pdf = await procesarPdfSubido(form, previo ? { key: previo.archivoKey, bytes: previo.archivoBytes } : null);
-      if (pdf.error) error = pdf.error;
-      else if (pdf.archivo) {
-        pdfNuevo = pdf.archivo.key;
-        pdfViejo = previo?.archivoKey ?? null;
-        data.archivoKey = pdf.archivo.key;
-        data.archivoNombre = pdf.archivo.nombre;
-        data.archivoBytes = pdf.archivo.bytes;
-      } else if (form.get("quitarArchivo") === "on" && previo?.archivoKey) quitar();
-    } else if (previo?.archivoKey) {
-      // Pasó a una categoría sin PDF (ej. Insumos): se libera el archivo.
-      quitar();
-    }
   }
   if (Astro.request.method === "POST" && !error) {
     try {
       const nuevoId = await upsertProducto(id, data, pres);
-      // Recién con el producto guardado se borra el PDF reemplazado/quitado.
-      await borrarPdf(pdfViejo);
       return Astro.redirect(`${sec.base}/${nuevoId}?ok=1`);
     } catch (e: any) {
       const dup = e?.code === "23505" || /unique|duplicad|duplicate/i.test(String(e?.message ?? ""));
-      // No se guardó: el PDF recién subido no queda asociado a nada.
-      await borrarPdf(pdfNuevo);
       if (!dup) throw e;
       error = "Ya existe otro producto con ese slug (URL). Elegí uno distinto.";
     }
@@ -174,11 +152,11 @@ if (p && !cats.some((c) => c.slug === p.categoriaSlug)) {
 const catInicial = p?.categoriaSlug ?? Astro.url.searchParams.get("categoria") ?? cats[0]?.slug;
 const tipoInicial = cats.find((c) => c.slug === catInicial)?.tipo ?? null;
 
-// Presentaciones: existentes + filas vacías. Plantines arranca con las bolsas
-// de vivero de 2, 5 y 10 L (consigna de Pedro) cuando el producto es nuevo.
+// Presentaciones: existentes + filas vacías. Un producto nuevo de Plantines
+// arranca con las bolsas de vivero de 2 y 5 L (consigna de Pedro).
 const presIniciales =
-  esNuevo && esCultivo && tipoInicial === "plantines"
-    ? [{ label: "2 L", precio: 0 }, { label: "5 L", precio: 0 }, { label: "10 L", precio: 0 }]
+  esNuevo && esCultivo && esTipoCultivo(tipoInicial)
+    ? (PRESENTACIONES_INICIALES[tipoInicial] ?? []).map((label) => ({ label, precio: 0 }))
     : (p?.presentaciones ?? []);
 const filasPres = [...presIniciales, { label: "", precio: 0 }, { label: "", precio: 0 }];
 const esp = p?.especificaciones ?? {};
@@ -250,7 +228,7 @@ const tituloLista = esCultivo ? "Cultivo" : "productos";
       <label class="text-sm font-medium text-marca-700">Presentaciones y precios</label>
       {esCultivo ? (
         <p class="text-xs text-marca-500">
-          Label y precio en pesos. Ej: 2 L, 25 litros, Edición digital. Dejá vacío para omitir.
+          Label y precio en pesos. Ej: 2 L, 25 litros, Atado, 1 kg, Unidad. Dejá vacío para omitir.
         </p>
       ) : (
         <p class="text-xs text-marca-500">
@@ -280,35 +258,27 @@ const tituloLista = esCultivo ? "Cultivo" : "productos";
         {TIPOS_CULTIVO.map((tipo) => (
           <div data-grupo-tipo={tipo} hidden={tipo !== tipoInicial}>
             <p class="text-sm font-medium text-marca-700">Tarjetas informativas</p>
-            <p class="text-xs text-marca-500">Las seis tarjetas de la ficha. Las que quedan vacías no se muestran.</p>
+            <p class="text-xs text-marca-500">
+              Las seis tarjetas de la ficha. Las que quedan vacías no se muestran.
+              {titulosEditables(tipo) && " En Insumos podés cambiar también el título de cada tarjeta."}
+            </p>
             <div class="mt-2 grid gap-4 sm:grid-cols-2">
               {ESPECIFICACIONES[tipo].map((c) => (
                 <div>
-                  <label class="text-sm font-medium text-marca-700">{c.label}</label>
+                  {titulosEditables(tipo) ? (
+                    <input
+                      name={`esp_${tipo}_${claveTitulo(c.key)}`}
+                      value={(tipo === tipoInicial ? esp[claveTitulo(c.key)] : "") || c.label}
+                      aria-label={`Título de la tarjeta (${c.label})`}
+                      class="w-full rounded-lg border border-dashed border-marca-300 bg-marca-50 px-2 py-1 text-sm font-medium text-marca-700"
+                    />
+                  ) : (
+                    <label class="text-sm font-medium text-marca-700">{c.label}</label>
+                  )}
                   <textarea name={`esp_${tipo}_${c.key}`} rows="2" class={campoBase} placeholder={c.ayuda ?? ""}>{tipo === tipoInicial ? (esp[c.key] ?? "") : ""}</textarea>
                 </div>
               ))}
             </div>
-            {llevaPdf(tipo) && (
-              <div class="mt-4 rounded-xl border border-marca-200 bg-marca-50 p-4">
-                <label class="text-sm font-medium text-marca-700">
-                  {tipo === "plantines" ? "🪴 Ficha de cultivo en PDF (de regalo con la compra)" : "📚 Archivo PDF del producto"}
-                </label>
-                <p class="text-xs text-marca-500">
-                  {tipo === "plantines"
-                    ? "Se envía gratis por correo al comprador cuando marcás el pago del pedido como “pagado”."
-                    : "Es lo que se compra: se envía por correo al marcar el pago como “pagado”. No lleva envío y se compra de a uno."}
-                  {" "}Máximo {formatoBytes(PDF_MAX_BYTES)}.
-                </p>
-                {tipo === tipoInicial && p?.archivoKey && (
-                  <p class="mt-2 text-sm text-marca-900">
-                    Actual: <strong>{p.archivoNombre}</strong> ({formatoBytes(p.archivoBytes ?? 0)})
-                    <label class="ml-3 inline-flex items-center gap-1 text-xs text-red-700"><input type="checkbox" name="quitarArchivo" /> Quitar</label>
-                  </p>
-                )}
-                <input type="file" name="archivoFile" accept="application/pdf,.pdf" class="mt-2 block w-full text-sm" disabled={tipo !== tipoInicial} data-archivo />
-              </div>
-            )}
           </div>
         ))}
 
@@ -404,11 +374,7 @@ const tituloLista = esCultivo ? "Cultivo" : "productos";
     if (!sel || grupos.length === 0) return;
     const aplicar = () => {
       const tipo = sel.selectedOptions[0]?.dataset.tipo ?? "";
-      grupos.forEach((g) => {
-        g.hidden = g.dataset.grupoTipo !== tipo;
-        // Un solo input de PDF activo (el del tipo elegido) para que el form no mande dos.
-        g.querySelectorAll<HTMLInputElement>("[data-archivo]").forEach((i) => (i.disabled = g.hidden));
-      });
+      grupos.forEach((g) => (g.hidden = g.dataset.grupoTipo !== tipo));
     };
     sel.addEventListener("change", aplicar);
     aplicar();

@@ -255,7 +255,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
     defaults: {
       logo: "/marca/cultivo-logo.webp",
       intro:
-        "Cultivo es un espacio para acercarte al mundo de las plantas. Acá vas a encontrar plantines, insumos y conocimiento práctico para cultivar, compostar y llenar de vida tu espacio.",
+        "Cultivo es un espacio para acercarte al mundo de las plantas. Acá vas a encontrar plantines, insumos y cosechas de nuestra huerta para cultivar, cuidar la tierra y compartir sus frutos.",
       catalogoImagen: "/marca/cultivo-isotipo.webp",
       catalogoTitulo: "Catálogo",
       catalogoDescripcion: "Todos los productos en un solo lugar.",

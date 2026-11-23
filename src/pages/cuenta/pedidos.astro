@@ -53,11 +53,11 @@ const dias = proximosDiasHabilitados(6, licencia);
             </div>
             <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
               <div><dt class="text-marca-500">Total</dt><dd class="font-medium text-marca-900">{formatoPrecio(p.total)}</dd></div>
-              <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{p.modalidad === "entrega" ? "Entrega" : p.modalidad === "digital" ? "Digital" : "Retiro"}</dd></div>
-              {p.modalidad !== "digital" && <div class="col-span-2"><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto(p.agenda, p.fechaAgenda)}</dd></div>}
+              <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{p.modalidad === "entrega" ? "Entrega" : "Retiro"}</dd></div>
+              <div class="col-span-2"><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto(p.agenda, p.fechaAgenda)}</dd></div>
             </dl>
 
-            {p.estado === "pendiente" && p.modalidad !== "digital" && (
+            {p.estado === "pendiente" && (
               <form method="POST" class="mt-3 flex flex-wrap items-end gap-2 border-t border-marca-100 pt-3">
                 <input type="hidden" name="pedidoId" value={p.id} />
                 <label class="text-sm">Cambiar agenda

@@ -2,15 +2,12 @@
 import type { ProductoFull } from "../db/queries";
 import { nombreCompleto, precioDesde, formatoPrecio, esRetornable } from "../db/queries";
 import FavoritoBoton from "./FavoritoBoton.astro";
-import { distintivoCultivo } from "../lib/cultivo";
 
 interface Props {
   producto: ProductoFull;
-  tipo?: string | null; // tipo de categoría de Cultivo (muestra su distintivo)
 }
 
-const { producto, tipo } = Astro.props;
-const distintivo = distintivoCultivo(tipo, false, Boolean(producto.archivoKey));
+const { producto } = Astro.props;
 const nombre = nombreCompleto(producto);
 const desde = producto.presentaciones.length > 1;
 const agotado = !producto.disponible;
@@ -33,13 +30,8 @@ const retornable = esRetornable(producto);
           Agotado
         </span>
       )}
-      {(retornable || producto.proteina || distintivo) && (
+      {(retornable || producto.proteina) && (
         <div class="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
-          {distintivo && (
-            <span class="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-marca-700 shadow-sm">
-              {tipo === "conocimiento" ? "📚" : "🪴"} {distintivo}
-            </span>
-          )}
           {retornable && (
             <span
               class="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-marca-700 shadow-sm"

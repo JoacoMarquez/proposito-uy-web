@@ -11,9 +11,6 @@ describe("costoEnvio", () => {
     expect(costoEnvio(0, "entrega")).toBe(COSTO_ENVIO);
     expect(costoEnvio(ENVIO_GRATIS_DESDE - 1, "entrega")).toBe(COSTO_ENVIO);
   });
-  it("un pedido digital no paga envío", () => {
-    expect(costoEnvio(0, "digital")).toBe(0);
-  });
   it("entrega desde el mínimo es gratis (límite inclusivo)", () => {
     expect(costoEnvio(ENVIO_GRATIS_DESDE, "entrega")).toBe(0);
     expect(costoEnvio(ENVIO_GRATIS_DESDE + 500, "entrega")).toBe(0);
@@ -21,9 +18,8 @@ describe("costoEnvio", () => {
 });
 
 describe("notaEnvio", () => {
-  it("no se muestra en retiro ni en pedidos digitales", () => {
+  it("no se muestra en retiro", () => {
     expect(notaEnvio(0, "retiro", formatoPrecio)).toBeNull();
-    expect(notaEnvio(0, "digital", formatoPrecio)).toBeNull();
   });
   it("avisa cuánto falta para el envío gratis", () => {
     const nota = notaEnvio(2500, "entrega", formatoPrecio);

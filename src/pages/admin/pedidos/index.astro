@@ -35,9 +35,7 @@ const fmtDistribucion = (p: { fechaAgenda: string | null }) =>
 
 // Franja horaria según modalidad (valores editables en Contenido › Tienda).
 const horarioPedido = (p: { modalidad: string; agenda: string }) =>
-  p.modalidad === "digital"
-    ? "PDF por correo"
-    : p.agenda === "coordinacion"
+  p.agenda === "coordinacion"
     ? "A definir por WhatsApp"
     : p.modalidad === "retiro"
       ? String(tienda.horarioRetiro)
@@ -78,7 +76,7 @@ const horarioPedido = (p: { modalidad: string; agenda: string }) =>
               <td class="p-3 font-medium text-marca-900">{p.numero}</td>
               <td class="p-3 whitespace-nowrap text-marca-900/70">{fmtFecha(p.creadoEn)}</td>
               <td class="p-3 text-marca-900/70">{p.nombre}</td>
-              <td class="p-3 text-marca-900/70">{p.modalidad === "entrega" ? "Entrega" : p.modalidad === "digital" ? "Digital" : "Retiro"}</td>
+              <td class="p-3 text-marca-900/70">{p.modalidad === "entrega" ? "Entrega" : "Retiro"}</td>
               <td class="p-3 whitespace-nowrap text-marca-900/70">{fmtDistribucion(p)}</td>
               <td class="p-3 whitespace-nowrap text-marca-900/70">{horarioPedido(p)}</td>
               <td class="p-3 whitespace-nowrap">{formatoPrecio(p.total)}</td>

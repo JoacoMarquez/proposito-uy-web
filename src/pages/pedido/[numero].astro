@@ -31,9 +31,7 @@ const wa = whatsappLink(`Hola! Adjunto el comprobante de mi pedido ${pedido.nume
 const waCoord = whatsappLink(`Hola! Mi pedido ${pedido.numero} es con coordinación personalizada. Quiero coordinar el día y horario de la entrega o el retiro.`);
 
 // Mensaje de confirmación con el detalle completo del pedido (PROP-96).
-const digital = pedido.modalidad === "digital";
-const modalidadTxt =
-  pedido.modalidad === "entrega" ? "Entrega a domicilio" : digital ? "Producto digital (PDF por correo)" : "Retiro en planta";
+const modalidadTxt = pedido.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta";
 const pagoTxt = pedido.metodoPago === "transferencia" ? "Transferencia" : "Efectivo";
 // Mensaje solo con caracteres ASCII (+ acentos): evitamos viñetas, signo de
 // multiplicación, rayas largas y emojis que algunos WhatsApp/teléfonos
@@ -47,7 +45,7 @@ const mensajeConfirmar = [
   lineasPedido,
   "",
   `Total: ${formatoPrecio(pedido.total)}`,
-  digital ? modalidadTxt : `${modalidadTxt} - ${agendaTexto}`,
+  `${modalidadTxt} - ${agendaTexto}`,
   pedido.direccion ? `Dirección: ${pedido.direccion}` : null,
   `Pago: ${pagoTxt}`,
 ]
@@ -91,9 +89,8 @@ const waConfirmar = whatsappLink(mensajeConfirmar);
 
       <!-- Logística -->
       <dl class="mt-6 grid grid-cols-2 gap-3 text-sm">
-        <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{modalidadTxt}</dd></div>
-        {!digital && <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto}</dd></div>}
-        {digital && <div class="col-span-2 rounded-xl bg-marca-50 p-3 text-marca-900/80">📚 Cuando confirmemos tu pago te enviamos el PDF a {pedido.email}.</div>}
+        <div><dt class="text-marca-500">Modalidad</dt><dd class="font-medium">{pedido.modalidad === "entrega" ? "Entrega a domicilio" : "Retiro en planta"}</dd></div>
+        <div><dt class="text-marca-500">Agenda</dt><dd class="font-medium">{agendaTexto}</dd></div>
         {pedido.direccion && <div class="col-span-2"><dt class="text-marca-500">Dirección</dt><dd class="font-medium">{pedido.direccion}</dd></div>}
         {pedido.modalidad === "retiro" && <div class="col-span-2"><dt class="text-marca-500">Retiro en</dt><dd class="font-medium">{site.direccionRetiro}</dd></div>}
       </dl>

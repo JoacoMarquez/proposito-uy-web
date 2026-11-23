@@ -10,14 +10,12 @@ import { site } from "../data/site";
 export const COSTO_ENVIO = site.costoEnvio;
 export const ENVIO_GRATIS_DESDE = site.envioGratisDesde;
 
-// "digital": pedido solo con productos digitales (guías PDF de Cultivo), sin envío.
-export type Modalidad = "entrega" | "retiro" | "digital";
+export type Modalidad = "entrega" | "retiro";
 
 /** Costo de envío para un subtotal y modalidad dados.
- *  0 si retira en planta, si es digital o si el subtotal alcanza el mínimo de
- *  envío gratis. `subtotal` = solo productos físicos (los digitales no suman). */
+ *  0 si retira en planta o si el subtotal alcanza el mínimo de envío gratis. */
 export function costoEnvio(subtotal: number, modalidad: Modalidad): number {
-  if (modalidad !== "entrega") return 0;
+  if (modalidad === "retiro") return 0;
   return subtotal >= ENVIO_GRATIS_DESDE ? 0 : COSTO_ENVIO;
 }
 
@@ -29,7 +27,7 @@ export function notaEnvio(
   modalidad: Modalidad,
   formato: (n: number) => string,
 ): string | null {
-  if (modalidad !== "entrega") return null;
+  if (modalidad === "retiro") return null;
   if (subtotal >= ENVIO_GRATIS_DESDE) return "🎉 ¡Tu pedido tiene envío gratis!";
   const falta = ENVIO_GRATIS_DESDE - subtotal;
   return `Te faltan ${formato(falta)} para envío gratis (desde ${formato(ENVIO_GRATIS_DESDE)}).`;

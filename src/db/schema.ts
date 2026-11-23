@@ -25,8 +25,8 @@ export const categorias = pgTable("categorias", {
   orden: integer("orden").notNull().default(0),
   // Sección del sitio a la que pertenece: "tienda" (alimentos) | "cultivo".
   seccion: text("seccion").notNull().default("tienda"),
-  // Solo Cultivo: "plantines" | "insumos" | "conocimiento". Define las tarjetas
-  // de la ficha y si el producto lleva PDF (ver src/lib/cultivo.ts).
+  // Solo Cultivo: "plantines" | "insumos" | "cosechas". Define las tarjetas
+  // de la ficha (ver src/lib/cultivo.ts).
   tipo: text("tipo"),
 });
 
@@ -59,13 +59,9 @@ export const productos = pgTable("productos", {
   orden: integer("orden").notNull().default(0), // orden global (lista admin + "Los más pedidos")
   ordenCategoria: integer("orden_categoria").notNull().default(0), // orden dentro de su categoría en la tienda
   // Cultivo: valores de las seis tarjetas informativas (clave → texto). Las
-  // etiquetas dependen del tipo de la categoría (src/lib/cultivo.ts).
+  // etiquetas dependen del tipo de la categoría; en Insumos también se guardan
+  // los títulos propios del producto como `titulo_<clave>` (src/lib/cultivo.ts).
   especificaciones: jsonb("especificaciones").$type<Record<string, string>>().notNull().default({}),
-  // Cultivo: PDF asociado (ficha de regalo en Plantines / el producto en
-  // Conocimiento), guardado en R2. `archivoKey` = clave del objeto en el bucket.
-  archivoKey: text("archivo_key"),
-  archivoNombre: text("archivo_nombre"),
-  archivoBytes: integer("archivo_bytes"),
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
@@ -133,8 +129,6 @@ export const pedidos = pgTable("pedidos", {
   estado: text("estado").notNull().default("pendiente"), // pendiente | confirmado | entregado | cancelado
   estadoPago: text("estado_pago").notNull().default("pendiente"), // pendiente | pagado (separado del estado del pedido)
   clienteId: integer("cliente_id"), // cuenta del cliente, si compró logueado (null si invitado)
-  // Cultivo: cuándo se mandó el mail con los PDFs (al marcar el pago). null = nunca.
-  pdfEnviadoEn: timestamp("pdf_enviado_en"),
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 
@@ -234,30 +228,6 @@ export const paginas = pgTable("paginas", {
   slug: text("slug").primaryKey(), // "inicio" | "contacto" | "nosotros" | "ajustes" ...
   bloques: jsonb("bloques").$type<Record<string, unknown>>().notNull().default({}),
   actualizadoEn: timestamp("actualizado_en").notNull().defaultNow(),
-});
-
-// Cultivo: links de descarga de PDFs enviados por mail tras confirmar el pago.
-// Se guarda el hash del token (no el token en claro). Cada link tiene un tope de
-// descargas para que, si se reenvía o publica, no se pueda abusar del bucket.
-export const descargas = pgTable("descargas", {
-  id: serial("id").primaryKey(),
-  tokenHash: text("token_hash").notNull().unique(),
-  pedidoId: integer("pedido_id")
-    .notNull()
-    .references(() => pedidos.id, { onDelete: "cascade" }),
-  productoId: integer("producto_id")
-    .notNull()
-    .references(() => productos.id, { onDelete: "cascade" }),
-  usos: integer("usos").notNull().default(0),
-  creadoEn: timestamp("creado_en").notNull().defaultNow(),
-});
-
-// Contador mensual de operaciones contra R2, para cortar antes de salir del
-// plan gratis (ver src/lib/archivos.ts). Una fila por mes "YYYY-MM".
-export const usoArchivos = pgTable("uso_archivos", {
-  mes: text("mes").primaryKey(),
-  escrituras: integer("escrituras").notNull().default(0), // clase A (subir/listar)
-  lecturas: integer("lecturas").notNull().default(0), // clase B (descargar)
 });
 
 // Tipos inferidos para usar en la app
