@@ -5,6 +5,7 @@ import { productos, presentaciones, categorias, recetas, preguntas, pedidos, ped
 import { esquemaDePagina } from "./paginas-esquema";
 import { asc, desc, eq, max } from "drizzle-orm";
 import type { Producto, Presentacion, Categoria, Receta, Pregunta } from "./schema";
+import type { Seccion } from "../lib/cultivo";
 
 export type { Categoria, Receta, Pregunta } from "./schema";
 export type ProductoFull = Producto & { presentaciones: Presentacion[] };
@@ -52,8 +53,16 @@ export async function actualizarOrdenCategoria(idsEnOrden: number[]): Promise<vo
   );
 }
 
+// Productos de una sección del sitio (Tienda o Cultivo), según su categoría.
+export async function getProductosSeccion(seccion: Seccion): Promise<ProductoFull[]> {
+  const [prods, cats] = await Promise.all([getProductos(), getCategorias(seccion)]);
+  const slugs = new Set(cats.map((c) => c.slug));
+  return prods.filter((p) => slugs.has(p.categoriaSlug));
+}
+
+// "Los más pedidos": solo productos de la Tienda (Cultivo usa "También puede interesarte").
 export async function getDestacados(): Promise<ProductoFull[]> {
-  return (await getProductos()).filter((p) => p.destacado);
+  return (await getProductosSeccion("tienda")).filter((p) => p.destacado);
 }
 
 // Reordena SOLO los destacados ("Los más pedidos" del inicio) entre sí.
@@ -87,8 +96,14 @@ export function slotsDistintos(ordenes: number[]): number[] {
 }
 
 // ── Categorías ──
-export async function getCategorias(): Promise<Categoria[]> {
-  return db.select().from(categorias).orderBy(asc(categorias.orden));
+// Por defecto devuelve las de la Tienda: así todas las páginas existentes
+// (inicio, tienda, panel de productos) siguen sin ver las de Cultivo.
+export async function getCategorias(seccion: Seccion = "tienda"): Promise<Categoria[]> {
+  return db
+    .select()
+    .from(categorias)
+    .where(eq(categorias.seccion, seccion))
+    .orderBy(asc(categorias.orden));
 }
 
 export async function getCategoria(slug: string): Promise<Categoria | undefined> {
@@ -175,6 +190,8 @@ export interface ProductoInput {
   disponible: boolean;
   imagen: string | null;
   imagen2: string | null;
+  // Cultivo: valores de las tarjetas informativas (ver src/lib/cultivo.ts).
+  especificaciones?: Record<string, string>;
 }
 
 export async function getProductoById(id: number): Promise<ProductoFull | undefined> {

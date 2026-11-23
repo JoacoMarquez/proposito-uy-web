@@ -8,6 +8,7 @@ import {
   getProducto,
   getCategoria,
   getDestacados,
+  getProductosSeccion,
   getContenido,
   nombreCompleto,
   precioDesde,
@@ -20,6 +21,7 @@ import SelectorTalle from "../../components/SelectorTalle.astro";
 import { esSlugMix, SABORES_MIX, RECARGO_CAJU, cantidadTamano } from "../../lib/barrasMix";
 import { separarTalle, tallesDe } from "../../lib/talles";
 import { site, whatsappLink } from "../../data/site";
+import { tarjetasEspecificacion, recomendados, rutaSeccion, nombreSeccion } from "../../lib/cultivo";
 
 const { slug } = Astro.params;
 const producto = slug ? await getProducto(slug) : undefined;
@@ -28,9 +30,16 @@ if (!producto) return Astro.redirect("/tienda");
 const nombre = nombreCompleto(producto);
 const cat = await getCategoria(producto.categoriaSlug);
 const aliado = producto.productoAliadoSlug ? await getProducto(producto.productoAliadoSlug) : undefined;
-const destacados = (await getDestacados()).filter((p) => p.slug !== producto.slug).slice(0, 3);
+// Cultivo: tarjetas por tipo y "También puede interesarte" (otros de Cultivo).
+const esCultivo = cat?.seccion === "cultivo";
+const tipo = esCultivo ? cat?.tipo ?? null : null;
+const disponible = producto.disponible;
+const seccionHref = rutaSeccion(cat?.seccion);
+const destacados = esCultivo
+  ? recomendados(producto, await getProductosSeccion("cultivo"))
+  : (await getDestacados()).filter((p) => p.slug !== producto.slug).slice(0, 3);
 
-const detalles = [
+const detalles = esCultivo ? tarjetasEspecificacion(tipo, producto.especificaciones) : [
   { label: "Ingredientes", valor: producto.ingredientes },
   { label: "Tamaño unitario", valor: producto.tamanoUnitario },
   { label: "Contenido", valor: producto.contenido },
@@ -38,7 +47,7 @@ const detalles = [
   { label: "Conservación", valor: producto.conservacion },
   { label: "Uso", valor: producto.uso },
   { label: "Vencimiento", valor: producto.vencimiento },
-].filter((d) => d.valor);
+].filter((d) => d.valor) as { label: string; valor: string }[];
 
 // Link de consulta por WhatsApp para productos agotados (reusado en la rama mix y la normal).
 const consultaWaHref = whatsappLink(`Hola! Quiero consultar por ${nombre}`);
@@ -61,8 +70,8 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
 <Layout titulo={nombre} descripcion={producto.descripcion} imagen={producto.imagen ?? undefined}>
   <section class="mx-auto max-w-5xl px-4 py-12">
     <nav class="text-sm text-marca-600">
-      <a href="/tienda" class="hover:underline">Tienda</a> /
-      <a href={`/tienda/${producto.categoriaSlug}`} class="hover:underline">{cat?.nombre}</a> /
+      <a href={seccionHref} class="hover:underline">{nombreSeccion(cat?.seccion)}</a> /
+      <a href={`${seccionHref}/${producto.categoriaSlug}`} class="hover:underline">{cat?.nombre}</a> /
       <span>{nombre}</span>
     </nav>
 
@@ -74,6 +83,7 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
       <div>
         <h1 class="text-3xl font-bold text-marca-900">{producto.nombre}</h1>
         <p class="text-lg text-marca-600">{producto.variante}</p>
+
 
         {(retornable || producto.proteina) && (
           <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -102,7 +112,7 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
           </p>
         )}
 
-        {!producto.disponible && (
+        {!disponible && (
           <p class="mt-4 rounded-xl bg-marca-900/5 p-3 text-sm font-medium text-marca-900">
             Producto temporalmente agotado. Consultanos por WhatsApp.
           </p>
@@ -233,7 +243,7 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
 
             {producto.nota && <p class="mt-2 text-sm text-marca-600">{producto.nota}</p>}
 
-            {producto.disponible ? (
+            {disponible ? (
               <div class="mt-6 flex items-center gap-3">
                 <input
                   id="cantidad"
@@ -296,13 +306,15 @@ const recargoCaju = Math.max(0, parseInt(String(tienda?.recargoCajuMix ?? ""), 1
       ))}
     </div>
 
-    <!-- Los más pedidos -->
-    <div class="mt-16">
-      <TituloSeccion titulo="Los más pedidos" />
-      <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {destacados.map((p) => <ProductCard producto={p} />)}
+    <!-- Los más pedidos (Tienda) / También puede interesarte (Cultivo) -->
+    {destacados.length > 0 && (
+      <div class="mt-16">
+        <TituloSeccion titulo={esCultivo ? "También puede interesarte" : "Los más pedidos"} />
+        <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {destacados.map((p) => <ProductCard producto={p} />)}
+        </div>
       </div>
-    </div>
+    )}
   </section>
 </Layout>
 

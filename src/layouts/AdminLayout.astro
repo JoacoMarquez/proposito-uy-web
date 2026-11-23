@@ -9,7 +9,7 @@ interface Props {
 const { titulo, ocultarTitulo = false } = Astro.props;
 
 // Subitems de Productos: "Todos" + una entrada por categoría (lleva a su editor).
-const categorias = await getCategorias();
+const [categorias, categoriasCultivo] = await Promise.all([getCategorias(), getCategorias("cultivo")]);
 const email = Astro.locals.adminUser?.email;
 const inicial = (email ?? "?").trim().charAt(0).toUpperCase() || "?";
 const path = Astro.url.pathname;
@@ -24,6 +24,14 @@ const nav: NavItem[] = [
     sub: categorias.map((c) => ({
       label: c.nombre,
       href: `/admin/productos/categorias/${c.slug}`,
+    })),
+  },
+  {
+    label: "Cultivo",
+    href: "/admin/cultivo",
+    sub: categoriasCultivo.map((c) => ({
+      label: c.nombre,
+      href: `/admin/cultivo/categorias/${c.slug}`,
     })),
   },
   { label: "Recetas", href: "/admin/recetas" },

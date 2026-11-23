@@ -40,11 +40,12 @@ export function whatsappLink(mensaje?: string): string {
   return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(texto)}`;
 }
 
-// Navegación principal (las 7 secciones del documento base).
+// Navegación principal (las 7 secciones del documento base + Cultivo).
 export const nav = [
   { label: "Inicio", href: "/" },
   { label: "Nosotros", href: "/nosotros" },
   { label: "Tienda", href: "/tienda" },
+  { label: "Cultivo", href: "/cultivo" },
   { label: "Recetario", href: "/recetario" },
   { label: "Retornables", href: "/retornables" },
   { label: "Preguntas", href: "/preguntas" },

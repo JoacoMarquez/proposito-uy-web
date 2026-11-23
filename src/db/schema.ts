@@ -23,6 +23,11 @@ export const categorias = pgTable("categorias", {
   notasCreador: jsonb("notas_creador").$type<string[]>().notNull().default([]),
   imagen: text("imagen"),
   orden: integer("orden").notNull().default(0),
+  // Sección del sitio a la que pertenece: "tienda" (alimentos) | "cultivo".
+  seccion: text("seccion").notNull().default("tienda"),
+  // Solo Cultivo: "plantines" | "insumos" | "cosechas". Define las tarjetas
+  // de la ficha (ver src/lib/cultivo.ts).
+  tipo: text("tipo"),
 });
 
 export const productos = pgTable("productos", {
@@ -53,6 +58,10 @@ export const productos = pgTable("productos", {
   imagen2: text("imagen2"), // segunda foto opcional (packaging / complementaria)
   orden: integer("orden").notNull().default(0), // orden global (lista admin + "Los más pedidos")
   ordenCategoria: integer("orden_categoria").notNull().default(0), // orden dentro de su categoría en la tienda
+  // Cultivo: valores de las seis tarjetas informativas (clave → texto). Las
+  // etiquetas dependen del tipo de la categoría; en Insumos también se guardan
+  // los títulos propios del producto como `titulo_<clave>` (src/lib/cultivo.ts).
+  especificaciones: jsonb("especificaciones").$type<Record<string, string>>().notNull().default({}),
   creadoEn: timestamp("creado_en").notNull().defaultNow(),
 });
 

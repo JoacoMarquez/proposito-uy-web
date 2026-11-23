@@ -34,7 +34,16 @@ async function seed() {
       orden: i,
     });
   }
-  console.log(`  ✓ ${ordenCat.length} categorías`);
+  // Categorías fijas de Cultivo (sin productos: Pedro los carga desde el panel).
+  const CULTIVO = [
+    { slug: "plantines", nombre: "Plantines", descripcion: "Plantas ornamentales, aromáticas y frutales." },
+    { slug: "insumos", nombre: "Insumos", descripcion: "Productos prácticos para cultivar y cuidar tus plantas." },
+    { slug: "cosechas", nombre: "Cosechas", descripcion: "Verduras y hierbas frescas de nuestra huerta, según temporada y disponibilidad." },
+  ];
+  for (let i = 0; i < CULTIVO.length; i++) {
+    await db.insert(categorias).values({ ...CULTIVO[i], seccion: "cultivo", tipo: CULTIVO[i].slug, orden: i });
+  }
+  console.log(`  ✓ ${ordenCat.length} categorías de tienda + ${CULTIVO.length} de cultivo`);
 
   // Retornabilidad: frascos a devolver para 1 gratis, por slug + label de la
   // presentación. Solo participan los frascos de vidrio de la categoría Húmedos.

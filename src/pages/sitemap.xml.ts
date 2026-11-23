@@ -12,6 +12,8 @@ const RUTAS_FIJAS = [
   "/nosotros",
   "/tienda",
   "/tienda/catalogo",
+  "/cultivo",
+  "/cultivo/catalogo",
   "/recetario",
   "/retornables",
   "/preguntas",
@@ -26,15 +28,17 @@ function url(path: string): string {
 }
 
 export const GET: APIRoute = async () => {
-  const [productos, categorias, recetas] = await Promise.all([
+  const [productos, categorias, categoriasCultivo, recetas] = await Promise.all([
     getProductos(),
     getCategorias(),
+    getCategorias("cultivo"),
     getRecetas(),
   ]);
 
   const rutas = [
     ...RUTAS_FIJAS,
     ...categorias.map((c) => `/tienda/${c.slug}`),
+    ...categoriasCultivo.map((c) => `/cultivo/${c.slug}`),
     ...productos.map((p) => `/producto/${p.slug}`),
     ...recetas.map((r) => `/recetario/${r.slug}`),
   ];

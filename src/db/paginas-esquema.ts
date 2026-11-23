@@ -31,6 +31,8 @@ export const RUTAS_SITIO: { value: string; label: string }[] = [
   { value: "/", label: "Inicio" },
   { value: "/tienda", label: "Tienda" },
   { value: "/tienda/catalogo", label: "Catálogo" },
+  { value: "/cultivo", label: "Cultivo" },
+  { value: "/cultivo/catalogo", label: "Catálogo de Cultivo" },
   { value: "/recetario", label: "Recetario" },
   { value: "/retornables", label: "Retornables" },
   { value: "/preguntas", label: "Preguntas" },
@@ -227,6 +229,36 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       licenciaActiva: "",
       licenciaDesde: "",
       licenciaHasta: "",
+    },
+  },
+  {
+    slug: "cultivo",
+    titulo: "Cultivo",
+    descripcion: "Portada de Cultivo: logo, presentación y bloque de Catálogo.",
+    secciones: [
+      {
+        titulo: "Encabezado",
+        campos: [
+          { key: "logo", label: "Logo", tipo: "imagen", ayuda: "Logo completo de Cultivo (isotipo + nombre + lema)." },
+          { key: "intro", label: "Texto de presentación", tipo: "text" },
+        ],
+      },
+      {
+        titulo: "Bloque Catálogo",
+        campos: [
+          { key: "catalogoImagen", label: "Imagen del bloque", tipo: "imagen", ayuda: "Isotipo de Cultivo del recuadro “Catálogo”." },
+          { key: "catalogoTitulo", label: "Título del bloque", tipo: "text" },
+          { key: "catalogoDescripcion", label: "Descripción del bloque", tipo: "text" },
+        ],
+      },
+    ],
+    defaults: {
+      logo: "/marca/cultivo-logo.webp",
+      intro:
+        "Cultivo es un espacio para acercarte al mundo de las plantas. Acá vas a encontrar plantines, insumos y cosechas de nuestra huerta para cultivar, cuidar la tierra y compartir sus frutos.",
+      catalogoImagen: "/marca/cultivo-isotipo.webp",
+      catalogoTitulo: "Catálogo",
+      catalogoDescripcion: "Todos los productos en un solo lugar.",
     },
   },
   {
