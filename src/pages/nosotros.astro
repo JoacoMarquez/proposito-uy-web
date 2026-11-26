@@ -84,11 +84,22 @@ const contenidoRealParrafos = String(c.contenidoRealTexto ?? "")
     </div>
   </section>
 
-  <!-- Contenido real -->
-  <section class="mx-auto max-w-3xl px-4 pb-20">
+  <!-- De la cocina a la tierra (antes "Contenido real"): texto y, si hay,
+       imagen a la derecha en computadora / debajo en celular. -->
+  <section class:list={["mx-auto px-4 pb-20", c.contenidoRealImagen ? "max-w-6xl" : "max-w-3xl"]}>
     <TituloSeccion titulo={c.contenidoRealTitulo} />
-    <div class="mt-4 space-y-4 text-marca-900/80">
-      {contenidoRealParrafos.map((p) => <p class="leading-relaxed">{p}</p>)}
+    <div class:list={["mt-4", c.contenidoRealImagen && "grid items-center gap-8 md:mt-8 md:grid-cols-2 md:gap-12"]}>
+      <div class="space-y-4 text-marca-900/80">
+        {contenidoRealParrafos.map((p) => <p class="leading-relaxed">{p}</p>)}
+      </div>
+      {c.contenidoRealImagen && (
+        <img
+          src={c.contenidoRealImagen}
+          alt={c.contenidoRealTitulo}
+          loading="lazy"
+          class="aspect-[4/5] w-full rounded-2xl object-cover"
+        />
+      )}
     </div>
   </section>
 </Layout>

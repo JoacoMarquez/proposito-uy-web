@@ -36,6 +36,7 @@ if (Astro.request.method === "POST") {
 
   // Imagen: archivo nuevo → se guarda y se usa su URL; si no, se conserva la actual.
   const subida = await procesarImagenSubida(form);
+  const subidaMovil = await procesarImagenSubida(form, "imagenMovilFile");
 
   const data: CategoriaContenidoInput = {
     nombre: s("nombre"),
@@ -44,10 +45,11 @@ if (Astro.request.method === "POST") {
     caracteristicas: lineas("caracteristicas"),
     notasCreador: lineas("notasCreador"),
     imagen: subida.url ?? (s("imagen") === "" ? null : s("imagen")),
+    imagenMovil: subidaMovil.url ?? (s("imagenMovil") === "" ? null : s("imagenMovil")),
   };
 
-  if (subida.error) {
-    error = subida.error;
+  if (subida.error || subidaMovil.error) {
+    error = subida.error ?? subidaMovil.error ?? "";
   } else if (!data.nombre) {
     error = "El nombre no puede quedar vacío.";
   } else {
@@ -59,6 +61,8 @@ if (Astro.request.method === "POST") {
 const guardado = Astro.url.searchParams.get("ok") === "1";
 const c = categoria;
 const productos = await getProductosPorCategoria(c.slug);
+// Las tarjetas de Cultivo son apaisadas (16:9); las de Tienda, cuadradas.
+const apaisada = c.seccion === "cultivo";
 // Tras guardar (o con error), abrir en la pestaña de Contenido; si no, en la lista.
 const tabInicial = guardado || error ? "contenido" : "lista";
 const campoBase = "mt-1 w-full rounded-xl border border-marca-300 px-3 py-2 text-sm";
@@ -162,7 +166,15 @@ const tabBtn =
         </div>
 
         <!-- Imagen -->
-        <ImageField imagen={c.imagen} alt={c.nombre} />
+        <ImageField imagen={c.imagen} alt={c.nombre} label="Imagen (computadora)" ayuda={apaisada ? "Horizontal 16:9, ej. 1600 × 900 px." : "Cuadrada, ej. 1200 × 1200 px."} />
+        <ImageField
+          imagen={c.imagenMovil}
+          alt={c.nombre}
+          name="imagenMovil"
+          fieldId="imagenMovilFile"
+          label="Imagen (celular)"
+          ayuda="Opcional. Formato 4:3, ej. 1200 × 900 px. Si no cargás una, en celular se usa la de computadora."
+        />
 
         <div>
           <label class="text-sm font-medium text-marca-700">Características</label>

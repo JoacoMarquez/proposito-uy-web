@@ -22,10 +22,12 @@ export const categorias = pgTable("categorias", {
   caracteristicas: jsonb("caracteristicas").$type<string[]>().notNull().default([]),
   notasCreador: jsonb("notas_creador").$type<string[]>().notNull().default([]),
   imagen: text("imagen"),
+  // Versión para celular de la imagen de la tarjeta (opcional; si falta se usa `imagen`).
+  imagenMovil: text("imagen_movil"),
   orden: integer("orden").notNull().default(0),
   // Sección del sitio a la que pertenece: "tienda" (alimentos) | "cultivo".
   seccion: text("seccion").notNull().default("tienda"),
-  // Solo Cultivo: "plantines" | "insumos" | "cosechas". Define las tarjetas
+  // Solo Cultivo: "plantines" | "insumos". Define las tarjetas
   // de la ficha (ver src/lib/cultivo.ts).
   tipo: text("tipo"),
 });
@@ -43,6 +45,10 @@ export const productos = pgTable("productos", {
   // Distintivo de proteína en la ficha (ej.: "10 g de proteína").
   // null/vacío = no se muestra.
   proteina: text("proteina"),
+  // Asesoramiento por WhatsApp incluido: distintivo en tarjeta/ficha + recuadro
+  // explicativo en la ficha (texto editable; vacío = texto por defecto).
+  asesoramiento: boolean("asesoramiento").notNull().default(false),
+  asesoramientoTexto: text("asesoramiento_texto"),
   ingredientes: text("ingredientes").notNull(),
   packaging: text("packaging").notNull(),
   conservacion: text("conservacion").notNull(),

@@ -41,8 +41,7 @@ describe("títulos editables en Insumos", () => {
       limpiarEspecificaciones("insumos", { materiales: "Turba", titulo_materiales: "Composición", titulo_aplicacion: "Aplicación" }),
     ).toEqual({ materiales: "Turba", titulo_materiales: "Composición" });
   });
-  it("en Plantines y Cosechas los títulos son fijos", () => {
-    expect(limpiarEspecificaciones("cosechas", { variedad: "Crespa", titulo_variedad: "Otra" })).toEqual({ variedad: "Crespa" });
+  it("en Plantines los títulos son fijos", () => {
     expect(tarjetasEspecificacion("plantines", { especie: "Romero", titulo_especie: "X" })[0].label).toBe("Especie");
   });
 });
@@ -57,13 +56,28 @@ describe("rutaSeccion", () => {
 
 describe("recomendados", () => {
   const p = (slug: string, categoriaSlug: string, disponible = true) => ({ slug, categoriaSlug, disponible });
-  const todos = [p("romero", "plantines"), p("lavanda", "plantines"), p("tierra", "insumos"), p("lechuga", "cosechas"), p("agotado", "insumos", false)];
+  const plantines = [p("romero", "plantines"), p("lavanda", "plantines"), p("menta", "plantines"), p("ruda", "plantines", false)];
+  const insumos = [p("tierra", "insumos"), p("compost", "insumos"), p("balde", "insumos"), p("bancal", "insumos", false)];
+  const todos = [...plantines, ...insumos];
+  const slugs = (xs: { slug: string }[]) => xs.map((x) => x.slug);
 
-  it("excluye el actual y los agotados, y mezcla categorías", () => {
-    const r = recomendados(p("romero", "plantines"), todos).map((x) => x.slug);
-    expect(r).toEqual(["tierra", "lavanda", "lechuga"]);
+  it("viendo un plantín: 2 insumos + 1 plantín", () => {
+    expect(slugs(recomendados(p("romero", "plantines"), todos))).toEqual(["tierra", "compost", "lavanda"]);
   });
-  it("respeta la cantidad pedida", () => {
-    expect(recomendados(p("romero", "plantines"), todos, 2)).toHaveLength(2);
+  it("viendo un insumo: 2 plantines + 1 insumo", () => {
+    expect(slugs(recomendados(p("tierra", "insumos"), todos))).toEqual(["romero", "lavanda", "compost"]);
+  });
+  it("si falta la otra categoría, completa con la misma", () => {
+    expect(slugs(recomendados(p("romero", "plantines"), plantines))).toEqual(["lavanda", "menta", "ruda"]);
+    expect(slugs(recomendados(p("romero", "plantines"), [...plantines, p("tierra", "insumos")]))).toEqual(["tierra", "lavanda", "menta"]);
+  });
+  it("usa agotados solo si no hay suficientes disponibles", () => {
+    const pocos = [p("romero", "plantines"), p("ruda", "plantines", false), p("tierra", "insumos")];
+    expect(slugs(recomendados(p("romero", "plantines"), pocos))).toEqual(["tierra", "ruda"]);
+  });
+  it("nunca repite el actual ni duplica", () => {
+    const r = slugs(recomendados(p("tierra", "insumos"), [...todos, ...todos]));
+    expect(new Set(r).size).toBe(r.length);
+    expect(r).not.toContain("tierra");
   });
 });

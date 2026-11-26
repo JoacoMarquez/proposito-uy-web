@@ -14,7 +14,8 @@ const atajos = [
   { href: c.atajo1Href, titulo: c.atajo1Titulo, imagen: c.atajo1Imagen },
   { href: c.atajo2Href, titulo: c.atajo2Titulo, imagen: c.atajo2Imagen },
   { href: c.atajo3Href, titulo: c.atajo3Titulo, imagen: c.atajo3Imagen },
-];
+  { href: c.atajo4Href, titulo: c.atajo4Titulo, imagen: c.atajo4Imagen },
+].filter((a) => a.titulo && a.href);
 ---
 
 <Layout>
@@ -48,7 +49,7 @@ const atajos = [
       <TituloSeccion titulo={c.tituloCategorias} />
       <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
         {categoriasLista.map((c) => (
-          <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} />
+          <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} imagenMovil={c.imagenMovil} />
         ))}
         {/* Solo mobile: completa la grilla 2x2 con acceso al catálogo completo. */}
         <a
@@ -68,10 +69,11 @@ const atajos = [
     </div>
   </section>
 
-  <!-- Atajos -->
+  <!-- Atajos: los mismos 4 en computadora (una fila) y celular (2x2). Contacto
+       sigue en el menú y el pie. -->
   <section class="mx-auto max-w-6xl px-4 py-8 sm:py-16">
     <TituloSeccion titulo={c.tituloAtajos} />
-    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
       {atajos.map((a) => (
         <a href={a.href} class="overflow-hidden rounded-2xl border border-marca-100 bg-white hover:shadow-md">
           {a.imagen ? (
@@ -86,21 +88,6 @@ const atajos = [
           </div>
         </a>
       ))}
-      {/* Solo mobile: completa la grilla 2x2 con acceso a Contacto. */}
-      <a href="/contacto" class="overflow-hidden rounded-2xl border border-marca-100 bg-white hover:shadow-md sm:hidden">
-        {c.contactoImagen ? (
-          <img src={c.contactoImagen} alt="Contacto" loading="lazy" class="aspect-video w-full object-cover" />
-        ) : (
-          <div class="flex aspect-video items-center justify-center bg-marca-600">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-8 w-8 text-white">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-            </svg>
-          </div>
-        )}
-        <div class="p-3 sm:p-4">
-          <h3 class="text-sm font-semibold text-marca-900 sm:text-base">Contacto</h3>
-        </div>
-      </a>
     </div>
   </section>
 
