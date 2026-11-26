@@ -15,7 +15,7 @@ const c = await getContenido("tienda");
 
     <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5">
       {lista.map((c) => (
-        <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} />
+        <CategoriaCard slug={c.slug} nombre={c.nombre} descripcion={c.descripcion} imagen={c.imagen} imagenMovil={c.imagenMovil} />
       ))}
       {/* Catálogo: bloque visual de marca, mismo tamaño que las categorías para equilibrar la grilla.
           Placeholder con el isotipo; reemplazar por la foto de productos o el isotipo invertido del cliente (PROP-83). */}

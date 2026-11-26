@@ -98,7 +98,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         ],
       },
       {
-        titulo: "Atajos (3 accesos rápidos)",
+        titulo: "Atajos (4 accesos rápidos, iguales en computadora y celular)",
         campos: [
           { key: "atajo1Titulo", label: "Atajo 1 · Título", tipo: "text" },
           { key: "atajo1Href", label: "Atajo 1 · Link", tipo: "ruta" },
@@ -109,13 +109,15 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
           { key: "atajo3Titulo", label: "Atajo 3 · Título", tipo: "text" },
           { key: "atajo3Href", label: "Atajo 3 · Link", tipo: "ruta" },
           { key: "atajo3Imagen", label: "Atajo 3 · Imagen", tipo: "imagen" },
+          { key: "atajo4Titulo", label: "Atajo 4 · Título", tipo: "text" },
+          { key: "atajo4Href", label: "Atajo 4 · Link", tipo: "ruta" },
+          { key: "atajo4Imagen", label: "Atajo 4 · Imagen", tipo: "imagen" },
         ],
       },
       {
-        titulo: "Bloques solo mobile (Catálogo y Contacto)",
+        titulo: "Bloque solo mobile (Catálogo)",
         campos: [
           { key: "catalogoImagen", label: "Catálogo · Imagen (solo mobile)", tipo: "imagen", ayuda: "Solo se muestra en celular, en la grilla de Categorías." },
-          { key: "contactoImagen", label: "Contacto · Imagen (solo mobile)", tipo: "imagen", ayuda: "Solo se muestra en celular, en la grilla de Atajos." },
         ],
       },
     ],
@@ -139,8 +141,10 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       atajo3Titulo: "Preguntas",
       atajo3Href: "/preguntas",
       atajo3Imagen: "",
+      atajo4Titulo: "Cultivo",
+      atajo4Href: "/cultivo",
+      atajo4Imagen: "",
       catalogoImagen: "",
-      contactoImagen: "",
     },
   },
   {
@@ -246,7 +250,9 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       {
         titulo: "Bloque Catálogo",
         campos: [
-          { key: "catalogoImagen", label: "Imagen del bloque", tipo: "imagen", ayuda: "Isotipo de Cultivo del recuadro “Catálogo”." },
+          { key: "catalogoImagen", label: "Isotipo del bloque", tipo: "imagen", ayuda: "Isotipo de Cultivo del recuadro “Catálogo” (se muestra si no hay foto de fondo)." },
+          { key: "catalogoFondo", label: "Foto del bloque (computadora)", tipo: "imagen", ayuda: "Opcional. Ocupa todo el ancho: formato 3:1, ej. 2400 × 800 px. Si la cargás, reemplaza al isotipo." },
+          { key: "catalogoFondoMovil", label: "Foto del bloque (celular)", tipo: "imagen", ayuda: "Opcional. Formato 16:9, ej. 1600 × 900 px. Si no la cargás, en celular se usa la de computadora." },
           { key: "catalogoTitulo", label: "Título del bloque", tipo: "text" },
           { key: "catalogoDescripcion", label: "Descripción del bloque", tipo: "text" },
         ],
@@ -255,8 +261,10 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
     defaults: {
       logo: "/marca/cultivo-logo.webp",
       intro:
-        "Cultivo es un espacio para acercarte al mundo de las plantas. Acá vas a encontrar plantines, insumos y cosechas de nuestra huerta para cultivar, cuidar la tierra y compartir sus frutos.",
+        "Cultivo es un espacio para acercarte al mundo de las plantas. Acá vas a encontrar plantines e insumos para cultivar y cuidar la tierra.",
       catalogoImagen: "/marca/cultivo-isotipo.webp",
+      catalogoFondo: "",
+      catalogoFondoMovil: "",
       catalogoTitulo: "Catálogo",
       catalogoDescripcion: "Todos los productos en un solo lugar.",
     },
@@ -356,10 +364,11 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
         ],
       },
       {
-        titulo: "Contenido real",
+        titulo: "De la cocina a la tierra (antes «Contenido real»)",
         campos: [
           { key: "contenidoRealTitulo", label: "Título", tipo: "text" },
           { key: "contenidoRealTexto", label: "Texto (un párrafo por línea)", tipo: "richtext" },
+          { key: "contenidoRealImagen", label: "Imagen", tipo: "imagen", ayuda: "Opcional. En computadora va a la derecha del texto; en celular, debajo. Formato 4:5, ej. 1200 × 1500 px." },
         ],
       },
       {
@@ -412,6 +421,7 @@ export const ESQUEMA_PAGINAS: EsquemaPagina[] = [
       tituloValoresAccion: "Los valores en acción",
       subtituloValoresAccion: "Los valores no son solo palabras, sino parte del trabajo cotidiano.",
       contenidoRealTitulo: "Contenido real",
+      contenidoRealImagen: "",
       contenidoRealTexto:
         "Todo el contenido visual de esta web nace de elaboraciones hechas por nosotros: no son renders ni fotos generadas con IA.\nLas recetas y productos fueron preparados, fotografiados y seleccionados en sesiones propias de contenido, con nuestros productos y espacio de trabajo.\nLo que ves busca representar lo que realmente hacemos: alimentos simples, cuidados y posibles de preparar o recibir tal como se muestran.\nTambién cuidamos que la comunicación sea directa. Si nos escribís por WhatsApp, del otro lado te responde una persona.",
       valor1Titulo: "Cercanía",

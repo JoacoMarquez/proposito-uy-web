@@ -119,6 +119,7 @@ export interface CategoriaContenidoInput {
   caracteristicas: string[];
   notasCreador: string[];
   imagen: string | null;
+  imagenMovil: string | null;
 }
 
 export async function actualizarCategoria(slug: string, data: CategoriaContenidoInput): Promise<void> {
@@ -177,6 +178,8 @@ export interface ProductoInput {
   descripcion: string;
   textoInformativo: string | null;
   proteina: string | null;
+  asesoramiento: boolean;
+  asesoramientoTexto: string | null;
   ingredientes: string;
   packaging: string;
   conservacion: string;

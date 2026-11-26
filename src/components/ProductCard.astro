@@ -2,6 +2,7 @@
 import type { ProductoFull } from "../db/queries";
 import { nombreCompleto, precioDesde, formatoPrecio, esRetornable } from "../db/queries";
 import FavoritoBoton from "./FavoritoBoton.astro";
+import { ASESORAMIENTO_DISTINTIVO } from "../lib/asesoramiento";
 
 interface Props {
   producto: ProductoFull;
@@ -30,8 +31,8 @@ const retornable = esRetornable(producto);
           Agotado
         </span>
       )}
-      {(retornable || producto.proteina) && (
-        <div class="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+      {(retornable || producto.proteina || producto.asesoramiento) && (
+        <div class="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5">
           {retornable && (
             <span
               class="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-marca-700 shadow-sm"
@@ -43,6 +44,11 @@ const retornable = esRetornable(producto);
           {producto.proteina && (
             <span class="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-marca-700 shadow-sm">
               ⚡ {producto.proteina}
+            </span>
+          )}
+          {producto.asesoramiento && (
+            <span class="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-marca-700 shadow-sm" title={ASESORAMIENTO_DISTINTIVO}>
+              💬 {ASESORAMIENTO_DISTINTIVO}
             </span>
           )}
         </div>

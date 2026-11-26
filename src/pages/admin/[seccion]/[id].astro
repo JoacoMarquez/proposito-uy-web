@@ -2,7 +2,7 @@
 export const prerender = false;
 // Editor de producto, compartido por Tienda (/admin/productos/[id]) y Cultivo
 // (/admin/cultivo/[id]). En Cultivo los campos informativos cambian según el
-// tipo de la categoría elegida (Plantines / Insumos / Cosechas).
+// tipo de la categoría elegida (Plantines / Insumos).
 import AdminLayout from "../../../layouts/AdminLayout.astro";
 import AdminEditorHeader from "../../../components/AdminEditorHeader.astro";
 import ImageField from "../../../components/ImageField.astro";
@@ -16,6 +16,7 @@ import {
   type ProductoInput,
 } from "../../../db/queries";
 import { procesarImagenSubida } from "../../../lib/upload";
+import { ASESORAMIENTO_DISTINTIVO, ASESORAMIENTO_TEXTO_POR_DEFECTO } from "../../../lib/asesoramiento";
 import { seccionAdmin, baseAdmin } from "../../../lib/admin-seccion";
 import {
   ESPECIFICACIONES,
@@ -95,6 +96,9 @@ if (Astro.request.method === "POST") {
     descripcion: s("descripcion"),
     textoInformativo: esCultivo ? null : sn("textoInformativo"),
     proteina: esCultivo ? null : sn("proteina"),
+    asesoramiento: form.get("asesoramiento") === "on",
+    // Si queda igual al texto por defecto no se guarda (así un cambio futuro del default aplica).
+    asesoramientoTexto: s("asesoramientoTexto") && s("asesoramientoTexto") !== ASESORAMIENTO_TEXTO_POR_DEFECTO ? s("asesoramientoTexto") : null,
     ingredientes: esCultivo ? "" : s("ingredientes"),
     packaging: esCultivo ? "" : s("packaging"),
     conservacion: esCultivo ? "" : s("conservacion"),
@@ -250,6 +254,18 @@ const tituloLista = esCultivo ? "Cultivo" : "productos";
           </div>
         ))}
       </div>
+    </div>
+
+    <!-- Asesoramiento por WhatsApp: distintivo + recuadro en la ficha -->
+    <div class="rounded-xl border border-marca-200 bg-marca-50 p-4">
+      <label class="flex items-center gap-2 text-sm font-medium text-marca-700">
+        <input type="checkbox" name="asesoramiento" checked={p?.asesoramiento ?? false} />
+        💬 {ASESORAMIENTO_DISTINTIVO}
+      </label>
+      <p class="mt-1 text-xs text-marca-500">
+        Muestra el distintivo en la tarjeta y en la ficha, y este recuadro en la ficha (debajo de la descripción).
+      </p>
+      <textarea name="asesoramientoTexto" rows="2" class={campoBase}>{p?.asesoramientoTexto || ASESORAMIENTO_TEXTO_POR_DEFECTO}</textarea>
     </div>
 
     {esCultivo ? (

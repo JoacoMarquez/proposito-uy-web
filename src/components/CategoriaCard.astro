@@ -6,10 +6,12 @@ interface Props {
   nombre: string;
   descripcion: string;
   imagen?: string | null;
+  imagenMovil?: string | null; // versión para celular (si falta, se usa `imagen`)
   base?: string; // ruta de la sección: "/tienda" (default) o "/cultivo"
   apaisada?: boolean; // formato horizontal (portada de Cultivo)
 }
-const { slug, nombre, descripcion, imagen, base = "/tienda", apaisada = false } = Astro.props;
+const { slug, nombre, descripcion, imagen, imagenMovil, base = "/tienda", apaisada = false } = Astro.props;
+const principal = imagen || imagenMovil;
 ---
 
 <a
@@ -19,13 +21,17 @@ const { slug, nombre, descripcion, imagen, base = "/tienda", apaisada = false } 
     apaisada ? "sm:aspect-[16/9]" : "sm:aspect-square",
   ]}
 >
-  {imagen && (
-    <img
-      src={imagen}
-      alt={`Categoría ${nombre}`}
-      loading="lazy"
-      class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-    />
+  {principal && (
+    <picture>
+      {/* Celular (< 640 px): su propia imagen, con el encuadre pensado para ese formato. */}
+      {imagenMovil && imagen && <source media="(max-width: 639px)" srcset={imagenMovil} />}
+      <img
+        src={principal}
+        alt={`Categoría ${nombre}`}
+        loading="lazy"
+        class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+    </picture>
   )}
   <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
   <div class="absolute inset-x-0 bottom-0 p-3 sm:p-5">

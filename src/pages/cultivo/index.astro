@@ -1,15 +1,17 @@
 ---
 export const prerender = false;
-// Portada de Cultivo: mismo esquema que la de Tienda (3 categorías + Catálogo),
-// con el logo de Cultivo y su texto de presentación (Contenido › Cultivo).
+// Portada de Cultivo: logo + presentación, y debajo Plantines e Insumos lado a
+// lado con Catálogo ocupando todo el ancho (consigna de Pedro, 25/11).
+// Textos e imágenes en Contenido › Cultivo y en cada categoría.
 import Layout from "../../layouts/Layout.astro";
 import CategoriaCard from "../../components/CategoriaCard.astro";
 import { getCategorias, getContenido } from "../../db/queries";
 
 const [lista, c] = await Promise.all([getCategorias("cultivo"), getContenido("cultivo")]);
+const fondo = c.catalogoFondo || c.catalogoFondoMovil;
 ---
 
-<Layout titulo="Cultivo" descripcion="Plantines, insumos y cosechas de nuestra huerta para cultivar, cuidar la tierra y compartir sus frutos.">
+<Layout titulo="Cultivo" descripcion="Plantines e insumos para cultivar y cuidar la tierra.">
   <section class="mx-auto max-w-6xl px-4 py-12 sm:py-16">
     <div class="text-center">
       <h1 class="sr-only">Cultivo</h1>
@@ -19,20 +21,55 @@ const [lista, c] = await Promise.all([getCategorias("cultivo"), getContenido("cu
 
     <div class="mt-10 grid grid-cols-2 gap-3 sm:gap-5">
       {lista.map((cat) => (
-        <CategoriaCard slug={cat.slug} nombre={cat.nombre} descripcion={cat.descripcion} imagen={cat.imagen} base="/cultivo" apaisada />
+        <CategoriaCard
+          slug={cat.slug}
+          nombre={cat.nombre}
+          descripcion={cat.descripcion}
+          imagen={cat.imagen}
+          imagenMovil={cat.imagenMovil}
+          base="/cultivo"
+          apaisada
+        />
       ))}
+
+      <!-- Catálogo: todo el ancho. Con foto de fondo se ve como las demás tarjetas;
+           sin foto, el isotipo sobre fondo claro. -->
       <a
         href="/cultivo/catalogo"
-        class="group relative flex aspect-[4/3] flex-col items-center justify-center overflow-hidden rounded-2xl bg-marca-100 p-4 text-center transition-shadow hover:shadow-md sm:aspect-[16/9] sm:p-6"
+        class:list={[
+          "group relative col-span-2 flex aspect-[16/9] flex-col overflow-hidden rounded-2xl p-4 transition-shadow hover:shadow-md sm:aspect-[3/1] sm:p-6",
+          fondo ? "justify-end bg-marca-200" : "items-center justify-center bg-marca-100 text-center",
+        ]}
       >
-        <img
-          src={c.catalogoImagen}
-          alt=""
-          loading="lazy"
-          class="h-14 w-14 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20"
-        />
-        <h2 class="mt-2 text-base font-semibold text-marca-900 sm:mt-4 sm:text-lg">{c.catalogoTitulo}</h2>
-        <p class="mt-1 text-xs text-marca-900/70 sm:text-sm">{c.catalogoDescripcion}</p>
+        {fondo ? (
+          <Fragment>
+            <picture>
+              {c.catalogoFondo && c.catalogoFondoMovil && <source media="(max-width: 639px)" srcset={c.catalogoFondoMovil} />}
+              <img
+                src={fondo}
+                alt=""
+                loading="lazy"
+                class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </picture>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+            <div class="relative">
+              <h2 class="text-base font-semibold text-white sm:text-lg">{c.catalogoTitulo}</h2>
+              <p class="mt-1 text-xs text-white/85 sm:text-sm">{c.catalogoDescripcion}</p>
+            </div>
+          </Fragment>
+        ) : (
+          <Fragment>
+            <img
+              src={c.catalogoImagen}
+              alt=""
+              loading="lazy"
+              class="h-16 w-16 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20"
+            />
+            <h2 class="mt-2 text-base font-semibold text-marca-900 sm:mt-4 sm:text-lg">{c.catalogoTitulo}</h2>
+            <p class="mt-1 text-xs text-marca-900/70 sm:text-sm">{c.catalogoDescripcion}</p>
+          </Fragment>
+        )}
       </a>
     </div>
   </section>

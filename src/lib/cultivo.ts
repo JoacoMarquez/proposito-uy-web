@@ -1,4 +1,4 @@
-// Sección Cultivo: plantines, insumos y cosechas de la huerta.
+// Sección Cultivo: plantines e insumos.
 //
 // Las categorías de Cultivo viven en la misma tabla `categorias` que las de la
 // Tienda, diferenciadas por `seccion = "cultivo"`, y cada una tiene un `tipo`
@@ -7,9 +7,9 @@
 // Lógica pura (sin DB) para poder testearla y usarla en cliente y servidor.
 
 export type Seccion = "tienda" | "cultivo";
-export type TipoCultivo = "plantines" | "insumos" | "cosechas";
+export type TipoCultivo = "plantines" | "insumos";
 
-export const TIPOS_CULTIVO: TipoCultivo[] = ["plantines", "insumos", "cosechas"];
+export const TIPOS_CULTIVO: TipoCultivo[] = ["plantines", "insumos"];
 
 export interface CampoEspecificacion {
   key: string;
@@ -34,14 +34,6 @@ export const ESPECIFICACIONES: Record<TipoCultivo, CampoEspecificacion[]> = {
     { key: "aplicacion", label: "Aplicación" },
     { key: "recomendaciones", label: "Recomendaciones" },
     { key: "informacionAdicional", label: "Información adicional" },
-  ],
-  cosechas: [
-    { key: "variedad", label: "Variedad" },
-    { key: "presentacion", label: "Presentación" },
-    { key: "cultivo", label: "Cultivo" },
-    { key: "cosecha", label: "Cosecha" },
-    { key: "conservacion", label: "Conservación" },
-    { key: "uso", label: "Uso" },
   ],
 };
 
@@ -107,23 +99,33 @@ export function nombreSeccion(seccion: string | null | undefined): string {
   return seccion === "cultivo" ? "Cultivo" : "Tienda";
 }
 
-// "También puede interesarte": otros productos de Cultivo, priorizando los de
-// otras categorías (la consigna pide mezclar), respetando el orden recibido.
+// "También puede interesarte" (consigna de Pedro, 25/11): 3 productos de
+// Cultivo que crucen categorías. Viendo un Insumo → 2 Plantines + 1 Insumo;
+// viendo un Plantín → 2 Insumos + 1 Plantín. Sin repetir el actual ni
+// duplicados, priorizando los disponibles. Si no alcanza para esa
+// distribución, se completa con otros disponibles de Cultivo y, en último
+// caso, con agotados. Respeta el orden recibido (el del panel).
 export function recomendados<T extends { slug: string; categoriaSlug: string; disponible: boolean }>(
   actual: { slug: string; categoriaSlug: string },
   candidatos: T[],
   cantidad = 3,
 ): T[] {
-  const otros = candidatos.filter((p) => p.slug !== actual.slug && p.disponible);
-  const deOtraCat = otros.filter((p) => p.categoriaSlug !== actual.categoriaSlug);
-  const mismaCat = otros.filter((p) => p.categoriaSlug === actual.categoriaSlug);
-  // Intercala: primero uno de otra categoría, luego de la misma, para variar.
+  const otros = candidatos.filter((p) => p.slug !== actual.slug);
+  const disponibles = otros.filter((p) => p.disponible);
+  const deOtraCat = disponibles.filter((p) => p.categoriaSlug !== actual.categoriaSlug);
+  const mismaCat = disponibles.filter((p) => p.categoriaSlug === actual.categoriaSlug);
+
   const out: T[] = [];
-  let i = 0;
-  let j = 0;
-  while (out.length < cantidad && (i < deOtraCat.length || j < mismaCat.length)) {
-    if (i < deOtraCat.length) out.push(deOtraCat[i++]);
-    if (out.length < cantidad && j < mismaCat.length) out.push(mismaCat[j++]);
-  }
+  const sumar = (lista: T[], hasta: number) => {
+    for (const p of lista) {
+      if (out.length >= hasta) break;
+      if (!out.some((x) => x.slug === p.slug)) out.push(p);
+    }
+  };
+  const deOtra = Math.min(cantidad - 1, 2); // 2 de la otra categoría (con 3 lugares)
+  sumar(deOtraCat, deOtra);
+  sumar(mismaCat, out.length + (cantidad - deOtra)); // 1 de la misma
+  sumar(disponibles, cantidad); // faltantes: cualquier otro disponible
+  sumar(otros, cantidad); // último recurso: agotados
   return out;
 }
